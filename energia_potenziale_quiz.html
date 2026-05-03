@@ -3679,8 +3679,8 @@ function endQuiz() {
 /* ============================================
    SEZIONE APPUNTI
    ============================================ */
-const noteIds = ['coulomb','campo','linee','sovra','flusso','gauss','dim-coulomb','dim-campo','dim-gauss','dim-piastra','dim-condensatore','dim-velocita'];
-const noteLabels = ['Legge di Coulomb','Campo Elettrico','Linee di Campo','Sovrapposizione','Flusso','Legge di Gauss','DIM: Coulomb','DIM: Campo E','DIM: Gauss','DIM: Piastra','DIM: Condensatore','DIM: Velocita\''];
+const noteIds = ['energia','potenziale','condensatori','equipotenziali','eV-millikan','dim-energia-cond','dim-densita','dim-condensatore-piano'];
+const noteLabels = ['Energia Potenziale','Potenziale (V)','Capacita\' & Condensatori','Superfici Equipotenziali','Elettronvolt & Millikan','DIM: Energia Condensatore','DIM: Densita\' Energia','DIM: Condensatore Piano'];
 
 // Popola navigazione rapida appunti
 (function initNotes() {
@@ -3710,7 +3710,7 @@ function showNotes(section) {
   // Se richiesto, scrolla direttamente alle dimostrazioni
   if (section === 'dimostrazioni') {
     setTimeout(() => {
-      const el = document.getElementById('note-dim-coulomb');
+      const el = document.getElementById('note-dim-energia-cond');
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
   }
