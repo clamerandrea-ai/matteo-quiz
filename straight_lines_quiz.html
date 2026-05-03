@@ -1,0 +1,2051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Straight Lines Quiz - Study &amp; Practice</title>
+<style>
+
+/* ============================================
+   STILI GENERALI
+   ============================================ */
+:root {
+  --primary: #4361ee;
+  --primary-light: #e8ecff;
+  --success: #06d6a0;
+  --success-light: #e6faf4;
+  --danger: #ef476f;
+  --danger-light: #fde8ed;
+  --warning: #ffd166;
+  --dark: #1d3557;
+  --gray: #6c757d;
+  --light: #f8f9fa;
+  --white: #ffffff;
+  --shadow: 0 6px 24px rgba(0,0,0,0.10);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.15);
+  --radius: 14px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(160deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  min-height: 100vh;
+  color: var(--dark);
+  line-height: 1.6;
+}
+
+/* ============================================
+   PROF. PALUDETTO — PERSONAGGIO CARTOON
+   ============================================ */
+.prof-container {
+  display: none;
+  position: relative;
+  margin: 20px auto;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.prof-container.show {
+  display: flex;
+  animation: profAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes profAppear {
+  0% { opacity: 0; transform: translateY(60px) scale(0.5); }
+  60% { transform: translateY(-10px) scale(1.05); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes profBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes profShake {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(-5deg); }
+  30% { transform: rotate(5deg); }
+  45% { transform: rotate(-4deg); }
+  60% { transform: rotate(4deg); }
+  75% { transform: rotate(-2deg); }
+}
+
+.prof-svg-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 0 auto;
+}
+
+.prof-container.correct .prof-svg-container {
+  animation: profBounce 0.8s ease 0.3s;
+  filter: drop-shadow(0 8px 30px rgba(6, 214, 160, 0.35));
+}
+
+.prof-container.wrong .prof-svg-container {
+  animation: profShake 0.6s ease;
+  filter: drop-shadow(0 8px 30px rgba(239, 71, 111, 0.35));
+}
+
+/* Fumetto / Bubble */
+.prof-bubble {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 18px 24px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  font-size: 1.1em;
+  font-weight: 600;
+  line-height: 1.5;
+  max-width: 480px;
+  margin-top: -10px;
+}
+
+.prof-bubble::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+  border-bottom-color: var(--white);
+}
+
+.prof-container.correct .prof-bubble {
+  border: 3px solid var(--success);
+  background: linear-gradient(135deg, #f0fff8, var(--white));
+}
+
+.prof-container.wrong .prof-bubble {
+  border: 3px solid var(--danger);
+  background: linear-gradient(135deg, #fff5f7, var(--white));
+}
+
+.prof-container.correct .prof-bubble::before { border-bottom-color: var(--success); }
+.prof-container.wrong .prof-bubble::before { border-bottom-color: var(--danger); }
+
+.prof-name {
+  font-size: 0.7em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+
+.prof-container.correct .prof-name { color: var(--success); }
+.prof-container.wrong .prof-name { color: var(--danger); }
+
+/* SVG nascosti/mostrati */
+.prof-svg-correct, .prof-svg-wrong { display: none; }
+.prof-container.correct .prof-svg-correct { display: block; }
+.prof-container.wrong .prof-svg-wrong { display: block; }
+
+/* Header start screen - versione piccola */
+.prof-header-container {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 10px;
+}
+
+.container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Sfondo decorativo sottile */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 20%, rgba(67, 97, 238, 0.05) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, rgba(124, 58, 237, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ============================================
+   SCHERMATA INIZIALE
+   ============================================ */
+#start-screen {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  margin-top: 30px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+#start-screen h1 {
+  font-size: 2.1em;
+  color: var(--dark);
+  margin-bottom: 6px;
+}
+
+#start-screen h1 span {
+  background: linear-gradient(135deg, var(--primary), #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#start-screen .subtitle {
+  color: var(--gray);
+  font-size: 1em;
+  margin-bottom: 10px;
+}
+
+.prof-welcome {
+  font-size: 0.9em;
+  color: var(--dark);
+  background: var(--light);
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.topic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.topic-item {
+  background: var(--primary-light);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topic-item input[type="checkbox"] { accent-color: var(--primary); }
+
+.mode-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.btn {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+.btn:active { transform: translateY(0) scale(0.97); }
+
+.btn-primary { background: var(--primary); color: var(--white); }
+.btn-success { background: var(--success); color: var(--white); }
+.btn-warning { background: var(--warning); color: var(--dark); }
+.btn-danger { background: var(--danger); color: var(--white); }
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+}
+
+.btn-ultra {
+  background: linear-gradient(135deg, #ff6a00, #ee0979);
+  color: var(--white);
+  position: relative;
+  overflow: hidden;
+}
+.btn-ultra::after {
+  content: '🔥';
+  margin-left: 6px;
+}
+
+.btn-exam {
+  background: linear-gradient(135deg, #1d3557, #457b9d);
+  color: var(--white);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.btn-demo {
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: var(--white);
+  font-weight: 700;
+}
+
+/* Sezioni menu principale */
+.menu-section {
+  background: var(--light);
+  border: 1px solid #e0e0e0;
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.menu-section-title {
+  font-size: 0.85em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--gray);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.menu-section-title .section-icon {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.section-icon.test { background: var(--primary); }
+.section-icon.study { background: var(--success); }
+
+/* ============================================
+   SEZIONE ESAME
+   ============================================ */
+#exam-screen .exam-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 30px 34px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+
+.exam-header {
+  text-align: center;
+  border-bottom: 2px solid var(--dark);
+  padding-bottom: 14px;
+  margin-bottom: 24px;
+}
+
+.exam-header h2 { font-size: 1.4em; margin-bottom: 4px; letter-spacing: 1px; }
+.exam-header .exam-info {
+  display: flex; justify-content: space-between; font-size: 0.9em; color: var(--gray);
+  margin-top: 8px;
+}
+
+.exam-question {
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #eee;
+}
+
+.exam-question:last-child { border-bottom: none; }
+
+.exam-question .eq-number {
+  font-weight: 700;
+  color: var(--primary);
+  margin-right: 6px;
+}
+
+.exam-question .eq-text {
+  font-size: 1.02em;
+  margin-bottom: 10px;
+  line-height: 1.7;
+}
+
+.exam-options { padding-left: 10px; }
+
+.exam-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 10px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.exam-option:hover { background: var(--light); }
+.exam-option input[type="radio"] { margin-top: 4px; accent-color: var(--primary); }
+.exam-option label { cursor: pointer; line-height: 1.5; }
+
+.exam-option.correct-highlight { background: var(--success-light); }
+.exam-option.wrong-highlight { background: var(--danger-light); }
+
+.exam-open-area {
+  margin-top: 10px;
+}
+
+.exam-open-area textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95em;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.exam-open-area textarea:focus { border-color: var(--primary); }
+
+.exam-section-title {
+  font-size: 1.1em;
+  font-weight: 700;
+  color: var(--dark);
+  margin: 24px 0 14px;
+  padding: 8px 12px;
+  background: var(--light);
+  border-radius: 6px;
+}
+
+.exam-correction {
+  display: none;
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.93em;
+  line-height: 1.6;
+}
+
+.exam-correction.show { display: block; }
+.exam-correction.correct-box { background: var(--success-light); border-left: 4px solid var(--success); }
+.exam-correction.wrong-box { background: var(--danger-light); border-left: 4px solid var(--danger); }
+
+.exam-result-bar {
+  text-align: center;
+  padding: 20px;
+  background: var(--light);
+  border-radius: var(--radius);
+  margin-top: 20px;
+}
+
+.exam-result-bar .exam-grade {
+  font-size: 2.5em;
+  font-weight: 800;
+}
+
+.exam-timer {
+  font-weight: 600;
+  font-size: 1.1em;
+  color: var(--danger);
+}
+
+.prev-stats {
+  margin-top: 25px;
+  padding: 15px;
+  background: var(--light);
+  border-radius: 8px;
+  font-size: 0.9em;
+}
+
+/* ============================================
+   SCHERMATA QUIZ
+   ============================================ */
+#quiz-screen {
+  display: none;
+  margin-top: 20px;
+}
+
+.quiz-header {
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 16px 24px;
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.progress-info { font-weight: 600; color: var(--dark); }
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), #7c3aed, #a855f7);
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+}
+
+.score-display {
+  display: flex;
+  gap: 15px;
+  font-size: 0.9em;
+}
+
+.score-correct { color: var(--success); font-weight: 600; }
+.score-wrong { color: var(--danger); font-weight: 600; }
+
+.question-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 16px;
+  border: 1px solid rgba(0,0,0,0.04);
+  animation: cardAppear 0.4s ease;
+}
+
+@keyframes cardAppear {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.question-meta {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+.badge-topic { background: var(--primary-light); color: var(--primary); }
+.badge-diff-1 { background: #d4edda; color: #155724; }
+.badge-diff-2 { background: #fff3cd; color: #856404; }
+.badge-diff-3 { background: #f8d7da; color: #721c24; }
+.badge-type { background: #e2e3e5; color: #383d41; }
+
+.question-text {
+  font-size: 1.15em;
+  font-weight: 500;
+  margin-bottom: 20px;
+  line-height: 1.7;
+}
+
+/* Opzioni scelta multipla */
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  background: var(--white);
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.option-btn:hover:not(.disabled) {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: translateX(6px);
+  box-shadow: 0 3px 12px rgba(67, 97, 238, 0.15);
+}
+
+.option-btn.selected { border-color: var(--primary); background: var(--primary-light); }
+.option-btn.correct {
+  border-color: var(--success);
+  background: var(--success-light);
+  animation: correctPulse 0.4s ease;
+}
+.option-btn.wrong {
+  border-color: var(--danger);
+  background: var(--danger-light);
+  animation: wrongShake 0.4s ease;
+}
+.option-btn.disabled { cursor: default; opacity: 0.85; }
+
+@keyframes correctPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+@keyframes wrongShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* Input per risposte aperte/numeriche */
+.answer-input-container { margin-top: 10px; }
+
+.answer-input {
+  width: 100%;
+  padding: 14px 18px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1em;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.answer-input:focus { border-color: var(--primary); }
+
+.submit-answer-btn {
+  margin-top: 12px;
+}
+
+/* Feedback */
+.feedback-box {
+  display: none;
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.feedback-correct {
+  background: var(--success-light);
+  border-left: 5px solid var(--success);
+}
+
+.feedback-wrong {
+  background: var(--danger-light);
+  border-left: 5px solid var(--danger);
+}
+
+.feedback-title {
+  font-weight: 700;
+  font-size: 1.1em;
+  margin-bottom: 8px;
+}
+
+.feedback-correct .feedback-title { color: var(--success); }
+.feedback-wrong .feedback-title { color: var(--danger); }
+
+.feedback-text { margin-bottom: 10px; line-height: 1.7; }
+
+/* Approfondimento */
+.deepdive-box {
+  display: none;
+  background: #fff8e1;
+  border-left: 5px solid var(--warning);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  animation: slideIn 0.4s ease;
+}
+
+.deepdive-title {
+  font-weight: 700;
+  color: #e65100;
+  margin-bottom: 8px;
+}
+
+.deepdive-text { line-height: 1.7; }
+
+.next-btn-container {
+  text-align: center;
+  margin: 16px 0;
+}
+
+/* ============================================
+   SCHERMATA RIEPILOGO
+   ============================================ */
+#summary-screen {
+  display: none;
+  margin-top: 20px;
+}
+
+.summary-card {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 34px;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 16px;
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.summary-card h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--dark);
+}
+
+.big-score {
+  text-align: center;
+  font-size: 3em;
+  font-weight: 800;
+  margin: 10px 0;
+}
+
+.big-score.good { color: var(--success); }
+.big-score.medium { color: var(--warning); }
+.big-score.bad { color: var(--danger); }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.stat-box {
+  background: var(--light);
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-number { font-size: 1.8em; font-weight: 700; }
+.stat-label { font-size: 0.85em; color: var(--gray); }
+
+.topic-results { margin: 20px 0; }
+
+.topic-result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.topic-result-item.weak { background: var(--danger-light); }
+.topic-result-item.strong { background: var(--success-light); }
+.topic-result-item.medium-res { background: #fff3cd; }
+
+.topic-bar {
+  width: 100px;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.topic-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.suggestions {
+  background: var(--primary-light);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-top: 15px;
+}
+
+.suggestions h3 { color: var(--primary); margin-bottom: 8px; }
+.suggestions ul { padding-left: 20px; }
+.suggestions li { margin-bottom: 5px; }
+
+.history-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9em;
+}
+
+.history-item .correct-mark { color: var(--success); font-weight: 700; }
+.history-item .wrong-mark { color: var(--danger); font-weight: 700; }
+
+/* ============================================
+   SEZIONE APPUNTI
+   ============================================ */
+.notes-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.notes-nav button {
+  padding: 6px 14px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: var(--light);
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.notes-nav button:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.note-section {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.note-title {
+  padding: 14px 18px;
+  margin: 0;
+  cursor: pointer;
+  background: var(--light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+  user-select: none;
+}
+
+.note-title:hover { background: var(--primary-light); }
+
+.note-toggle { font-size: 0.8em; color: var(--gray); transition: transform 0.3s; }
+
+.note-body {
+  padding: 18px 20px;
+  line-height: 1.8;
+  display: none;
+}
+
+.note-body.open { display: block; }
+
+.note-body h4 {
+  margin: 14px 0 8px;
+  color: var(--primary);
+}
+
+.note-body ul, .note-body ol {
+  padding-left: 22px;
+  margin: 8px 0;
+}
+
+.note-body li { margin-bottom: 4px; }
+
+.formula-box {
+  background: linear-gradient(135deg, #e8ecff, #f0e6ff);
+  border-left: 4px solid var(--primary);
+  padding: 14px 18px;
+  margin: 12px 0;
+  font-size: 1.15em;
+  font-weight: 600;
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  border-radius: 0 8px 8px 0;
+}
+
+.note-tip {
+  background: #fff8e1;
+  border-left: 4px solid var(--warning);
+  padding: 10px 14px;
+  margin: 12px 0;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.95em;
+}
+
+/* Passaggi dimostrazione */
+.demo-step {
+  background: var(--light);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 12px 0;
+  border-left: 4px solid var(--primary);
+  position: relative;
+}
+
+.demo-step .step-num {
+  display: inline-block;
+  background: var(--primary);
+  color: var(--white);
+  font-weight: 700;
+  font-size: 0.8em;
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-right: 8px;
+}
+
+.demo-step .step-label {
+  font-weight: 600;
+  color: var(--dark);
+}
+
+.demo-step p { margin-top: 8px; }
+.demo-step ul { margin-top: 6px; padding-left: 20px; }
+.demo-step li { margin-bottom: 3px; }
+
+/* Infografiche */
+.infographic {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  border: 2px solid #e0e7ff;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 18px;
+  text-align: center;
+  overflow-x: auto;
+}
+
+.infographic svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.info-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 10px 0;
+}
+
+.info-block {
+  background: var(--white);
+  border: 2px solid var(--primary);
+  border-radius: 10px;
+  padding: 10px 16px;
+  min-width: 110px;
+  text-align: center;
+  position: relative;
+}
+
+.info-block.highlight {
+  background: linear-gradient(135deg, #e8ecff, #f0e6ff);
+  border-color: #7c3aed;
+}
+
+.info-block.result {
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
+  border-color: var(--success);
+}
+
+.info-block .ib-title {
+  font-size: 0.75em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gray);
+  margin-bottom: 4px;
+}
+
+.info-block .ib-formula {
+  font-size: 1.1em;
+  font-weight: 700;
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  color: var(--dark);
+}
+
+.info-block .ib-note {
+  font-size: 0.78em;
+  color: var(--gray);
+  margin-top: 3px;
+}
+
+.info-arrow {
+  font-size: 1.5em;
+  color: var(--primary);
+  padding: 0 6px;
+  font-weight: 700;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.info-card {
+  background: var(--white);
+  border-radius: 10px;
+  padding: 12px;
+  border-left: 4px solid var(--primary);
+  text-align: left;
+}
+
+.info-card.green { border-left-color: var(--success); }
+.info-card.red { border-left-color: var(--danger); }
+.info-card.purple { border-left-color: #7c3aed; }
+.info-card.orange { border-left-color: #ff6a00; }
+
+.info-card .ic-title {
+  font-size: 0.8em;
+  font-weight: 700;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-card .ic-content {
+  font-size: 0.95em;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.info-card .ic-formula {
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  font-weight: 700;
+  font-size: 1.05em;
+}
+
+.info-visual {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+
+.info-visual-item {
+  text-align: center;
+}
+
+.info-visual-item .iv-icon {
+  font-size: 2.5em;
+  line-height: 1.2;
+}
+
+.info-visual-item .iv-label {
+  font-size: 0.82em;
+  color: var(--gray);
+  margin-top: 2px;
+}
+
+.info-step-flow {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.info-step-box {
+  background: var(--white);
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  min-width: 100px;
+  max-width: 160px;
+  text-align: center;
+  font-size: 0.88em;
+  line-height: 1.4;
+}
+
+.info-step-box.active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.info-step-box .isb-num {
+  display: inline-block;
+  background: var(--primary);
+  color: var(--white);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 0.8em;
+  font-weight: 700;
+  line-height: 22px;
+  margin-bottom: 4px;
+}
+
+.info-step-box .isb-formula {
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  font-weight: 700;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 600px) {
+  .container { padding: 10px; }
+  #start-screen { padding: 20px; }
+  .question-card { padding: 20px; }
+  .quiz-header { padding: 12px 16px; }
+  #start-screen h1 { font-size: 1.5em; }
+  .prof-svg-container { width: 160px; height: 160px; }
+  .prof-bubble { font-size: 0.95em; padding: 14px 18px; }
+  .info-step-flow { gap: 4px; }
+  .info-arrow { font-size: 1em; padding: 0 2px; }
+  .info-step-box { min-width: 70px; max-width: 110px; font-size: 0.78em; padding: 6px 8px; }
+}
+
+/* ============================================
+   BANNER MOTIVAZIONALE
+   ============================================ */
+.motivation-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7); z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  animation: fadeInOverlay 0.3s ease;
+}
+@keyframes fadeInOverlay { from { opacity: 0; } to { opacity: 1; } }
+@keyframes popIn { from { transform: scale(0.5) rotate(-3deg); opacity: 0; } to { transform: scale(1) rotate(0deg); opacity: 1; } }
+@keyframes fadeOutOverlay { from { opacity: 1; } to { opacity: 0; } }
+.motivation-card {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  border-radius: 20px; padding: 40px 36px; max-width: 460px; width: 90%;
+  text-align: center; color: #fff; position: relative; overflow: hidden;
+  animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 40px rgba(99,102,241,0.3);
+}
+.motivation-card::before {
+  content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: conic-gradient(from 0deg, transparent 0%, rgba(99,102,241,0.1) 25%, transparent 50%);
+  animation: rotateBg 6s linear infinite;
+}
+@keyframes rotateBg { to { transform: rotate(360deg); } }
+.motivation-emoji { font-size: 3.5em; margin-bottom: 12px; position: relative; z-index: 1; }
+.motivation-text { font-size: 1.35em; font-weight: 700; line-height: 1.4; margin-bottom: 8px; position: relative; z-index: 1; }
+.motivation-sub { font-size: 0.95em; color: rgba(255,255,255,0.7); margin-bottom: 24px; position: relative; z-index: 1; }
+.motivation-btn {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff;
+  border: none; padding: 14px 36px; border-radius: 50px; font-size: 1.1em;
+  font-weight: 700; cursor: pointer; position: relative; z-index: 1;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(99,102,241,0.4);
+}
+.motivation-btn:hover { transform: scale(1.05); box-shadow: 0 6px 30px rgba(99,102,241,0.6); }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- START SCREEN -->
+  <div id="start-screen">
+    <div class="prof-header-container" id="prof-header-svg"></div>
+    <h1>Chapter 17: <span>Straight Lines</span></h1>
+    <p class="subtitle">Interactive study tool for Year 10 / 1st Liceo Mathematics</p>
+    <div class="prof-welcome">Mr. Clarke says: "Let's see if you've been paying attention."</div>
+
+    <div class="menu-section">
+      <div class="menu-section-title"><span class="section-icon test"></span> Tests &amp; Preparation</div>
+      <h3 style="margin-bottom:10px; text-align:left; font-size:0.95em;">Filter by topic:</h3>
+      <div class="topic-grid" id="topic-filters"></div>
+      <div class="mode-buttons">
+        <button class="btn btn-primary" onclick="startQuiz('all')">Full Test</button>
+        <button class="btn btn-warning" onclick="startQuiz('random')">Random Mode</button>
+        <button class="btn btn-danger" onclick="startQuiz('errors')" id="btn-errors" style="display:none;">Review Mistakes</button>
+        <button class="btn btn-ultra" onclick="startQuiz('ultra')">Ultra Preparation</button>
+      </div>
+      <div class="mode-buttons" style="margin-top:10px;">
+        <button class="btn btn-exam" onclick="showExam()">Mock Exam</button>
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-title"><span class="section-icon study"></span> Study &amp; Review</div>
+      <div class="mode-buttons">
+        <button class="btn btn-outline" style="border-color:var(--success);color:var(--success);" onclick="showNotes()">Study Notes</button>
+      </div>
+    </div>
+
+    <div class="prev-stats" id="prev-stats" style="display:none;">
+      <strong>Previous session:</strong>
+      <span id="prev-stats-text"></span>
+      <br><button class="btn btn-outline" style="margin-top:8px; padding:6px 16px; font-size:0.85em;" onclick="clearProgress()">Clear progress</button>
+    </div>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="quiz-screen">
+    <div class="quiz-header">
+      <div class="progress-info">Question <span id="current-q">1</span> of <span id="total-q">0</span></div>
+      <div class="score-display">
+        <span class="score-correct">Correct: <span id="score-correct">0</span></span>
+        <span class="score-wrong">Wrong: <span id="score-wrong">0</span></span>
+      </div>
+      <div class="progress-bar-container"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+    </div>
+    <div class="question-card" id="question-card">
+      <div class="question-meta" id="question-meta"></div>
+      <div class="question-text" id="question-text"></div>
+      <div id="answer-area"></div>
+      <div class="submit-answer-btn" id="submit-area" style="display:none;">
+        <button class="btn btn-primary" onclick="checkOpenAnswer()">Check Answer</button>
+      </div>
+    </div>
+    <div class="prof-container" id="prof-container">
+      <div class="prof-svg-container">
+        <div class="prof-svg-correct" id="prof-svg-happy"></div>
+        <div class="prof-svg-wrong" id="prof-svg-angry"></div>
+      </div>
+      <div class="prof-bubble">
+        <div class="prof-name" id="prof-name">Mr. Clarke</div>
+        <div id="prof-phrase"></div>
+      </div>
+    </div>
+    <div class="feedback-box" id="feedback-box">
+      <div class="feedback-title" id="feedback-title"></div>
+      <div class="feedback-text" id="feedback-text"></div>
+    </div>
+    <div class="deepdive-box" id="deepdive-box">
+      <div class="deepdive-title">Deep Dive</div>
+      <div class="deepdive-text" id="deepdive-text"></div>
+    </div>
+    <div class="next-btn-container" id="next-btn-container" style="display:none;">
+      <button class="btn btn-primary" onclick="nextQuestion()">Next Question</button>
+      <button class="btn btn-outline" style="margin-left:8px;" onclick="endQuiz()">Finish</button>
+    </div>
+  </div>
+
+  <!-- SUMMARY SCREEN -->
+  <div id="summary-screen">
+    <div class="summary-card">
+      <h2>Session Summary</h2>
+      <div class="prof-container show" id="prof-summary" style="margin-bottom:16px;">
+        <div class="prof-svg-container" id="prof-summary-svg"></div>
+        <div class="prof-bubble">
+          <div class="prof-name" id="prof-summary-name">Mr. Clarke</div>
+          <div id="prof-summary-phrase"></div>
+        </div>
+      </div>
+      <div class="big-score" id="final-score"></div>
+      <p style="text-align:center;color:var(--gray);" id="final-score-label"></p>
+      <div class="stats-grid" id="stats-grid"></div>
+      <h3 style="margin:20px 0 10px;">Results by Topic</h3>
+      <div class="topic-results" id="topic-results"></div>
+      <div class="suggestions" id="suggestions"></div>
+      <h3 style="margin:20px 0 10px;">Answer History</h3>
+      <div class="history-list" id="history-list"></div>
+    </div>
+    <div style="text-align:center; margin:20px 0 40px;">
+      <button class="btn btn-primary" onclick="location.reload()">Start Over</button>
+      <button class="btn btn-danger" style="margin-left:10px;" onclick="startQuiz('errors')">Review Mistakes</button>
+    </div>
+  </div>
+
+  <!-- EXAM SCREEN -->
+  <div id="exam-screen" style="display:none; margin-top:20px;">
+    <div class="exam-card">
+      <div class="exam-header">
+        <h2>MATHEMATICS TEST &mdash; STRAIGHT LINES</h2>
+        <div class="exam-info">
+          <span>Name: _______________&nbsp;&nbsp; Surname: _______________</span>
+          <span>Year: 10&nbsp;&nbsp; Date: ___/___/______</span>
+        </div>
+        <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+          <span class="exam-timer" id="exam-timer">Time: 45:00</span>
+          <button class="btn btn-outline" style="padding:6px 14px; font-size:0.85em;" onclick="hideExam()">Back to menu</button>
+        </div>
+      </div>
+      <div class="exam-section-title">PART 1 &mdash; Multiple Choice (10 questions)</div>
+      <div id="exam-mc-questions"></div>
+      <div class="exam-section-title">PART 2 &mdash; Open-ended Questions (3 questions)</div>
+      <div id="exam-open-questions"></div>
+      <div style="text-align:center; margin-top:24px;">
+        <button class="btn btn-primary" onclick="submitExam()" id="exam-submit-btn" style="padding:14px 40px; font-size:1.05em;">Submit Test</button>
+      </div>
+      <div class="exam-result-bar" id="exam-result" style="display:none;">
+        <p style="font-size:1.1em; margin-bottom:8px;">Test Result:</p>
+        <div class="exam-grade" id="exam-grade"></div>
+        <p id="exam-grade-detail" style="color:var(--gray);margin-top:6px;"></p>
+        <div style="margin-top:16px;">
+          <button class="btn btn-primary" onclick="resetExam()">Retake Test</button>
+          <button class="btn btn-outline" style="margin-left:8px;" onclick="hideExam()">Back to menu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTES SCREEN -->
+  <div id="notes-screen" style="display:none; margin-top:20px;">
+    <div class="summary-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:20px;">
+        <h2 style="margin:0;">Straight Lines &mdash; Study Notes</h2>
+        <button class="btn btn-outline" onclick="hideNotes()" style="padding:8px 18px; font-size:0.9em;">Back to menu</button>
+      </div>
+      <div class="notes-nav" id="notes-nav"></div>
+      <div id="notes-content">
+
+        <div class="note-section" id="note-vert-horiz">
+          <h3 class="note-title" onclick="toggleNote('vert-horiz')">1. Vertical and Horizontal Lines <span class="note-toggle">&#9660;</span></h3>
+          <div class="note-body" id="body-vert-horiz">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px;">Vertical &amp; Horizontal Lines</div>
+              <div class="info-grid">
+                <div class="info-card green"><div class="ic-title">Horizontal</div><div class="ic-content">Equation: <span class="ic-formula">y = c</span><br>Gradient = <strong>0</strong><br>Parallel to x-axis</div></div>
+                <div class="info-card red"><div class="ic-title">Vertical</div><div class="ic-content">Equation: <span class="ic-formula">x = a</span><br>Gradient: <strong>undefined</strong><br>Parallel to y-axis</div></div>
+              </div>
+            </div>
+            <h4>Horizontal Lines</h4>
+            <p>A horizontal line has the equation:</p>
+            <div class="formula-box">y = c</div>
+            <ul>
+              <li>Every point has the same y-coordinate.</li>
+              <li>The gradient is <strong>0</strong> (no vertical change).</li>
+              <li>Example: y = 3 passes through (0,3), (1,3), (5,3).</li>
+            </ul>
+            <h4>Vertical Lines</h4>
+            <div class="formula-box">x = a</div>
+            <ul>
+              <li>Every point has the same x-coordinate.</li>
+              <li>The gradient is <strong>undefined</strong> (division by zero).</li>
+              <li>Example: x = &minus;2 passes through (&minus;2,0), (&minus;2,5).</li>
+            </ul>
+            <div class="note-tip">Horizontal = y = c (gradient 0). Vertical = x = a (gradient undefined). Don't mix them up!</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-points">
+          <h3 class="note-title" onclick="toggleNote('points')">2. Points on a Line <span class="note-toggle">&#9660;</span></h3>
+          <div class="note-body" id="body-points">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px;">Testing if a Point Lies on a Line</div>
+              <div class="info-step-flow">
+                <div class="info-step-box"><div class="isb-num">1</div><br>Take point (x,y)</div>
+                <div class="info-arrow">&rarr;</div>
+                <div class="info-step-box"><div class="isb-num">2</div><br>Substitute into equation</div>
+                <div class="info-arrow">&rarr;</div>
+                <div class="info-step-box active"><div class="isb-num">3</div><br>LHS = RHS?</div>
+              </div>
+            </div>
+            <div class="formula-box">If LHS = RHS after substitution, the point is ON the line.</div>
+            <h4>Example</h4>
+            <p>Does (2,7) lie on y = 3x + 1? Sub: 7 = 3(2)+1 = 7. Yes!</p>
+            <p>Does (1,5) lie on y = 2x + 1? Sub: 5 &ne; 2(1)+1 = 3. No!</p>
+            <div class="note-tip">This works for any form of equation. Just plug in x and y and check equality.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-intercepts">
+          <h3 class="note-title" onclick="toggleNote('intercepts')">3. Axes Intercepts <span class="note-toggle">&#9660;</span></h3>
+          <div class="note-body" id="body-intercepts">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px;">Finding Intercepts</div>
+              <div class="info-grid">
+                <div class="info-card green"><div class="ic-title">x-intercept</div><div class="ic-content">Set <span class="ic-formula">y = 0</span>, solve for x<br>Point: (x, 0)</div></div>
+                <div class="info-card purple"><div class="ic-title">y-intercept</div><div class="ic-content">Set <span class="ic-formula">x = 0</span>, solve for y<br>Point: (0, y)</div></div>
+              </div>
+            </div>
+            <div class="formula-box">x-intercept: set y = 0 and solve for x</div>
+            <div class="formula-box">y-intercept: set x = 0 and solve for y</div>
+            <h4>Gradient from intercepts</h4>
+            <p>Given x-intercept (a,0) and y-intercept (0,b):</p>
+            <div class="formula-box">m = (b &minus; 0) / (0 &minus; a) = &minus;b/a</div>
+            <div class="note-tip">x-intercept means y = 0; y-intercept means x = 0. Many students confuse these!</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-table">
+          <h3 class="note-title" onclick="toggleNote('table')">4. Graphing from a Table of Values <span class="note-toggle">&#9660;</span></h3>
+          <div class="note-body" id="body-table">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px;">Table of Values Method</div>
+              <div class="info-step-flow">
+                <div class="info-step-box"><div class="isb-num">1</div><br>Choose x values</div>
+                <div class="info-arrow">&rarr;</div>
+                <div class="info-step-box"><div class="isb-num">2</div><br>Calculate y</div>
+                <div class="info-arrow">&rarr;</div>
+                <div class="info-step-box"><div class="isb-num">3</div><br>Plot points</div>
+                <div class="info-arrow">&rarr;</div>
+                <div class="info-step-box active"><div class="isb-num">4</div><br>Draw line</div>
+              </div>
+            </div>
+            <ol>
+              <li>Choose at least 3 x-values (e.g. &minus;2, 0, 2).</li>
+              <li>Substitute each x to find y.</li>
+              <li>Plot each (x,y) on the grid.</li>
+              <li>Draw a straight line through all points with a ruler.</li>
+            </ol>
+            <div class="note-tip">Use 3+ points to check your work. If one doesn't line up, you made a calculation error.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-gradient">
+          <h3 class="note-title" onclick="toggleNote('gradient')">5. Gradient-Intercept Form <span class="note-toggle">&#9660;</span></h3>
+          <div class="note-body" id="body-gradient">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px;">y = mx + c &mdash; The Key Formula</div>
+              <div class="info-flow">
+                <div class="info-block highlight"><div class="ib-title">Key Formula</div><div class="ib-formula">y = mx + c</div></div>
+              </div>
+              <div class="info-grid" style="margin-top:14px;">
+                <div class="info-card green"><div class="ic-title">m = gradient</div><div class="ic-content">Rise / Run<br><span class="ic-formula">m = (y&#8322;&minus;y&#8321;)/(x&#8322;&minus;x&#8321;)</span></div></div>
+                <div class="info-card purple"><div class="ic-title">c = y-intercept</div><div class="ic-content">Crosses y-axis at (0, c)</div></div>
+                <div class="info-card orange"><div class="ic-title">m &gt; 0</div><div class="ic-content">Line slopes <strong>upward</strong> /</div></div>
+                <div class="info-card red"><div class="ic-title">m &lt; 0</div><div class="ic-content">Line slopes <strong>downward</strong> \</div></div>
+              </div>
+            </div>
+            <div class="formula-box">y = mx + c</div>
+            <ul>
+              <li><strong>m</strong> = gradient (slope): rise over run.</li>
+              <li><strong>c</strong> = y-intercept: where line crosses the y-axis.</li>
+            </ul>
+            <h4>Drawing using m and c:</h4>
+            <ol>
+              <li>Plot (0, c) on the y-axis.</li>
+              <li>From there, go "rise" up/down and "run" right.</li>
+              <li>Draw the line through both points.</li>
+            </ol>
+            <div class="formula-box">Gradient from two points: m = (y&#8322; &minus; y&#8321;) / (x&#8322; &minus; x&#8321;)</div>
+            <div class="note-tip">If m = 2, the line rises 2 for every 1 across. If m = &minus;3, it falls 3 for every 1 across.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-general">
+          <h3 class="note-title" onclick="toggleNote('general')">6. General Form <span class="note-toggle">&#9660;</span></h3>
+          <div class="note-body" id="body-general">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px;">General Form &harr; Gradient-Intercept</div>
+              <div class="info-flow">
+                <div class="info-block"><div class="ib-title">General</div><div class="ib-formula">ax + by = d</div></div>
+                <div class="info-arrow">&harr;</div>
+                <div class="info-block highlight"><div class="ib-title">Gradient-Intercept</div><div class="ib-formula">y = mx + c</div></div>
+              </div>
+            </div>
+            <div class="formula-box">ax + by = d</div>
+            <h4>Converting to y = mx + c:</h4>
+            <ol>
+              <li>by = &minus;ax + d</li>
+              <li>y = (&minus;a/b)x + d/b</li>
+              <li>So m = &minus;a/b and c = d/b</li>
+            </ol>
+            <h4>Graphing in general form:</h4>
+            <p>Find the two intercepts and draw through them.</p>
+            <div class="note-tip">General form avoids fractions. E.g. x + 2y = 6 is neater than y = &minus;0.5x + 3.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-finding">
+          <h3 class="note-title" onclick="toggleNote('finding')">7. Finding the Equation of a Line <span class="note-toggle">&#9660;</span></h3>
+          <div class="note-body" id="body-finding">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px;">Three Methods</div>
+              <div class="info-grid">
+                <div class="info-card green"><div class="ic-title">Method 1</div><div class="ic-content">Given m and c<br><span class="ic-formula">y = mx + c</span></div></div>
+                <div class="info-card purple"><div class="ic-title">Method 2</div><div class="ic-content">Given m + point (a,b)<br><span class="ic-formula">y &minus; b = m(x &minus; a)</span></div></div>
+                <div class="info-card orange"><div class="ic-title">Method 3</div><div class="ic-content">Given two points<br>Find m first, then Method 2</div></div>
+              </div>
+            </div>
+            <h4>Method 1: Gradient + y-intercept</h4>
+            <div class="formula-box">y = mx + c</div>
+            <h4>Method 2: Gradient + a point (a,b)</h4>
+            <div class="formula-box">y &minus; b = m(x &minus; a)</div>
+            <h4>Method 3: Two points</h4>
+            <ol>
+              <li>Find m = (y&#8322; &minus; y&#8321;) / (x&#8322; &minus; x&#8321;)</li>
+              <li>Use either point with Method 2.</li>
+            </ol>
+            <div class="note-tip">The point-gradient formula y &minus; b = m(x &minus; a) is the most versatile. It works every time!</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+
+/* ============================================
+   QUESTION BANK
+   ============================================ */
+const QUESTIONS = [
+  // VERTICAL & HORIZONTAL LINES (5)
+  {text:"What is the equation of a horizontal line passing through (0, 5)?",type:"multiple",options:["y = 5","x = 5","y = 5x","x + y = 5"],answer:0,explanation:"A horizontal line has equation y = c. Since it passes through (0,5), the equation is y = 5.",commonError:"Don't confuse horizontal (y = c) with vertical (x = a). A horizontal line has constant y.",deepdive:"Horizontal lines are parallel to the x-axis. Every point on y = 5 has y-coordinate 5, regardless of x.",difficulty:1,topic:"Vertical & Horizontal Lines"},
+  {text:"The gradient of a vertical line is zero.",type:"truefalse",statement:"The gradient of a vertical line is zero.",answer:false,explanation:"False! The gradient of a vertical line is UNDEFINED (not zero). A horizontal line has gradient zero.",commonError:"Students often confuse vertical and horizontal. Vertical = undefined gradient. Horizontal = zero gradient.",deepdive:"The gradient formula is m = rise/run. For a vertical line, run = 0, so m = rise/0, which is undefined. For a horizontal line, rise = 0, so m = 0/run = 0.",difficulty:1,topic:"Vertical & Horizontal Lines"},
+  {text:"What is the equation of the y-axis?",type:"multiple",options:["x = 0","y = 0","y = x","x = y"],answer:0,explanation:"The y-axis is a vertical line where x is always 0. Its equation is x = 0.",commonError:"The y-axis is x = 0 (not y = 0). The x-axis is y = 0.",deepdive:"The axes themselves are lines! The x-axis is y = 0 (horizontal) and the y-axis is x = 0 (vertical).",difficulty:1,topic:"Vertical & Horizontal Lines"},
+  {text:"Which line is parallel to x = 3?",type:"multiple",options:["x = -7","y = 3","y = -7","y = x + 3"],answer:0,explanation:"x = 3 is a vertical line. Any other vertical line x = a is parallel to it. x = -7 is vertical.",commonError:"y = 3 is horizontal, not parallel to the vertical line x = 3.",deepdive:"Parallel lines have the same gradient. All vertical lines are parallel to each other (all have undefined gradient). All horizontal lines are parallel to each other (all have gradient 0).",difficulty:2,topic:"Vertical & Horizontal Lines"},
+  {text:"A line has equation x = -4. What is its gradient?",type:"multiple",options:["Undefined","0","-4","4"],answer:0,explanation:"x = -4 is a vertical line. Vertical lines have undefined gradient because the run is 0.",commonError:"-4 is the x-coordinate, not the gradient. The gradient of any vertical line is undefined.",deepdive:"You cannot assign a numerical value to the gradient of a vertical line. It is not infinity or any number - it is simply undefined.",difficulty:1,topic:"Vertical & Horizontal Lines"},
+
+  // POINTS ON A LINE (6)
+  {text:"Does the point (2, 7) lie on the line y = 2x + 1?",type:"truefalse",statement:"The point (2, 7) lies on the line y = 2x + 1.",answer:false,explanation:"Substitute x=2: y = 2(2)+1 = 5. But the point has y = 7. Since 7 \u2260 5, the point does NOT lie on the line.",commonError:"Always substitute and check both sides. Don't just guess or assume.",deepdive:"A point lies on a line only if its coordinates satisfy the equation. Here 7 \u2260 5, so (2,7) is not on y = 2x+1.",difficulty:1,topic:"Points on a Line"},
+  {text:"Does (3, 11) lie on y = 4x - 1?",type:"truefalse",statement:"The point (3, 11) lies on y = 4x - 1.",answer:true,explanation:"Substitute x=3: y = 4(3)-1 = 12-1 = 11. The point has y=11. Since 11 = 11, yes it lies on the line.",commonError:"Be careful with the arithmetic. 4(3) = 12, then 12-1 = 11.",deepdive:"When LHS = RHS after substitution, the point satisfies the equation and therefore lies on the line.",difficulty:1,topic:"Points on a Line"},
+  {text:"Which point lies on the line y = -x + 6?",type:"multiple",options:["(2, 4)","(2, 8)","(3, 4)","(1, 4)"],answer:0,explanation:"Substitute (2,4): y = -(2)+6 = 4. LHS = 4 = RHS. So (2,4) lies on the line.",commonError:"Check each option by substituting. (2,8): -2+6=4\u22608. (3,4): -3+6=3\u22604. (1,4): -1+6=5\u22604.",deepdive:"To find which point lies on a line, substitute each point's x-value and check if the result equals the y-value.",difficulty:2,topic:"Points on a Line"},
+  {text:"If (4, k) lies on y = 3x - 5, what is k?",type:"numeric",answer:7,tolerance:0.01,explanation:"Substitute x=4: y = 3(4)-5 = 12-5 = 7. So k = 7.",commonError:"Remember to substitute x = 4 into the equation, then the result is k (the y-value).",deepdive:"When a point lies on a line, its coordinates must satisfy the equation. Substituting the known coordinate lets you find the unknown one.",difficulty:2,topic:"Points on a Line"},
+  {text:"The point (0, c) always lies on the y-axis.",type:"truefalse",statement:"The point (0, c) lies on the y-axis for any value of c.",answer:true,explanation:"True! Any point with x-coordinate 0 lies on the y-axis, regardless of the y-coordinate.",commonError:"The y-axis is where x = 0. Any point (0, anything) is on the y-axis.",deepdive:"Similarly, any point (a, 0) lies on the x-axis. These are the intercept points.",difficulty:1,topic:"Points on a Line"},
+  {text:"Does (-1, 5) lie on 2x + y = 3?",type:"truefalse",statement:"The point (-1, 5) lies on 2x + y = 3.",answer:true,explanation:"Substitute: 2(-1) + 5 = -2 + 5 = 3. LHS = 3 = RHS. Yes, it lies on the line.",commonError:"This works for general form too. Just plug in x and y and check if both sides are equal.",deepdive:"The substitution method works for any form of a linear equation - gradient-intercept, general form, or any other.",difficulty:2,topic:"Points on a Line"},
+
+  // AXES INTERCEPTS (6)
+  {text:"Find the y-intercept of y = 3x - 5.",type:"numeric",answer:-5,tolerance:0.01,explanation:"Set x = 0: y = 3(0) - 5 = -5. The y-intercept is -5 (the point is (0,-5)).",commonError:"The y-intercept is the value of c in y = mx + c. Here c = -5.",deepdive:"In gradient-intercept form y = mx + c, the y-intercept is always c. You can read it directly from the equation.",difficulty:1,topic:"Axes Intercepts"},
+  {text:"Find the x-intercept of y = 2x - 8.",type:"numeric",answer:4,tolerance:0.01,explanation:"Set y = 0: 0 = 2x - 8, so 2x = 8, x = 4. The x-intercept is 4 (the point is (4,0)).",commonError:"For the x-intercept, set y = 0 (not x = 0). Then solve for x.",deepdive:"The x-intercept is where the line crosses the x-axis. At that point, y = 0 always.",difficulty:2,topic:"Axes Intercepts"},
+  {text:"Find the y-intercept of 3x + 2y = 12.",type:"numeric",answer:6,tolerance:0.01,explanation:"Set x = 0: 3(0) + 2y = 12, so 2y = 12, y = 6.",commonError:"For general form, set x = 0 and solve for y to find the y-intercept.",deepdive:"In general form ax + by = d, the y-intercept is d/b (here 12/2 = 6) and the x-intercept is d/a (here 12/3 = 4).",difficulty:2,topic:"Axes Intercepts"},
+  {text:"A line has x-intercept (6, 0) and y-intercept (0, 3). What is its gradient?",type:"numeric",answer:-0.5,tolerance:0.05,explanation:"m = (3-0)/(0-6) = 3/(-6) = -0.5",commonError:"Use the gradient formula with the two intercept points. m = (y2-y1)/(x2-x1).",deepdive:"From intercepts (a,0) and (0,b), the gradient is always m = -b/a. Here m = -3/6 = -0.5.",difficulty:2,topic:"Axes Intercepts"},
+  {text:"What is the x-intercept of 5x + 2y = 10?",type:"numeric",answer:2,tolerance:0.01,explanation:"Set y = 0: 5x + 0 = 10, so x = 2. The x-intercept is (2, 0).",commonError:"For x-intercept, always set y = 0. For y-intercept, always set x = 0.",deepdive:"In general form ax + by = d: x-intercept = d/a and y-intercept = d/b.",difficulty:1,topic:"Axes Intercepts"},
+  {text:"The y-intercept of y = 7x is:",type:"multiple",options:["0","7","1","-7"],answer:0,explanation:"y = 7x can be written as y = 7x + 0. The y-intercept (c) is 0. The line passes through the origin.",commonError:"When there is no constant term, c = 0. The line goes through (0,0).",deepdive:"Any line of the form y = mx (no +c) passes through the origin. Its y-intercept is 0.",difficulty:1,topic:"Axes Intercepts"},
+
+  // GRAPHING FROM TABLE (5)
+  {text:"For y = 2x + 1, when x = 3, what is y?",type:"numeric",answer:7,tolerance:0.01,explanation:"y = 2(3) + 1 = 6 + 1 = 7.",commonError:"Substitute carefully: multiply first, then add.",deepdive:"Creating a table of values means substituting several x-values to find their corresponding y-values.",difficulty:1,topic:"Graphing from Table"},
+  {text:"For y = -x + 4, when x = -2, what is y?",type:"numeric",answer:6,tolerance:0.01,explanation:"y = -(-2) + 4 = 2 + 4 = 6.",commonError:"Be careful with double negatives: -(-2) = +2.",deepdive:"Negative times negative equals positive. This is a common source of errors in tables of values.",difficulty:1,topic:"Graphing from Table"},
+  {text:"How many points do you need at minimum to draw a straight line?",type:"multiple",options:["2","1","3","4"],answer:0,explanation:"You need at least 2 points to define a straight line. However, using 3 points is recommended to check for errors.",commonError:"While 2 points define a line, using 3 helps verify your calculations are correct.",deepdive:"Two points determine a unique line. A third point serves as a check - if it doesn't line up, you made an error somewhere.",difficulty:1,topic:"Graphing from Table"},
+  {text:"For y = 3x - 2, when x = 0, what is y?",type:"numeric",answer:-2,tolerance:0.01,explanation:"y = 3(0) - 2 = 0 - 2 = -2. This is also the y-intercept.",commonError:"When x = 0, you get the y-intercept directly.",deepdive:"x = 0 is the most important value in your table because it gives you the y-intercept, which is the easiest point to plot.",difficulty:1,topic:"Graphing from Table"},
+  {text:"When creating a table of values, choosing x = 0 gives you which special point?",type:"multiple",options:["The y-intercept","The x-intercept","The gradient","The midpoint"],answer:0,explanation:"When x = 0, y = m(0) + c = c. This gives the y-intercept.",commonError:"x = 0 gives the y-intercept. Setting y = 0 gives the x-intercept.",deepdive:"Always include x = 0 in your table - it gives the y-intercept and is the easiest point to plot on the y-axis.",difficulty:1,topic:"Graphing from Table"},
+
+  // GRADIENT-INTERCEPT FORM (8)
+  {text:"What is the gradient of y = 3x - 5?",type:"multiple",options:["3","-5","5","-3"],answer:0,explanation:"In y = mx + c, m is the gradient. Here m = 3.",commonError:"-5 is the y-intercept (c), not the gradient. The gradient is the coefficient of x.",deepdive:"In y = mx + c: m (coefficient of x) = gradient, c (constant term) = y-intercept.",difficulty:1,topic:"Gradient-Intercept Form"},
+  {text:"What is the y-intercept of y = -2x + 7?",type:"multiple",options:["7","-2","2","-7"],answer:0,explanation:"In y = mx + c, c is the y-intercept. Here c = 7.",commonError:"The y-intercept is the constant term (+7), not the coefficient of x (-2).",deepdive:"The y-intercept is where the line crosses the y-axis (where x = 0). Substituting x = 0: y = -2(0) + 7 = 7.",difficulty:1,topic:"Gradient-Intercept Form"},
+  {text:"A line has gradient 4 and y-intercept -1. What is its equation?",type:"multiple",options:["y = 4x - 1","y = -x + 4","y = -4x + 1","y = x - 4"],answer:0,explanation:"Using y = mx + c with m = 4 and c = -1: y = 4x - 1.",commonError:"Just substitute m and c directly into y = mx + c.",deepdive:"This is Method 1 for finding equations: if you know m and c, just write y = mx + c.",difficulty:1,topic:"Gradient-Intercept Form"},
+  {text:"What is the gradient of the line through (1, 3) and (4, 9)?",type:"numeric",answer:2,tolerance:0.01,explanation:"m = (9-3)/(4-1) = 6/3 = 2.",commonError:"Make sure you subtract in the same order: (y2-y1)/(x2-x1).",deepdive:"The gradient formula m = (y2-y1)/(x2-x1) gives the rate of change. Here the line rises 6 units over 3 units = gradient 2.",difficulty:2,topic:"Gradient-Intercept Form"},
+  {text:"If a line has a negative gradient, it slopes:",type:"multiple",options:["Downward from left to right","Upward from left to right","Horizontally","Vertically"],answer:0,explanation:"A negative gradient means the line goes downhill as you move from left to right.",commonError:"Positive gradient = uphill (/). Negative gradient = downhill (\\). Zero = horizontal. Undefined = vertical.",deepdive:"Think of gradient as a hill: positive means climbing up, negative means going down, zero means flat ground.",difficulty:1,topic:"Gradient-Intercept Form"},
+  {text:"What is the gradient of a line parallel to y = 5x + 2?",type:"numeric",answer:5,tolerance:0.01,explanation:"Parallel lines have the same gradient. The gradient of y = 5x + 2 is 5, so any parallel line also has gradient 5.",commonError:"Parallel = same gradient. Don't confuse with perpendicular (negative reciprocal).",deepdive:"Two lines are parallel if and only if they have the same gradient. y = 5x + 2 and y = 5x - 10 are parallel (both have m = 5).",difficulty:2,topic:"Gradient-Intercept Form"},
+  {text:"Convert y = 3x + 6 to find the x-intercept.",type:"numeric",answer:-2,tolerance:0.01,explanation:"Set y = 0: 0 = 3x + 6, so 3x = -6, x = -2.",commonError:"Set y = 0 to find x-intercept, then solve for x.",deepdive:"The x-intercept is where y = 0. For y = mx + c: 0 = mx + c, so x = -c/m. Here x = -6/3 = -2.",difficulty:2,topic:"Gradient-Intercept Form"},
+  {text:"A line passes through (0, -3) with gradient 2. Its equation is:",type:"multiple",options:["y = 2x - 3","y = -3x + 2","y = 2x + 3","y = -2x - 3"],answer:0,explanation:"(0,-3) is the y-intercept, so c = -3. With m = 2: y = 2x - 3.",commonError:"Since the point has x = 0, it is the y-intercept directly. c = -3.",deepdive:"When a point has x = 0, it sits on the y-axis, so its y-value IS the y-intercept c.",difficulty:1,topic:"Gradient-Intercept Form"},
+
+  // GENERAL FORM (7)
+  {text:"Convert 2x + 5y = 10 to gradient-intercept form.",type:"multiple",options:["y = -0.4x + 2","y = 0.4x + 2","y = -2x + 5","y = 2x + 10"],answer:0,explanation:"5y = -2x + 10, so y = (-2/5)x + 10/5 = -0.4x + 2.",commonError:"Isolate y: subtract the x-term, then divide everything by the coefficient of y.",deepdive:"To convert ax + by = d to y = mx + c: m = -a/b and c = d/b. Here m = -2/5 = -0.4 and c = 10/5 = 2.",difficulty:2,topic:"General Form"},
+  {text:"What is the gradient of the line 3x + 4y = 12?",type:"numeric",answer:-0.75,tolerance:0.05,explanation:"Rearrange: 4y = -3x + 12, so y = (-3/4)x + 3. Gradient = -3/4 = -0.75.",commonError:"In general form ax + by = d, gradient = -a/b.",deepdive:"Quick formula: for ax + by = d, the gradient is always -a/b. Here: -3/4 = -0.75.",difficulty:2,topic:"General Form"},
+  {text:"Write x + y = 5 in gradient-intercept form.",type:"multiple",options:["y = -x + 5","y = x + 5","y = x - 5","y = 5x + 1"],answer:0,explanation:"y = -x + 5 (subtract x from both sides). Gradient = -1, y-intercept = 5.",commonError:"Moving x to the other side changes its sign: y = -x + 5.",deepdive:"x + y = 5 is the same as y = -x + 5. The gradient is -1 and the y-intercept is 5.",difficulty:1,topic:"General Form"},
+  {text:"Find the x-intercept of 4x + 3y = 24.",type:"numeric",answer:6,tolerance:0.01,explanation:"Set y = 0: 4x = 24, x = 6.",commonError:"For x-intercept, set y = 0 in the general form equation.",deepdive:"In general form, x-intercept = d/a. Here 24/4 = 6.",difficulty:1,topic:"General Form"},
+  {text:"Find the y-intercept of 2x - y = 8.",type:"numeric",answer:-8,tolerance:0.01,explanation:"Set x = 0: -y = 8, so y = -8.",commonError:"Be careful with signs. -y = 8 means y = -8, not y = 8.",deepdive:"Rearranging: y = 2x - 8. The y-intercept is -8.",difficulty:2,topic:"General Form"},
+  {text:"Which equation is in general form?",type:"multiple",options:["3x + 2y = 7","y = 3x + 2","y - 2 = 3(x - 1)","x = 5"],answer:0,explanation:"General form is ax + by = d. Only 3x + 2y = 7 fits this pattern.",commonError:"General form has x and y terms on one side and the constant on the other.",deepdive:"y = 3x + 2 is gradient-intercept form. y - 2 = 3(x-1) is point-gradient form. x = 5 is a vertical line.",difficulty:1,topic:"General Form"},
+  {text:"Convert y = -2x + 3 to general form.",type:"multiple",options:["2x + y = 3","2x - y = 3","-2x + y = 3","x + 2y = 3"],answer:0,explanation:"Move -2x to the left: 2x + y = 3.",commonError:"Add 2x to both sides: y + 2x = 3, which is 2x + y = 3.",deepdive:"To convert from gradient-intercept to general form, move the mx term to the left side.",difficulty:2,topic:"General Form"},
+
+  // FINDING EQUATION OF A LINE (8)
+  {text:"Find the equation of a line with gradient 2 and y-intercept -3.",type:"multiple",options:["y = 2x - 3","y = -3x + 2","y = 2x + 3","y = -2x - 3"],answer:0,explanation:"Using y = mx + c with m = 2 and c = -3: y = 2x - 3.",commonError:"Just substitute m and c into y = mx + c.",deepdive:"This is the simplest case: when you know both m and c, write y = mx + c directly.",difficulty:1,topic:"Finding Equation of a Line"},
+  {text:"Find the equation of a line through (2, 5) with gradient 3.",type:"multiple",options:["y = 3x - 1","y = 3x + 5","y = 5x + 3","y = 3x - 5"],answer:0,explanation:"Using y - b = m(x - a): y - 5 = 3(x - 2), so y - 5 = 3x - 6, y = 3x - 1.",commonError:"Use the point-gradient formula: y - b = m(x - a), then simplify.",deepdive:"y - 5 = 3(x - 2). Expand: y - 5 = 3x - 6. Add 5: y = 3x - 1. Check: when x=2, y=3(2)-1=5. Correct!",difficulty:2,topic:"Finding Equation of a Line"},
+  {text:"Find the gradient of the line through (1, 2) and (3, 8).",type:"numeric",answer:3,tolerance:0.01,explanation:"m = (8-2)/(3-1) = 6/2 = 3.",commonError:"Subtract coordinates in the same order: (y2-y1)/(x2-x1).",deepdive:"The gradient measures steepness. Rise = 8-2 = 6, Run = 3-1 = 2, so m = 6/2 = 3.",difficulty:1,topic:"Finding Equation of a Line"},
+  {text:"Find the equation of a line through (1, 3) and (3, 7).",type:"multiple",options:["y = 2x + 1","y = 2x + 3","y = 4x - 1","y = 3x + 1"],answer:0,explanation:"m = (7-3)/(3-1) = 4/2 = 2. Using (1,3): y-3 = 2(x-1), y = 2x + 1.",commonError:"Step 1: find gradient. Step 2: use point-gradient formula with either point.",deepdive:"Check with both points: (1,3): 2(1)+1=3. (3,7): 2(3)+1=7. Both work!",difficulty:2,topic:"Finding Equation of a Line"},
+  {text:"Find the equation of a line through (0, 4) and (2, 0).",type:"multiple",options:["y = -2x + 4","y = 2x + 4","y = -2x - 4","y = 4x - 2"],answer:0,explanation:"m = (0-4)/(2-0) = -4/2 = -2. y-intercept is 4 (from point (0,4)). So y = -2x + 4.",commonError:"Since one point is (0,4), the y-intercept is 4. Just find m and write y = mx + 4.",deepdive:"When one point has x = 0, it gives you the y-intercept directly, making the problem easier.",difficulty:2,topic:"Finding Equation of a Line"},
+  {text:"A line passes through (4, 1) with gradient -2. What is its y-intercept?",type:"numeric",answer:9,tolerance:0.01,explanation:"y - 1 = -2(x - 4). y = -2x + 8 + 1 = -2x + 9. So y-intercept = 9.",commonError:"Use point-gradient form, then rearrange to find c.",deepdive:"y - 1 = -2(x-4) expands to y - 1 = -2x + 8, then y = -2x + 9. The y-intercept is 9.",difficulty:2,topic:"Finding Equation of a Line"},
+  {text:"Find the equation of a line through (-1, 4) and (2, -2).",type:"multiple",options:["y = -2x + 2","y = 2x + 6","y = -2x - 2","y = -x + 3"],answer:0,explanation:"m = (-2-4)/(2-(-1)) = -6/3 = -2. y-4 = -2(x-(-1)) = -2(x+1). y = -2x - 2 + 4 = -2x + 2.",commonError:"Be careful with negative coordinates. (-1) in the formula becomes x-(-1) = x+1.",deepdive:"Always check: (-1,4): -2(-1)+2 = 2+2 = 4. (2,-2): -2(2)+2 = -4+2 = -2. Both correct!",difficulty:3,topic:"Finding Equation of a Line"},
+  {text:"A line is parallel to y = 3x + 1 and passes through (2, 10). Its equation is:",type:"multiple",options:["y = 3x + 4","y = 3x + 10","y = -3x + 4","y = 3x - 4"],answer:0,explanation:"Parallel means same gradient: m = 3. y - 10 = 3(x - 2). y = 3x - 6 + 10 = 3x + 4.",commonError:"Parallel lines share the same gradient but have different y-intercepts.",deepdive:"Parallel to y = 3x + 1 means m = 3. Through (2,10): y - 10 = 3(x-2), y = 3x + 4.",difficulty:3,topic:"Finding Equation of a Line"}
+];
+
+/* ULTRA PREPARATION */
+const ULTRA_QUESTIONS = [
+  {text:"A line passes through (2, -1) and is perpendicular to y = (1/2)x + 3. Find the equation in the form y = mx + c. What is the value of c?",type:"numeric",answer:3,tolerance:0.1,explanation:"Perpendicular gradient = -1/(1/2) = -2. y-(-1) = -2(x-2). y+1 = -2x+4. y = -2x+3. So c = 3.",commonError:"For perpendicular lines, the gradient is the negative reciprocal: if m1 = 1/2, then m2 = -2.",deepdive:"Perpendicular gradients multiply to -1: (1/2) x (-2) = -1. Use point-gradient form with the new gradient.",difficulty:3,topic:"Ultra Preparation"},
+  {text:"Line L1 has equation 2x + 3y = 12. Line L2 passes through (0, 0) and is parallel to L1. What is the equation of L2 in the form ax + by = d?",type:"multiple",options:["2x + 3y = 0","3x + 2y = 0","2x - 3y = 0","-2x + 3y = 0"],answer:0,explanation:"L1: gradient = -2/3. L2 is parallel so gradient = -2/3. Through origin (0,0): y = (-2/3)x. Multiply by 3: 3y = -2x. Rearrange: 2x + 3y = 0.",commonError:"Parallel means same coefficients of x and y, just different constant.",deepdive:"For parallel lines in general form ax+by=d, only d changes. Same a and b values.",difficulty:3,topic:"Ultra Preparation"},
+  {text:"Find the area of the triangle formed by the line 3x + 4y = 12 and the coordinate axes.",type:"numeric",answer:6,tolerance:0.1,explanation:"x-intercept: (4,0). y-intercept: (0,3). Triangle has base 4 and height 3. Area = (1/2)(4)(3) = 6.",commonError:"Find both intercepts first, then use Area = (1/2) x base x height.",deepdive:"The triangle has vertices at (0,0), (4,0), and (0,3). Base = 4, height = 3, area = 6 square units.",difficulty:3,topic:"Ultra Preparation"},
+  {text:"Three points are A(1,2), B(3,6), C(5,10). Are they collinear (on the same line)? If yes, what is the gradient? Enter the gradient.",type:"numeric",answer:2,tolerance:0.01,explanation:"m(AB) = (6-2)/(3-1) = 4/2 = 2. m(BC) = (10-6)/(5-3) = 4/2 = 2. Same gradient, so collinear. Gradient = 2.",commonError:"Check if the gradient between each pair of points is the same. If yes, they are collinear.",deepdive:"Collinear means all points lie on the same line. If m(AB) = m(BC), the points are collinear.",difficulty:3,topic:"Ultra Preparation"},
+  {text:"A line passes through (a, 3) and (5, 7) with gradient 2. Find the value of a.",type:"numeric",answer:3,tolerance:0.01,explanation:"m = (7-3)/(5-a) = 4/(5-a) = 2. So 5-a = 2, a = 3.",commonError:"Set up the gradient formula and solve for the unknown coordinate.",deepdive:"4/(5-a) = 2 means 4 = 2(5-a) = 10-2a, so 2a = 6, a = 3. Check: (3,3) to (5,7): m = 4/2 = 2.",difficulty:3,topic:"Ultra Preparation"}
+];
+
+/* EXAM MC (10 questions, 5 options A-E) */
+const EXAM_MC = [
+  {text:"What is the gradient of the line y = -4x + 7?",options:["-4","7","4","-7","None of the above"],answer:0,explanation:"In y = mx + c, the gradient m is the coefficient of x. Here m = -4."},
+  {text:"Which of these is the equation of a vertical line?",options:["x = 3","y = 3","y = 3x","x = 3y","None of the above"],answer:0,explanation:"Vertical lines have equation x = a. Only x = 3 is vertical."},
+  {text:"Find the y-intercept of 5x + 2y = 20.",options:["10","4","20","5","None of the above"],answer:0,explanation:"Set x = 0: 2y = 20, y = 10."},
+  {text:"What is the gradient of a line through (2, 1) and (6, 9)?",options:["2","4","0.5","8","None of the above"],answer:0,explanation:"m = (9-1)/(6-2) = 8/4 = 2."},
+  {text:"A line has equation y = 3x - 2. Its x-intercept is:",options:["2/3","3/2","-2","2","None of the above"],answer:0,explanation:"Set y = 0: 0 = 3x - 2, x = 2/3."},
+  {text:"Convert 3x - y = 6 to gradient-intercept form:",options:["y = 3x - 6","y = -3x + 6","y = 3x + 6","y = -3x - 6","None of the above"],answer:0,explanation:"-y = -3x + 6, so y = 3x - 6."},
+  {text:"Which line is parallel to y = 2x + 5?",options:["y = 2x - 1","y = -2x + 5","y = 0.5x + 5","y = -0.5x + 1","None of the above"],answer:0,explanation:"Parallel lines have the same gradient. m = 2 for y = 2x - 1."},
+  {text:"The equation of a line through (3, 5) with gradient -1 is:",options:["y = -x + 8","y = -x + 2","y = x + 2","y = -x - 8","None of the above"],answer:0,explanation:"y - 5 = -1(x - 3). y = -x + 3 + 5 = -x + 8."},
+  {text:"A horizontal line through (7, -3) has equation:",options:["y = -3","x = 7","y = 7","x = -3","None of the above"],answer:0,explanation:"Horizontal lines have equation y = c. Through (7,-3): y = -3."},
+  {text:"The gradient of a line joining (0, b) and (a, 0) is:",options:["-b/a","b/a","a/b","-a/b","None of the above"],answer:0,explanation:"m = (0 - b)/(a - 0) = -b/a."}
+];
+
+const EXAM_OPEN = [
+  {text:"A line passes through the points A(1, 3) and B(5, 11). (a) Find the gradient of the line. (b) Find the equation of the line in the form y = mx + c. (c) Find the x-intercept and y-intercept. (d) Does the point (3, 7) lie on this line?",solution:"(a) m = (11-3)/(5-1) = 8/4 = 2\n\n(b) y - 3 = 2(x - 1)\ny - 3 = 2x - 2\ny = 2x + 1\n\n(c) y-intercept: c = 1, so (0, 1)\nx-intercept: 0 = 2x + 1, x = -1/2, so (-0.5, 0)\n\n(d) Substitute (3, 7): y = 2(3) + 1 = 7. Yes, (3, 7) lies on the line."},
+  {text:"Line L1 has equation 3x + 2y = 12. (a) Find the gradient of L1. (b) Find both intercepts. (c) Line L2 is parallel to L1 and passes through (0, -1). Write the equation of L2 in both gradient-intercept and general form.",solution:"(a) Rearrange: 2y = -3x + 12, y = (-3/2)x + 6. Gradient = -3/2 = -1.5\n\n(b) x-intercept: set y=0: 3x = 12, x = 4. Point: (4, 0)\ny-intercept: set x=0: 2y = 12, y = 6. Point: (0, 6)\n\n(c) L2 has same gradient m = -3/2 and passes through (0, -1), so c = -1.\nGradient-intercept: y = (-3/2)x - 1\nGeneral form: multiply by 2: 2y = -3x - 2, so 3x + 2y = -2"},
+  {text:"A triangle is formed by three lines: y = 0 (x-axis), x = 0 (y-axis), and y = -x + 6. (a) Find the vertices of the triangle. (b) Find the area of the triangle. (c) Find the equation of a line from the origin to the midpoint of the hypotenuse.",solution:"(a) Vertex 1: intersection of y=0 and x=0: (0, 0)\nVertex 2: intersection of y=-x+6 and y=0: 0=-x+6, x=6. Point: (6, 0)\nVertex 3: intersection of y=-x+6 and x=0: y=-0+6=6. Point: (0, 6)\n\n(b) Base = 6 (along x-axis), Height = 6 (along y-axis)\nArea = (1/2)(6)(6) = 18 square units\n\n(c) Midpoint of hypotenuse (from (6,0) to (0,6)): ((6+0)/2, (0+6)/2) = (3, 3)\nLine from (0,0) to (3,3): m = 3/3 = 1. Equation: y = x"}
+];
+
+/* SVG - Mr. Clarke (blue/navy tones, clean-shaven, friendly) */
+const PROF_SVG_HAPPY = '<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="glowG" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:#06d6a0;stop-opacity:0.2"/><stop offset="100%" style="stop-color:#06d6a0;stop-opacity:0"/></radialGradient></defs><circle cx="110" cy="110" r="108" fill="url(#glowG)"/><path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#1e3a5f" stroke="#152d4a" stroke-width="2"/><path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#15304d" stroke="none"/><rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/><ellipse cx="110" cy="105" rx="48" ry="52" fill="#deb887"/><path d="M62 90 Q62 50 85 40 Q100 34 110 33 Q120 34 135 40 Q158 50 158 90" fill="#2c3e50" stroke="#1a252f" stroke-width="1"/><path d="M62 90 Q60 85 63 80 Q62 75 65 70" fill="#2c3e50"/><path d="M158 90 Q160 85 157 80 Q158 75 155 70" fill="#2c3e50"/><rect x="76" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/><rect x="116" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/><line x1="104" y1="102" x2="116" y2="102" stroke="#1a1a2e" stroke-width="2.5"/><line x1="76" y1="100" x2="66" y2="96" stroke="#1a1a2e" stroke-width="2.5"/><line x1="144" y1="100" x2="154" y2="96" stroke="#1a1a2e" stroke-width="2.5"/><path d="M84 102 Q90 96 96 102" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/><path d="M124 102 Q130 96 136 102" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/><path d="M78 86 Q90 80 100 84" fill="none" stroke="#2c3e50" stroke-width="2.5" stroke-linecap="round"/><path d="M120 84 Q130 80 142 86" fill="none" stroke="#2c3e50" stroke-width="2.5" stroke-linecap="round"/><path d="M92 130 Q110 142 128 130" fill="none" stroke="#c4956a" stroke-width="2.5" stroke-linecap="round"/><g transform="translate(165,140) rotate(-15)"><rect x="0" y="12" width="18" height="26" rx="5" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/><rect x="4" y="-8" width="12" height="24" rx="6" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/></g><circle cx="180" cy="45" r="18" fill="#06d6a0"/><path d="M171 45 L177 51 L189 39" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+const PROF_SVG_ANGRY = '<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="glowR" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:#ef476f;stop-opacity:0.2"/><stop offset="100%" style="stop-color:#ef476f;stop-opacity:0"/></radialGradient></defs><circle cx="110" cy="110" r="108" fill="url(#glowR)"/><path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#1e3a5f" stroke="#152d4a" stroke-width="2"/><path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#15304d" stroke="none"/><rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/><ellipse cx="110" cy="105" rx="48" ry="52" fill="#deb887"/><path d="M62 90 Q62 50 85 40 Q100 34 110 33 Q120 34 135 40 Q158 50 158 90" fill="#2c3e50" stroke="#1a252f" stroke-width="1"/><rect x="76" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/><rect x="116" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/><line x1="104" y1="102" x2="116" y2="102" stroke="#1a1a2e" stroke-width="2.5"/><line x1="76" y1="100" x2="66" y2="96" stroke="#1a1a2e" stroke-width="2.5"/><line x1="144" y1="100" x2="154" y2="96" stroke="#1a1a2e" stroke-width="2.5"/><circle cx="90" cy="101" r="3.5" fill="#1a1a2e"/><circle cx="130" cy="101" r="3.5" fill="#1a1a2e"/><path d="M78 88 Q88 82 100 88" fill="none" stroke="#2c3e50" stroke-width="3" stroke-linecap="round" transform="rotate(8, 89, 85)"/><path d="M120 88 Q132 82 142 88" fill="none" stroke="#2c3e50" stroke-width="3" stroke-linecap="round" transform="rotate(-8, 131, 85)"/><path d="M92 133 Q110 126 128 133" fill="none" stroke="#c4956a" stroke-width="2.5" stroke-linecap="round"/><g transform="translate(152,120) rotate(10)"><rect x="0" y="0" width="22" height="14" rx="5" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/><rect x="3" y="-6" width="5" height="10" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/><rect x="9" y="-8" width="5" height="12" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/><rect x="15" y="-6" width="5" height="10" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/></g><circle cx="180" cy="45" r="18" fill="#ef476f"/><path d="M173 38 L187 52 M187 38 L173 52" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round"/><g transform="translate(55,55)"><path d="M0 5 L5 0 L10 5 L5 10 Z" fill="none" stroke="#ef476f" stroke-width="2"/></g></svg>';
+
+const PROF_SVG_NEUTRAL = '<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="glowN" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:#4361ee;stop-opacity:0.15"/><stop offset="100%" style="stop-color:#4361ee;stop-opacity:0"/></radialGradient></defs><circle cx="110" cy="110" r="108" fill="url(#glowN)"/><path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#1e3a5f" stroke="#152d4a" stroke-width="2"/><path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#15304d" stroke="none"/><rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/><ellipse cx="110" cy="105" rx="48" ry="52" fill="#deb887"/><path d="M62 90 Q62 50 85 40 Q100 34 110 33 Q120 34 135 40 Q158 50 158 90" fill="#2c3e50" stroke="#1a252f" stroke-width="1"/><rect x="76" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/><rect x="116" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/><line x1="104" y1="102" x2="116" y2="102" stroke="#1a1a2e" stroke-width="2.5"/><line x1="76" y1="100" x2="66" y2="96" stroke="#1a1a2e" stroke-width="2.5"/><line x1="144" y1="100" x2="154" y2="96" stroke="#1a1a2e" stroke-width="2.5"/><circle cx="90" cy="101" r="3" fill="#1a1a2e"/><circle cx="130" cy="101" r="3" fill="#1a1a2e"/><path d="M80 86 Q90 82 100 85" fill="none" stroke="#2c3e50" stroke-width="2.5" stroke-linecap="round"/><path d="M120 85 Q130 82 140 86" fill="none" stroke="#2c3e50" stroke-width="2.5" stroke-linecap="round"/><path d="M100 132 L120 132" fill="none" stroke="#c4956a" stroke-width="2" stroke-linecap="round"/></svg>';
+
+(function initProfSVG() {
+  document.getElementById('prof-svg-happy').innerHTML = PROF_SVG_HAPPY;
+  document.getElementById('prof-svg-angry').innerHTML = PROF_SVG_ANGRY;
+  document.getElementById('prof-header-svg').innerHTML = PROF_SVG_NEUTRAL;
+})();
+
+const PROF_CORRECT_PHRASES = [
+  "Spot on! That's textbook perfect.",
+  "Brilliant! You nailed it.",
+  "Correct! Your algebra is sharp today.",
+  "Well done! Keep this up and you'll ace the test.",
+  "That's right! Clean and precise.",
+  "Perfect answer! Mr. Clarke approves.",
+  "Excellent work! You clearly studied.",
+  "Right you are! Confidence and accuracy.",
+  "Nailed it! That gradient knowledge is solid.",
+  "Correct! You're on a straight line to success."
+];
+
+const PROF_WRONG_PHRASES = [
+  "Not quite. Let's review that concept.",
+  "Incorrect. But mistakes help us learn.",
+  "Wrong answer. Check your working again.",
+  "That's not right. Re-read the theory section.",
+  "Nope. Common mistake though \u2014 read the explanation.",
+  "Incorrect. Time to revisit your notes.",
+  "Wrong. But don't give up \u2014 try again after reading.",
+  "That's off. Let's see where you went wrong.",
+  "Not this time. Focus on the method, not just the answer.",
+  "Incorrect. Mr. Clarke says: practice makes perfect."
+];
+
+/* STATE */
+let currentQuestions = [];
+let currentIndex = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let history = [];
+let topicStats = {};
+let errorQuestionIds = [];
+let answered = false;
+
+/* INIT */
+(function init() {
+  const topics = [...new Set(QUESTIONS.map(q => q.topic))];
+  const grid = document.getElementById('topic-filters');
+  topics.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'topic-item';
+    div.innerHTML = '<input type="checkbox" checked value="' + t + '" class="topic-cb"> ' + t;
+    grid.appendChild(div);
+  });
+  loadPreviousStats();
+})();
+
+function loadPreviousStats() {
+  const saved = localStorage.getItem('straight_lines_stats');
+  if (saved) {
+    const data = JSON.parse(saved);
+    document.getElementById('prev-stats').style.display = 'block';
+    document.getElementById('prev-stats-text').textContent = data.correct + '/' + data.total + ' correct (' + data.percentage + '%) - ' + data.date;
+    const savedErrors = localStorage.getItem('straight_lines_errors');
+    if (savedErrors && JSON.parse(savedErrors).length > 0) {
+      document.getElementById('btn-errors').style.display = 'inline-block';
+    }
+  }
+}
+
+function clearProgress() {
+  localStorage.removeItem('straight_lines_stats');
+  localStorage.removeItem('straight_lines_errors');
+  document.getElementById('prev-stats').style.display = 'none';
+  document.getElementById('btn-errors').style.display = 'none';
+}
+
+function startQuiz(mode) {
+  currentIndex = 0; correctCount = 0; wrongCount = 0;
+  history = []; topicStats = {}; errorQuestionIds = []; answered = false;
+  currentQuizMode = mode;
+  const selectedTopics = [...document.querySelectorAll('.topic-cb:checked')].map(cb => cb.value);
+  if (mode === 'ultra') { currentQuestions = [...ULTRA_QUESTIONS]; }
+  else if (mode === 'errors') {
+    const savedErrors = localStorage.getItem('straight_lines_errors');
+    if (savedErrors) { const errorIds = JSON.parse(savedErrors); currentQuestions = errorIds.map(id => QUESTIONS[id]).filter(q => q); }
+    if (!currentQuestions || currentQuestions.length === 0) { alert('No saved mistakes to review!'); return; }
+  } else {
+    currentQuestions = QUESTIONS.filter(q => selectedTopics.includes(q.topic));
+    if (currentQuestions.length === 0) { alert('Select at least one topic!'); return; }
+  }
+  if (mode === 'random') shuffleArray(currentQuestions);
+  else if (mode === 'all') currentQuestions.sort((a, b) => a.difficulty - b.difficulty);
+  const topics = [...new Set(currentQuestions.map(q => q.topic))];
+  topics.forEach(t => { topicStats[t] = { correct: 0, wrong: 0, total: 0 }; });
+
+  const msgList = (mode === 'ultra') ? ULTRA_MESSAGES : MOTIVATION_MESSAGES;
+  showMotivationalMessage(function() {
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('quiz-screen').style.display = 'block';
+    document.getElementById('summary-screen').style.display = 'none';
+    document.getElementById('exam-screen').style.display = 'none';
+    document.getElementById('notes-screen').style.display = 'none';
+    document.getElementById('total-q').textContent = currentQuestions.length;
+    showQuestion();
+  }, msgList);
+}
+
+function shuffleArray(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } }
+
+function showQuestion() {
+  answered = false;
+  const q = currentQuestions[currentIndex];
+  document.getElementById('current-q').textContent = currentIndex + 1;
+  document.getElementById('score-correct').textContent = correctCount;
+  document.getElementById('score-wrong').textContent = wrongCount;
+  document.getElementById('progress-bar').style.width = ((currentIndex) / currentQuestions.length * 100) + '%';
+  const meta = document.getElementById('question-meta');
+  const diffLabels = ['Easy', 'Medium', 'Hard'];
+  const typeLabels = { multiple: 'Multiple Choice', truefalse: 'True/False', numeric: 'Numeric' };
+  meta.innerHTML = '<span class="badge badge-topic">' + q.topic + '</span><span class="badge badge-diff-' + q.difficulty + '">' + diffLabels[q.difficulty - 1] + '</span><span class="badge badge-type">' + typeLabels[q.type] + '</span>';
+  document.getElementById('question-text').textContent = q.text;
+  const area = document.getElementById('answer-area');
+  area.innerHTML = '';
+  document.getElementById('submit-area').style.display = 'none';
+  if (q.type === 'multiple') {
+    const indices = q.options.map((_, i) => i); shuffleArray(indices); q._shuffledIndices = indices;
+    const container = document.createElement('div'); container.className = 'options-container';
+    indices.forEach((origIdx, displayIdx) => {
+      const btn = document.createElement('button'); btn.className = 'option-btn';
+      btn.textContent = q.options[origIdx]; btn.onclick = () => handleMultipleChoice(displayIdx);
+      btn.id = 'opt-' + displayIdx; btn.dataset.origIdx = origIdx; container.appendChild(btn);
+    });
+    area.appendChild(container);
+  } else if (q.type === 'truefalse') {
+    const stmt = document.createElement('p');
+    stmt.style.cssText = 'font-style:italic; margin-bottom:15px; padding:12px; background:#f0f0f0; border-radius:8px;';
+    stmt.textContent = '"' + q.statement + '"'; area.appendChild(stmt);
+    const container = document.createElement('div'); container.className = 'options-container';
+    ['True', 'False'].forEach((label, i) => {
+      const btn = document.createElement('button'); btn.className = 'option-btn'; btn.textContent = label;
+      btn.onclick = () => handleTrueFalse(i === 0); btn.id = 'tf-' + i; container.appendChild(btn);
+    });
+    area.appendChild(container);
+  } else if (q.type === 'numeric') {
+    const container = document.createElement('div'); container.className = 'answer-input-container';
+    container.innerHTML = '<input type="text" class="answer-input" id="numeric-input" placeholder="Enter your numeric answer..." onkeydown="if(event.key===\'Enter\')checkOpenAnswer()">';
+    area.appendChild(container); document.getElementById('submit-area').style.display = 'block';
+  }
+  document.getElementById('feedback-box').style.display = 'none';
+  document.getElementById('deepdive-box').style.display = 'none';
+  document.getElementById('next-btn-container').style.display = 'none';
+  document.getElementById('prof-container').className = 'prof-container';
+}
+
+function handleMultipleChoice(displayIdx) {
+  if (answered) return; answered = true;
+  const q = currentQuestions[currentIndex];
+  const origSelected = q._shuffledIndices[displayIdx];
+  const isCorrect = origSelected === q.answer;
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    const origIdx = parseInt(btn.dataset.origIdx);
+    if (origIdx === q.answer) btn.classList.add('correct');
+    if (i === displayIdx && !isCorrect) btn.classList.add('wrong');
+  });
+  processAnswer(isCorrect, q);
+}
+
+function handleTrueFalse(selected) {
+  if (answered) return; answered = true;
+  const q = currentQuestions[currentIndex];
+  const isCorrect = selected === q.answer;
+  const correctIdx = q.answer ? 0 : 1; const selectedIdx = selected ? 0 : 1;
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (i === correctIdx) btn.classList.add('correct');
+    if (i === selectedIdx && !isCorrect) btn.classList.add('wrong');
+  });
+  processAnswer(isCorrect, q);
+}
+
+function checkOpenAnswer() {
+  if (answered) return; answered = true;
+  const q = currentQuestions[currentIndex]; let isCorrect = false;
+  if (q.type === 'numeric') {
+    const input = document.getElementById('numeric-input');
+    const val = parseFloat(input.value.replace(',', '.'));
+    isCorrect = !isNaN(val) && Math.abs(val - q.answer) <= q.tolerance;
+    input.style.borderColor = isCorrect ? 'var(--success)' : 'var(--danger)';
+    input.style.background = isCorrect ? 'var(--success-light)' : 'var(--danger-light)';
+  }
+  processAnswer(isCorrect, q);
+}
+
+function processAnswer(isCorrect, q) {
+  if (isCorrect) { correctCount++; topicStats[q.topic].correct++; }
+  else { wrongCount++; topicStats[q.topic].wrong++; const globalIdx = QUESTIONS.indexOf(q); if (globalIdx !== -1) errorQuestionIds.push(globalIdx); }
+  topicStats[q.topic].total++;
+  history.push({ question: q.text, topic: q.topic, correct: isCorrect, difficulty: q.difficulty });
+  showFeedback(isCorrect, q);
+  document.getElementById('score-correct').textContent = correctCount;
+  document.getElementById('score-wrong').textContent = wrongCount;
+}
+
+function showFeedback(isCorrect, q) {
+  const fb = document.getElementById('feedback-box');
+  const dd = document.getElementById('deepdive-box');
+  const prof = document.getElementById('prof-container');
+  prof.className = 'prof-container show ' + (isCorrect ? 'correct' : 'wrong');
+  const phrases = isCorrect ? PROF_CORRECT_PHRASES : PROF_WRONG_PHRASES;
+  document.getElementById('prof-phrase').textContent = phrases[Math.floor(Math.random() * phrases.length)];
+  document.getElementById('prof-name').textContent = 'Mr. Clarke';
+  fb.style.display = 'block';
+  fb.className = 'feedback-box ' + (isCorrect ? 'feedback-correct' : 'feedback-wrong');
+  if (isCorrect) {
+    document.getElementById('feedback-title').textContent = 'Correct!';
+    document.getElementById('feedback-text').textContent = q.explanation;
+    dd.style.display = 'none';
+  } else {
+    document.getElementById('feedback-title').textContent = 'Incorrect';
+    document.getElementById('feedback-text').innerHTML = '<strong>Common error:</strong> ' + q.commonError + '<br><br><strong>Explanation:</strong> ' + q.explanation;
+    dd.style.display = 'block';
+    document.getElementById('deepdive-text').textContent = q.deepdive;
+  }
+  document.getElementById('next-btn-container').style.display = 'block';
+  prof.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= currentQuestions.length) endQuiz();
+  else { showQuestion(); document.getElementById('question-card').scrollIntoView({ behavior: 'smooth' }); }
+}
+
+function endQuiz() {
+  const total = correctCount + wrongCount;
+  const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+  let endMsgList;
+  if (pct >= 85) endMsgList = END_MESSAGES_GREAT;
+  else if (pct >= 70) endMsgList = END_MESSAGES_GOOD;
+  else if (pct >= 50) endMsgList = END_MESSAGES_MEH;
+  else endMsgList = END_MESSAGES_BAD;
+  showMotivationalMessage(function() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'block';
+  const scoreEl = document.getElementById('final-score');
+  scoreEl.textContent = pct + '%';
+  scoreEl.className = 'big-score ' + (pct >= 70 ? 'good' : pct >= 50 ? 'medium' : 'bad');
+  document.getElementById('final-score-label').textContent = correctCount + ' correct out of ' + total + ' questions';
+  const profSummary = document.getElementById('prof-summary');
+  let summaryPhrase, summaryClass;
+  if (pct >= 90) { summaryPhrase = "Outstanding! Top of the class material. Nearly perfect."; summaryClass = 'correct'; }
+  else if (pct >= 70) { summaryPhrase = "Good work, solid result. But don't rest on your laurels."; summaryClass = 'correct'; }
+  else if (pct >= 50) { summaryPhrase = "Just about passing. You have the basics but need more revision."; summaryClass = 'wrong'; }
+  else { summaryPhrase = "Below standard. Time for some serious revision. See me after class."; summaryClass = 'wrong'; }
+  profSummary.className = 'prof-container show ' + summaryClass;
+  document.getElementById('prof-summary-svg').innerHTML = pct >= 70 ? PROF_SVG_HAPPY : PROF_SVG_ANGRY;
+  document.getElementById('prof-summary-phrase').textContent = summaryPhrase;
+  document.getElementById('prof-summary-name').textContent = 'Mr. Clarke';
+  document.getElementById('stats-grid').innerHTML = '<div class="stat-box"><div class="stat-number">' + total + '</div><div class="stat-label">Total Questions</div></div><div class="stat-box"><div class="stat-number" style="color:var(--success)">' + correctCount + '</div><div class="stat-label">Correct</div></div><div class="stat-box"><div class="stat-number" style="color:var(--danger)">' + wrongCount + '</div><div class="stat-label">Wrong</div></div><div class="stat-box"><div class="stat-number">' + pct + '%</div><div class="stat-label">Percentage</div></div>';
+  const topicDiv = document.getElementById('topic-results'); topicDiv.innerHTML = ''; const weakTopics = [];
+  for (const [topic, stats] of Object.entries(topicStats)) {
+    if (stats.total === 0) continue;
+    const topicPct = Math.round((stats.correct / stats.total) * 100);
+    const cls = topicPct >= 70 ? 'strong' : topicPct >= 50 ? 'medium-res' : 'weak';
+    const barColor = topicPct >= 70 ? 'var(--success)' : topicPct >= 50 ? 'var(--warning)' : 'var(--danger)';
+    if (topicPct < 70) weakTopics.push(topic);
+    topicDiv.innerHTML += '<div class="topic-result-item ' + cls + '"><span><strong>' + topic + '</strong> \u2014 ' + stats.correct + '/' + stats.total + ' (' + topicPct + '%)</span><div class="topic-bar"><div class="topic-bar-fill" style="width:' + topicPct + '%;background:' + barColor + '"></div></div></div>';
+  }
+  const sugDiv = document.getElementById('suggestions');
+  if (weakTopics.length > 0) {
+    sugDiv.innerHTML = '<h3>Revision Suggestions</h3><p>Focus on these topics:</p><ul>' + weakTopics.map(t => '<li><strong>' + t + '</strong> \u2014 re-read the notes and redo exercises</li>').join('') + '</ul><p style="margin-top:8px;">Use "Review Mistakes" to redo only the questions you got wrong.</p>';
+  } else {
+    sugDiv.innerHTML = '<h3>Great work!</h3><p>You did well across all topics. Keep it up! Try Random Mode to consolidate.</p>';
+  }
+  const histDiv = document.getElementById('history-list'); histDiv.innerHTML = '';
+  history.forEach((h, i) => {
+    histDiv.innerHTML += '<div class="history-item"><span>' + (i + 1) + '. ' + h.question.substring(0, 60) + (h.question.length > 60 ? '...' : '') + '</span><span class="' + (h.correct ? 'correct-mark' : 'wrong-mark') + '">' + (h.correct ? 'Correct' : 'Wrong') + '</span></div>';
+  });
+  localStorage.setItem('straight_lines_stats', JSON.stringify({ total, correct: correctCount, wrong: wrongCount, percentage: pct, date: new Date().toLocaleDateString('en-GB') }));
+  localStorage.setItem('straight_lines_errors', JSON.stringify(errorQuestionIds));
+  }, endMsgList);
+}
+
+/* NOTES */
+const noteIds = ['vert-horiz','points','intercepts','table','gradient','general','finding'];
+const noteLabels = ['Vertical & Horizontal','Points on a Line','Axes Intercepts','Table of Values','Gradient-Intercept','General Form','Finding Equations'];
+(function initNotes() {
+  const nav = document.getElementById('notes-nav'); if (!nav) return;
+  noteIds.forEach((id, i) => {
+    const btn = document.createElement('button'); btn.textContent = noteLabels[i];
+    btn.onclick = () => { const body = document.getElementById('body-' + id); if (!body.classList.contains('open')) toggleNote(id); document.getElementById('note-' + id).scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+    nav.appendChild(btn);
+  });
+})();
+
+function showNotes() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'block';
+}
+function hideNotes() { document.getElementById('notes-screen').style.display = 'none'; document.getElementById('start-screen').style.display = 'block'; }
+function toggleNote(id) { const body = document.getElementById('body-' + id); const toggle = body.previousElementSibling.querySelector('.note-toggle'); body.classList.toggle('open'); toggle.textContent = body.classList.contains('open') ? '\u25B2' : '\u25BC'; }
+
+/* MOTIVATIONAL MESSAGES */
+const MOTIVATION_MESSAGES = [
+  { emoji: '🔥', text: 'Bro, vediamo se riesci a fare giusto almeno l\'85% delle risposte!', sub: 'Io dico che non ce la fai... dimostrami il contrario.', btn: 'Accetto la sfida!' },
+  { emoji: '💀', text: 'Lorenzo, preparati... questa verifica non perdona.', sub: 'Solo i veri gigachad superano l\'85%. Tu lo sei?', btn: 'Ovvio che si!' },
+  { emoji: '🧠', text: 'Il tuo cervello e\' pronto? Ne dubito...', sub: 'Fammi vedere cosa sai fare, niente scuse stavolta.', btn: 'Guardami!' },
+  { emoji: '😈', text: 'Sfida: zero errori. Ce la fai?', sub: 'L\'ultima volta non e\' andata benissimo eh... ma forse oggi e\' il giorno buono.', btn: 'Oggi spacco!' },
+  { emoji: '🏆', text: 'Obiettivo: massacrare questa verifica.', sub: 'Non voglio vedere meno del 90%. Ci credo in te bro.', btn: 'Let\'s go!' },
+  { emoji: '⚡', text: 'Lore, e\' il momento della verita\'!', sub: 'Hai studiato o stai improvvisando? Lo scopriremo tra 45 minuti...', btn: 'Ho studiato, giuro!' },
+  { emoji: '🎯', text: 'Mira alla perfezione, accetta l\'eccellenza.', sub: 'Se fai meno dell\'80% ti devi vergognare un po\'. Solo un po\'.', btn: 'Non mi vergognero\'!' },
+  { emoji: '🚀', text: 'Houston, Lorenzo sta per decollare!', sub: 'Ma sara\' un decollo o un\'esplosione sulla rampa? Vediamo...', btn: 'Decollo assicurato!' },
+  { emoji: '👑', text: 'I re non hanno paura delle verifiche.', sub: 'Quindi o sei un re, o stai per scoprire che non lo sei.', btn: 'Sono il re!' },
+  { emoji: '💪', text: 'Le rette nel piano non hanno segreti per te... giusto?', sub: 'Dimostralo. Parla poco e rispondi tanto.', btn: 'Ci penso io!' },
+  { emoji: '🎲', text: 'Oggi o spacchi tutto o spacchi il telefono dalla rabbia.', sub: 'Tertium non datur. Scegli saggiamente.', btn: 'Spacco tutto!' },
+  { emoji: '🧊', text: 'Sangue freddo, Lore. Sangue freddo.', sub: 'Leggi bene, pensa prima di rispondere, e non farti fregare.', btn: 'Ice cold!' }
+];
+
+const ULTRA_MESSAGES = [
+  { emoji: '🐔', text: 'Pollo, non ci riesci a fare queste!', sub: 'Queste domande sono per chi ha DAVVERO studiato. Sicuro di essere nel posto giusto?', btn: 'Non sono un pollo!' },
+  { emoji: '✈️', text: 'Bro vola basso e torna alle medie!', sub: 'Ultra Preparazione e\' roba per gente seria. Tu sei serio?', btn: 'Serio come la morte!' },
+  { emoji: '💀', text: 'Qui si piange, Lore. Qui si piange.', sub: 'Nessuno esce vivo da Ultra con meno del 70%. Nessuno.', btn: 'Io esco vivo!' },
+  { emoji: '🤡', text: 'Se sbagli piu\' del 30% sei ufficialmente un clown.', sub: 'Non io che lo dico, e\' la matematica. Fatti i conti.', btn: 'Non saro\' un clown!' },
+  { emoji: '🪦', text: 'R.I.P. alla tua media se sbagli qui.', sub: 'Ultra non perdona. O sai le cose, o vieni distrutto.', btn: 'So le cose!' },
+  { emoji: '😤', text: 'Lore, queste domande ti mangiano vivo.', sub: 'Sono le piu\' difficili che abbiamo. Pronto a soffrire?', btn: 'Nato pronto!' },
+  { emoji: '🔥', text: 'Benvenuto all\'inferno delle rette nel piano.', sub: 'Da qui non si torna indietro. O passi, o bruci.', btn: 'Non brucio!' },
+  { emoji: '🧨', text: 'Stai per entrare in una zona di guerra matematica.', sub: 'Le domande facili? Scordale. Qui si fa sul serio.', btn: 'Sono un soldato!' },
+  { emoji: '💩', text: 'Se fai schifo qui, fai schifo alla verifica.', sub: 'Questo e\' il livello della verifica vera. Niente aiutini.', btn: 'Non faro\' schifo!' },
+  { emoji: '🏋️', text: 'Palestra mentale: livello INCUBO.', sub: 'Hai i muscoli cerebrali per questo? Ho i miei dubbi...', btn: 'Guarda che muscoli!' }
+];
+
+const END_MESSAGES_GREAT = [
+  { emoji: '👑', text: 'SEI UN MOSTRO, LORE!', sub: 'Risultato pazzesco. La verifica non ha scampo contro di te.' },
+  { emoji: '🔥', text: 'Bro hai DEVASTATO tutto!', sub: 'Con questo livello la verifica e\' una passeggiata.' },
+  { emoji: '🏆', text: 'Gigachad certificato.', sub: 'Niente da dire, hai spaccato di brutto.' },
+  { emoji: '🚀', text: 'Lore sei in orbita!', sub: 'A questo punto punta al 100% alla verifica vera.' }
+];
+
+const END_MESSAGES_GOOD = [
+  { emoji: '💪', text: 'Bravo Lore, non male!', sub: 'Ma non adagiarti... puoi fare ancora meglio.' },
+  { emoji: '👍', text: 'Ci siamo quasi bro!', sub: 'Ancora un po\' di studio e sei una macchina.' },
+  { emoji: '🎯', text: 'Buon risultato, ma non basta.', sub: 'Rivedi gli errori e rifai il test. Punta piu\' in alto.' }
+];
+
+const END_MESSAGES_MEH = [
+  { emoji: '😬', text: 'Mmmh Lore... c\'e\' da lavorare.', sub: 'Non e\' un disastro, ma neanche una roba di cui vantarsi.' },
+  { emoji: '📚', text: 'Bro, apri sto libro e studia.', sub: 'Con questo risultato alla verifica piangi. Reagisci.' },
+  { emoji: '😤', text: 'Dai Lore, puoi fare MOLTO meglio di cosi\'.', sub: 'Riprova e concentrati sugli argomenti deboli.' }
+];
+
+const END_MESSAGES_BAD = [
+  { emoji: '💀', text: 'Fratello... che e\' successo?', sub: 'Devi ricominciare da zero. Serio. Rileggi tutto.' },
+  { emoji: '🪦', text: 'R.I.P. Qui servono le basi.', sub: 'Non c\'e\' scorciatoia, devi studiare di piu\'.' },
+  { emoji: '🐔', text: 'Te l\'avevo detto che non eri pronto...', sub: 'Ma tranquillo, ripassa e torna piu\' forte. Ci credo in te.' },
+  { emoji: '😭', text: 'Houston, abbiamo un problema grosso.', sub: 'Torna sugli appunti, rifai gli esercizi, e poi riproviamo.' }
+];
+
+function showMotivationalMessage(callback, messageList) {
+  const list = messageList || MOTIVATION_MESSAGES;
+  const msg = list[Math.floor(Math.random() * list.length)];
+  const overlay = document.createElement('div');
+  overlay.className = 'motivation-overlay';
+  const btnText = msg.btn || 'OK!';
+  overlay.innerHTML = '<div class="motivation-card">' +
+    '<div class="motivation-emoji">' + msg.emoji + '</div>' +
+    '<div class="motivation-text">' + msg.text + '</div>' +
+    '<div class="motivation-sub">' + msg.sub + '</div>' +
+    '<button class="motivation-btn" id="motivation-go-btn">' + btnText + '</button>' +
+    '</div>';
+  document.body.appendChild(overlay);
+  document.getElementById('motivation-go-btn').addEventListener('click', function() {
+    overlay.style.animation = 'fadeOutOverlay 0.3s ease forwards';
+    setTimeout(function() { overlay.remove(); if (callback) callback(); }, 300);
+  });
+}
+
+let currentQuizMode = null;
+
+/* EXAM */
+let examTimer = null; let examSeconds = 2700; let examSubmitted = false;
+function showExam() {
+  showMotivationalMessage(function() {
+    document.getElementById('start-screen').style.display = 'none';
+    document.getElementById('quiz-screen').style.display = 'none';
+    document.getElementById('summary-screen').style.display = 'none';
+    document.getElementById('notes-screen').style.display = 'none';
+    document.getElementById('exam-screen').style.display = 'block';
+    examSubmitted = false;
+    document.getElementById('exam-submit-btn').style.display = 'inline-block';
+    document.getElementById('exam-result').style.display = 'none';
+    renderExamMC(); renderExamOpen(); startExamTimer();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+function hideExam() { clearInterval(examTimer); document.getElementById('exam-screen').style.display = 'none'; document.getElementById('start-screen').style.display = 'block'; }
+function resetExam() { examSeconds = 2700; showExam(); }
+
+function renderExamMC() {
+  const container = document.getElementById('exam-mc-questions'); container.innerHTML = '';
+  EXAM_MC.forEach((q, qi) => {
+    const indices = q.options.map((_, i) => i); shuffleArray(indices); q._shuffled = indices;
+    const letters = ['A', 'B', 'C', 'D', 'E'];
+    let h = '<div class="exam-question" id="exam-q-' + qi + '"><div class="eq-text"><span class="eq-number">' + (qi + 1) + '.</span> ' + q.text + '</div><div class="exam-options">';
+    indices.forEach((origIdx, dispIdx) => {
+      h += '<div class="exam-option" id="exam-opt-' + qi + '-' + dispIdx + '"><input type="radio" name="exam-q-' + qi + '" id="exam-radio-' + qi + '-' + dispIdx + '" value="' + origIdx + '"><label for="exam-radio-' + qi + '-' + dispIdx + '">' + letters[dispIdx] + '. ' + q.options[origIdx] + '</label></div>';
+    });
+    h += '</div><div class="exam-correction" id="exam-corr-' + qi + '"></div></div>';
+    container.innerHTML += h;
+  });
+}
+
+function renderExamOpen() {
+  const container = document.getElementById('exam-open-questions'); container.innerHTML = '';
+  EXAM_OPEN.forEach((q, qi) => {
+    const num = EXAM_MC.length + qi + 1;
+    container.innerHTML += '<div class="exam-question" id="exam-open-' + qi + '"><div class="eq-text"><span class="eq-number">' + num + '.</span> ' + q.text + '</div><div class="exam-open-area"><textarea id="exam-textarea-' + qi + '" placeholder="Write your answer here..."></textarea></div><div class="exam-correction" id="exam-open-corr-' + qi + '"></div></div>';
+  });
+}
+
+function startExamTimer() {
+  examSeconds = 2700; clearInterval(examTimer); updateTimerDisplay();
+  examTimer = setInterval(() => { examSeconds--; updateTimerDisplay(); if (examSeconds <= 0) { clearInterval(examTimer); if (!examSubmitted) submitExam(); } }, 1000);
+}
+function updateTimerDisplay() {
+  const m = Math.floor(examSeconds / 60); const s = examSeconds % 60;
+  const el = document.getElementById('exam-timer');
+  el.textContent = 'Time: ' + m + ':' + s.toString().padStart(2, '0');
+  el.style.color = examSeconds < 300 ? 'var(--danger)' : 'var(--dark)';
+}
+
+function submitExam() {
+  if (examSubmitted) return;
+  if (!confirm('Are you sure you want to submit the test?')) return;
+  examSubmitted = true; clearInterval(examTimer);
+  let correctMC = 0;
+  EXAM_MC.forEach((q, qi) => {
+    const selected = document.querySelector('input[name="exam-q-' + qi + '"]:checked');
+    const corrDiv = document.getElementById('exam-corr-' + qi);
+    const selectedVal = selected ? parseInt(selected.value) : -1;
+    const isCorrect = selectedVal === q.answer;
+    if (isCorrect) { correctMC++; corrDiv.className = 'exam-correction show correct-box'; corrDiv.innerHTML = '<strong>Correct!</strong> ' + q.explanation; }
+    else { corrDiv.className = 'exam-correction show wrong-box'; corrDiv.innerHTML = '<strong>Wrong.</strong> ' + q.explanation; }
+    q._shuffled.forEach((origIdx, dispIdx) => {
+      const optEl = document.getElementById('exam-opt-' + qi + '-' + dispIdx);
+      if (origIdx === q.answer) optEl.classList.add('correct-highlight');
+      if (dispIdx === getDisplayIdx(qi, selectedVal) && !isCorrect) optEl.classList.add('wrong-highlight');
+    });
+    document.querySelectorAll('input[name="exam-q-' + qi + '"]').forEach(r => r.disabled = true);
+  });
+  EXAM_OPEN.forEach((q, qi) => {
+    const corrDiv = document.getElementById('exam-open-corr-' + qi);
+    corrDiv.className = 'exam-correction show correct-box';
+    corrDiv.innerHTML = '<strong>Model Solution:</strong><pre style="white-space:pre-wrap;font-family:inherit;margin-top:8px;">' + q.solution + '</pre>';
+  });
+  const mcGrade = (correctMC / 10 * 10).toFixed(1);
+  document.getElementById('exam-submit-btn').style.display = 'none';
+  document.getElementById('exam-result').style.display = 'block';
+  const gradeEl = document.getElementById('exam-grade');
+  gradeEl.textContent = correctMC + '/10 multiple choice correct';
+  gradeEl.style.color = correctMC >= 7 ? 'var(--success)' : correctMC >= 5 ? 'var(--warning)' : 'var(--danger)';
+  document.getElementById('exam-grade-detail').innerHTML = 'Part 1 (multiple choice): <strong>' + correctMC + '/10</strong> \u2014 Estimated grade: <strong>' + mcGrade + '/10</strong><br>Part 2 (open-ended): compare your answers with the solutions shown above.';
+  document.getElementById('exam-result').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function getDisplayIdx(qi, origVal) { return EXAM_MC[qi]._shuffled.indexOf(origVal); }
+</script>
+</body>
+</html>

@@ -1,0 +1,1900 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Anatomia - Allenamento e Verifica</title>
+<style>
+:root{--primary:#4361ee;--primary-light:#e8ecff;--success:#06d6a0;--success-light:#e6faf4;--danger:#ef476f;--danger-light:#fde8ed;--warning:#ffd166;--dark:#1d3557;--gray:#6c757d;--light:#f8f9fa;--white:#fff;--shadow:0 6px 24px rgba(0,0,0,.10);--shadow-lg:0 12px 40px rgba(0,0,0,.15);--radius:14px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:linear-gradient(160deg,#0a2e1f 0%,#1a5c3a 50%,#0d3b2a 100%);min-height:100vh;color:var(--dark);line-height:1.6}
+.prof-container{display:none;position:relative;margin:20px auto;flex-direction:column;align-items:center;text-align:center}
+.prof-container.show{display:flex;animation:profAppear .6s cubic-bezier(.34,1.56,.64,1)}
+@keyframes profAppear{0%{opacity:0;transform:translateY(60px) scale(.5)}60%{transform:translateY(-10px) scale(1.05)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes profBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes profShake{0%,100%{transform:rotate(0)}15%{transform:rotate(-5deg)}30%{transform:rotate(5deg)}45%{transform:rotate(-4deg)}60%{transform:rotate(4deg)}75%{transform:rotate(-2deg)}}
+.prof-svg-container{position:relative;width:220px;height:220px;margin:0 auto}
+.prof-container.correct .prof-svg-container{animation:profBounce .8s ease .3s;filter:drop-shadow(0 8px 30px rgba(6,214,160,.35))}
+.prof-container.wrong .prof-svg-container{animation:profShake .6s ease;filter:drop-shadow(0 8px 30px rgba(239,71,111,.35))}
+.prof-bubble{background:var(--white);border-radius:20px;padding:18px 24px;box-shadow:var(--shadow-lg);position:relative;font-size:1.1em;font-weight:600;line-height:1.5;max-width:480px;margin-top:-10px}
+.prof-bubble::before{content:'';position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:0;height:0;border:8px solid transparent;border-bottom-color:var(--white)}
+.prof-container.correct .prof-bubble{border:3px solid var(--success);background:linear-gradient(135deg,#f0fff8,var(--white))}
+.prof-container.wrong .prof-bubble{border:3px solid var(--danger);background:linear-gradient(135deg,#fff5f7,var(--white))}
+.prof-container.correct .prof-bubble::before{border-bottom-color:var(--success)}
+.prof-container.wrong .prof-bubble::before{border-bottom-color:var(--danger)}
+.prof-name{font-size:.7em;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px}
+.prof-container.correct .prof-name{color:var(--success)}
+.prof-container.wrong .prof-name{color:var(--danger)}
+.prof-svg-correct,.prof-svg-wrong{display:none}
+.prof-container.correct .prof-svg-correct{display:block}
+.prof-container.wrong .prof-svg-wrong{display:block}
+.prof-header-container{width:120px;height:120px;margin:0 auto 10px}
+.container{max-width:820px;margin:0 auto;padding:20px}
+body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 20%,rgba(67,97,238,.05) 0%,transparent 50%),radial-gradient(circle at 70% 80%,rgba(124,58,237,.05) 0%,transparent 50%);pointer-events:none;z-index:-1}
+#start-screen{background:var(--white);border-radius:20px;padding:40px;box-shadow:var(--shadow-lg);text-align:center;margin-top:30px;border:1px solid rgba(255,255,255,.1)}
+#start-screen h1{font-size:2.1em;color:var(--dark);margin-bottom:6px}
+#start-screen h1 span{background:linear-gradient(135deg,var(--primary),#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+#start-screen .subtitle{color:var(--gray);font-size:1em;margin-bottom:10px}
+.prof-welcome{font-size:.9em;color:var(--dark);background:var(--light);display:inline-block;padding:6px 16px;border-radius:20px;margin-bottom:20px;font-weight:500}
+.topic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:20px 0;text-align:left}
+.topic-item{background:var(--primary-light);padding:10px 14px;border-radius:8px;font-size:.9em;display:flex;align-items:center;gap:8px}
+.topic-item input[type="checkbox"]{accent-color:var(--primary)}
+.mode-buttons{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:25px}
+.btn{padding:12px 28px;border:none;border-radius:10px;font-size:1em;font-weight:600;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden}
+.btn:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.15)}
+.btn:active{transform:translateY(0) scale(.97)}
+.btn-primary{background:var(--primary);color:var(--white)}.btn-success{background:var(--success);color:var(--white)}.btn-warning{background:var(--warning);color:var(--dark)}.btn-danger{background:var(--danger);color:var(--white)}
+.btn-outline{background:transparent;border:2px solid var(--primary);color:var(--primary)}
+.btn-ultra{background:linear-gradient(135deg,#ff6a00,#ee0979);color:var(--white)}
+.btn-exam{background:linear-gradient(135deg,#1d3557,#457b9d);color:var(--white);font-weight:700;letter-spacing:.5px}
+.menu-section{background:var(--light);border:1px solid #e0e0e0;border-radius:var(--radius);padding:20px 24px;margin-top:20px;text-align:center}
+.menu-section-title{font-size:.85em;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:var(--gray);margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e0e0e0}
+.menu-section-title .section-icon{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:middle}
+.section-icon.test{background:var(--primary)}.section-icon.study{background:var(--success)}
+#exam-screen .exam-card{background:var(--white);border-radius:var(--radius);padding:30px 34px;box-shadow:var(--shadow);margin-bottom:16px}
+.exam-header{text-align:center;border-bottom:2px solid var(--dark);padding-bottom:14px;margin-bottom:24px}
+.exam-header h2{font-size:1.4em;margin-bottom:4px;letter-spacing:1px}
+.exam-header .exam-info{display:flex;justify-content:space-between;font-size:.9em;color:var(--gray);margin-top:8px}
+.exam-question{margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid #eee}
+.exam-question:last-child{border-bottom:none}
+.exam-question .eq-number{font-weight:700;color:var(--primary);margin-right:6px}
+.exam-question .eq-text{font-size:1.02em;margin-bottom:10px;line-height:1.7}
+.exam-options{padding-left:10px}
+.exam-option{display:flex;align-items:flex-start;gap:8px;padding:6px 10px;margin-bottom:4px;border-radius:6px;cursor:pointer;transition:background .15s}
+.exam-option:hover,.exam-option:active{background:var(--light)}
+.exam-option input[type="radio"]{margin-top:4px;accent-color:var(--primary);min-width:20px;min-height:20px}
+.exam-option label{cursor:pointer;line-height:1.5;-webkit-user-select:none;user-select:none;display:block;width:100%}
+.exam-option{touch-action:manipulation;-webkit-tap-highlight-color:rgba(67,97,238,0.15);min-height:44px;align-items:center}
+.exam-option.correct-highlight{background:var(--success-light)}.exam-option.wrong-highlight{background:var(--danger-light)}
+.exam-open-area{margin-top:10px}
+.exam-open-area textarea{width:100%;min-height:120px;padding:14px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit;font-size:.95em;resize:vertical;outline:none;transition:border-color .2s}
+.exam-open-area textarea:focus{border-color:var(--primary)}
+.exam-section-title{font-size:1.1em;font-weight:700;color:var(--dark);margin:24px 0 14px;padding:8px 12px;background:var(--light);border-radius:6px}
+.exam-correction{display:none;margin-top:8px;padding:10px 14px;border-radius:8px;font-size:.93em;line-height:1.6}
+.exam-correction.show{display:block}
+.exam-correction.correct-box{background:var(--success-light);border-left:4px solid var(--success)}
+.exam-correction.wrong-box{background:var(--danger-light);border-left:4px solid var(--danger)}
+.exam-result-bar{text-align:center;padding:20px;background:var(--light);border-radius:var(--radius);margin-top:20px}
+.exam-result-bar .exam-grade{font-size:2.5em;font-weight:800}
+.exam-timer{font-weight:600;font-size:1.1em;color:var(--danger)}
+.prev-stats{margin-top:25px;padding:15px;background:var(--light);border-radius:8px;font-size:.9em}
+#quiz-screen{display:none;margin-top:20px}
+.quiz-header{background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-radius:16px;padding:16px 24px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;border:1px solid rgba(255,255,255,.2)}
+.progress-info{font-weight:600;color:var(--dark)}
+.progress-bar-container{width:100%;height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--primary),#7c3aed,#a855f7);border-radius:4px;transition:width .6s cubic-bezier(.34,1.56,.64,1);box-shadow:0 0 8px rgba(124,58,237,.3)}
+.score-display{display:flex;gap:15px;font-size:.9em}
+.score-correct{color:var(--success);font-weight:600}.score-wrong{color:var(--danger);font-weight:600}
+.question-card{background:var(--white);border-radius:16px;padding:30px;box-shadow:var(--shadow-lg);margin-bottom:16px;border:1px solid rgba(0,0,0,.04);animation:cardAppear .4s ease}
+@keyframes cardAppear{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+.question-meta{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
+.badge{padding:4px 12px;border-radius:20px;font-size:.8em;font-weight:600}
+.badge-topic{background:var(--primary-light);color:var(--primary)}.badge-diff-1{background:#d4edda;color:#155724}.badge-diff-2{background:#fff3cd;color:#856404}.badge-diff-3{background:#f8d7da;color:#721c24}.badge-type{background:#e2e3e5;color:#383d41}
+.question-text{font-size:1.15em;font-weight:500;margin-bottom:20px;line-height:1.7}
+.options-container{display:flex;flex-direction:column;gap:10px}
+.option-btn{display:block;width:100%;text-align:left;padding:14px 18px;border:2px solid #e0e0e0;border-radius:10px;background:var(--white);font-size:1em;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1)}
+.option-btn:hover:not(.disabled){border-color:var(--primary);background:var(--primary-light);transform:translateX(6px);box-shadow:0 3px 12px rgba(67,97,238,.15)}
+.option-btn.selected{border-color:var(--primary);background:var(--primary-light)}
+.option-btn.correct{border-color:var(--success);background:var(--success-light);animation:correctPulse .4s ease}
+.option-btn.wrong{border-color:var(--danger);background:var(--danger-light);animation:wrongShake .4s ease}
+.option-btn.disabled{cursor:default;opacity:.85}
+@keyframes correctPulse{0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
+@keyframes wrongShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.answer-input-container{margin-top:10px}
+.answer-input{width:100%;padding:14px 18px;border:2px solid #e0e0e0;border-radius:8px;font-size:1em;outline:none;transition:border-color .2s}
+.answer-input:focus{border-color:var(--primary)}
+.submit-answer-btn{margin-top:12px}
+.feedback-box{display:none;border-radius:14px;padding:20px 24px;margin-bottom:16px;box-shadow:var(--shadow);animation:slideIn .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.feedback-correct{background:var(--success-light);border-left:5px solid var(--success)}
+.feedback-wrong{background:var(--danger-light);border-left:5px solid var(--danger)}
+.feedback-title{font-weight:700;font-size:1.1em;margin-bottom:8px}
+.feedback-correct .feedback-title{color:var(--success)}.feedback-wrong .feedback-title{color:var(--danger)}
+.feedback-text{margin-bottom:10px;line-height:1.7}
+.deepdive-box{display:none;background:#fff8e1;border-left:5px solid var(--warning);border-radius:var(--radius);padding:20px 24px;margin-bottom:16px;box-shadow:var(--shadow);animation:slideIn .4s ease}
+.deepdive-title{font-weight:700;color:#e65100;margin-bottom:8px}
+.deepdive-text{line-height:1.7}
+.next-btn-container{text-align:center;margin:16px 0}
+#summary-screen{display:none;margin-top:20px}
+.summary-card{background:var(--white);border-radius:20px;padding:34px;box-shadow:var(--shadow-lg);margin-bottom:16px;border:1px solid rgba(0,0,0,.04)}
+.summary-card h2{text-align:center;margin-bottom:20px;color:var(--dark)}
+.big-score{text-align:center;font-size:3em;font-weight:800;margin:10px 0}
+.big-score.good{color:var(--success)}.big-score.medium{color:var(--warning)}.big-score.bad{color:var(--danger)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin:20px 0}
+.stat-box{background:var(--light);padding:16px;border-radius:8px;text-align:center}
+.stat-number{font-size:1.8em;font-weight:700}.stat-label{font-size:.85em;color:var(--gray)}
+.topic-results{margin:20px 0}
+.topic-result-item{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-radius:8px;margin-bottom:8px}
+.topic-result-item.weak{background:var(--danger-light)}.topic-result-item.strong{background:var(--success-light)}.topic-result-item.medium-res{background:#fff3cd}
+.topic-bar{width:100px;height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden}
+.topic-bar-fill{height:100%;border-radius:4px}
+.suggestions{background:var(--primary-light);border-radius:8px;padding:16px 20px;margin-top:15px}
+.suggestions h3{color:var(--primary);margin-bottom:8px}.suggestions ul{padding-left:20px}.suggestions li{margin-bottom:5px}
+.history-list{max-height:300px;overflow-y:auto;margin-top:10px}
+.history-item{display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #eee;font-size:.9em}
+.history-item .correct-mark{color:var(--success);font-weight:700}.history-item .wrong-mark{color:var(--danger);font-weight:700}
+.notes-nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.notes-nav button{padding:6px 14px;border:1px solid #ddd;border-radius:20px;background:var(--light);font-size:.85em;cursor:pointer;transition:all .2s}
+.notes-nav button:hover{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
+.note-section{border:1px solid #e0e0e0;border-radius:10px;margin-bottom:12px;overflow:hidden}
+.note-title{padding:14px 18px;margin:0;cursor:pointer;background:var(--light);display:flex;justify-content:space-between;align-items:center;transition:background .2s;user-select:none}
+.note-title:hover{background:var(--primary-light)}
+.note-toggle{font-size:.8em;color:var(--gray)}
+.note-body{padding:18px 20px;line-height:1.8;display:none}
+.note-body.open{display:block}
+.note-body h4{margin:14px 0 8px;color:var(--primary)}
+.note-body ul,.note-body ol{padding-left:22px;margin:8px 0}
+.note-body li{margin-bottom:4px}
+.formula-box{background:linear-gradient(135deg,#e8ecff,#f0e6ff);border-left:4px solid var(--primary);padding:14px 18px;margin:12px 0;font-size:1.15em;font-weight:600;font-family:'Cambria Math','Times New Roman',serif;border-radius:0 8px 8px 0}
+.note-tip{background:#fff8e1;border-left:4px solid var(--warning);padding:10px 14px;margin:12px 0;border-radius:0 8px 8px 0;font-size:.95em}
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:10px 0}
+.info-card{background:var(--white);border-radius:10px;padding:12px;border-left:4px solid var(--primary);text-align:left}
+.info-card.green{border-left-color:var(--success)}.info-card.red{border-left-color:var(--danger)}.info-card.purple{border-left-color:#7c3aed}.info-card.orange{border-left-color:#ff6a00}
+.info-card .ic-title{font-size:.8em;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:.5px}
+.info-card .ic-content{font-size:.95em;margin-top:4px;line-height:1.5}
+.infographic{background:linear-gradient(135deg,#f8f9ff 0%,#f0f4ff 100%);border:2px solid #e0e7ff;border-radius:14px;padding:20px;margin-bottom:18px;text-align:center;overflow-x:auto}
+.info-flow{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0;margin:10px 0}
+.info-block{background:var(--white);border:2px solid var(--primary);border-radius:10px;padding:10px 16px;min-width:110px;text-align:center}
+.info-block.highlight{background:linear-gradient(135deg,#e8ecff,#f0e6ff);border-color:#7c3aed}
+.info-block.result{background:linear-gradient(135deg,#d4edda,#c3e6cb);border-color:var(--success)}
+.info-block .ib-title{font-size:.75em;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gray);margin-bottom:4px}
+.info-block .ib-formula{font-size:1.1em;font-weight:700;font-family:'Cambria Math','Times New Roman',serif;color:var(--dark)}
+.info-arrow{font-size:1.5em;color:var(--primary);padding:0 6px;font-weight:700}
+.info-step-flow{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;justify-content:center;margin:10px 0}
+.info-step-box{background:var(--white);border:2px solid #e0e0e0;border-radius:10px;padding:10px 14px;min-width:100px;max-width:160px;text-align:center;font-size:.88em;line-height:1.4}
+.info-step-box.active{border-color:var(--primary);background:var(--primary-light)}
+.info-step-box .isb-num{display:inline-block;background:var(--primary);color:var(--white);width:22px;height:22px;border-radius:50%;font-size:.8em;font-weight:700;line-height:22px;margin-bottom:4px}
+/* Mobile touch fixes */
+*{-webkit-tap-highlight-color:rgba(67,97,238,0.15)}
+button,.btn,.option-btn,.topic-item,.note-title,.exam-option{touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.btn{-webkit-appearance:none;appearance:none}
+.option-btn{-webkit-appearance:none;appearance:none}
+@media(max-width:600px){.container{padding:10px}#start-screen{padding:20px}.question-card{padding:20px}.quiz-header{padding:12px 16px}#start-screen h1{font-size:1.5em}.prof-svg-container{width:160px;height:160px}.prof-bubble{font-size:.95em;padding:14px 18px}.btn{padding:14px 24px;font-size:1.05em;min-height:48px}.option-btn{padding:16px 18px;min-height:48px;font-size:1em}.topic-item{padding:12px 14px;min-height:44px}.mode-buttons{gap:10px}.menu-section{padding:16px}.topic-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div id="start-screen">
+    <div class="prof-header-container" id="prof-header-svg"></div>
+    <h1>Quiz di <span>Anatomia</span></h1>
+    <p class="subtitle">Allenamento interattivo per la verifica di anatomia &mdash; Liceo Scientifico</p>
+    <div class="prof-welcome">Prof.ssa Rossi dice: &quot;Vediamo se hai studiato il corpo umano.&quot;</div>
+
+    <div class="menu-section">
+      <div class="menu-section-title"><span class="section-icon test"></span> Test e Preparazione</div>
+      <h3 style="margin-bottom:10px;text-align:left;font-size:.95em;">Filtra per argomento:</h3>
+      <div class="topic-grid" id="topic-filters"></div>
+      <div class="mode-buttons">
+        <button class="btn btn-primary" onclick="startQuiz('all')">Test completo</button>
+        <button class="btn btn-warning" onclick="startQuiz('random')">Modalita casuale</button>
+        <button class="btn btn-danger" onclick="startQuiz('errors')" id="btn-errors" style="display:none;">Ripassa gli errori</button>
+        <button class="btn btn-ultra" onclick="startQuiz('ultra')">Ultra Preparazione</button>
+      </div>
+      <div class="mode-buttons" style="margin-top:10px;">
+        <button class="btn btn-exam" onclick="showExam()">Simulazione Verifica</button>
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-title"><span class="section-icon study"></span> Studio e Ripasso</div>
+      <div class="mode-buttons">
+        <button class="btn btn-outline" style="border-color:var(--success);color:var(--success);" onclick="showNotes()">Appunti e Teoria</button>
+      </div>
+    </div>
+
+    <div class="prev-stats" id="prev-stats" style="display:none;">
+      <strong>Sessione precedente:</strong>
+      <span id="prev-stats-text"></span>
+      <br><button class="btn btn-outline" style="margin-top:8px;padding:6px 16px;font-size:.85em;" onclick="clearProgress()">Cancella progressi</button>
+    </div>
+  </div>
+
+  <div id="quiz-screen">
+    <div class="quiz-header">
+      <div class="progress-info">Domanda <span id="current-q">1</span> di <span id="total-q">0</span></div>
+      <div class="score-display">
+        <span class="score-correct">Corrette: <span id="score-correct">0</span></span>
+        <span class="score-wrong">Errate: <span id="score-wrong">0</span></span>
+      </div>
+      <div class="progress-bar-container"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+    </div>
+    <div class="question-card" id="question-card">
+      <div class="question-meta" id="question-meta"></div>
+      <div class="question-text" id="question-text"></div>
+      <div id="answer-area"></div>
+      <div class="submit-answer-btn" id="submit-area" style="display:none;">
+        <button class="btn btn-primary" onclick="checkOpenAnswer()">Verifica risposta</button>
+      </div>
+    </div>
+    <div class="prof-container" id="prof-container">
+      <div class="prof-svg-container">
+        <div class="prof-svg-correct" id="prof-svg-happy"></div>
+        <div class="prof-svg-wrong" id="prof-svg-angry"></div>
+      </div>
+      <div class="prof-bubble">
+        <div class="prof-name" id="prof-name">Prof.ssa Rossi</div>
+        <div id="prof-phrase"></div>
+      </div>
+    </div>
+    <div class="feedback-box" id="feedback-box">
+      <div class="feedback-title" id="feedback-title"></div>
+      <div class="feedback-text" id="feedback-text"></div>
+    </div>
+    <div class="deepdive-box" id="deepdive-box">
+      <div class="deepdive-title">Approfondimento</div>
+      <div class="deepdive-text" id="deepdive-text"></div>
+    </div>
+    <div class="next-btn-container" id="next-btn-container" style="display:none;">
+      <button class="btn btn-primary" onclick="nextQuestion()">Prossima domanda</button>
+      <button class="btn btn-outline" style="margin-left:8px;" onclick="endQuiz()">Termina</button>
+    </div>
+  </div>
+
+  <div id="summary-screen">
+    <div class="summary-card">
+      <h2>Riepilogo della Sessione</h2>
+      <div class="prof-container show" id="prof-summary" style="margin-bottom:16px;">
+        <div class="prof-svg-container" id="prof-summary-svg"></div>
+        <div class="prof-bubble">
+          <div class="prof-name" id="prof-summary-name">Prof.ssa Rossi</div>
+          <div id="prof-summary-phrase"></div>
+        </div>
+      </div>
+      <div class="big-score" id="final-score"></div>
+      <p style="text-align:center;color:var(--gray);" id="final-score-label"></p>
+      <div class="stats-grid" id="stats-grid"></div>
+      <h3 style="margin:20px 0 10px;">Risultati per argomento</h3>
+      <div class="topic-results" id="topic-results"></div>
+      <div class="suggestions" id="suggestions"></div>
+      <h3 style="margin:20px 0 10px;">Cronologia risposte</h3>
+      <div class="history-list" id="history-list"></div>
+    </div>
+    <div style="text-align:center;margin:20px 0 40px;">
+      <button class="btn btn-primary" onclick="location.reload()">Ricomincia</button>
+      <button class="btn btn-danger" style="margin-left:10px;" onclick="startQuiz('errors')">Ripassa gli errori</button>
+    </div>
+  </div>
+
+  <div id="exam-screen" style="display:none;margin-top:20px;">
+    <div class="quiz-header">
+      <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
+        <div class="progress-info">Verifica: Domanda <span id="exam-current">1</span> di <span id="exam-total">13</span></div>
+        <span class="exam-timer" id="exam-timer" style="font-weight:600;color:var(--danger);">50:00</span>
+      </div>
+      <div class="progress-bar-container"><div class="progress-bar-fill" id="exam-progress-bar" style="width:0%"></div></div>
+      <div style="width:100%;text-align:right;margin-top:4px;">
+        <button class="btn btn-outline" style="padding:6px 14px;font-size:.85em;" onclick="hideExam()">Abbandona</button>
+      </div>
+    </div>
+    <div class="question-card" id="exam-question-card">
+      <div class="question-meta" id="exam-question-meta"></div>
+      <div class="question-text" id="exam-question-text"></div>
+      <div id="exam-answer-area"></div>
+    </div>
+    <div class="next-btn-container" id="exam-next-container" style="display:none;">
+      <button class="btn btn-primary" onclick="nextExamQuestion()">Prossima domanda</button>
+    </div>
+    <div class="summary-card" id="exam-result" style="display:none;">
+      <h2>Risultato della Verifica</h2>
+      <div class="big-score" id="exam-grade"></div>
+      <p style="text-align:center;color:var(--gray);" id="exam-grade-detail"></p>
+      <div id="exam-review"></div>
+      <div style="text-align:center;margin-top:20px;">
+        <button class="btn btn-primary" onclick="resetExam()">Ripeti la verifica</button>
+        <button class="btn btn-outline" style="margin-left:8px;" onclick="hideExam()">Torna al menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="notes-screen" style="display:none;margin-top:20px;">
+    <div class="summary-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
+        <h2 style="margin:0;">Appunti di Anatomia</h2>
+        <button class="btn btn-outline" onclick="hideNotes()" style="padding:8px 18px;font-size:.9em;">Torna al menu</button>
+      </div>
+      <div class="notes-nav" id="notes-nav"></div>
+      <div id="notes-content"></div>
+    </div>
+  </div>
+
+</div>
+<script>
+/* Mobile touch fix: prevent 300ms delay */
+document.addEventListener('touchstart', function(){}, {passive:true});
+
+const QUESTIONS = [
+  // GERARCHIA STRUTTURALE (4)
+  {
+    text: "Qual e' l'ordine corretto della gerarchia strutturale del corpo, dal piu' semplice al piu' complesso?",
+    type: "multiple",
+    options: ["Cellula -> Tessuto -> Organo -> Sistema di organi -> Organismo","Tessuto -> Cellula -> Organo -> Organismo -> Sistema di organi","Cellula -> Organo -> Tessuto -> Sistema di organi -> Organismo","Organismo -> Sistema di organi -> Organo -> Tessuto -> Cellula"],
+    answer: 0,
+    explanation: "La gerarchia va dal livello piu' semplice al piu' complesso: cellule simili formano un tessuto, tessuti diversi un organo, organi correlati un sistema, tutti i sistemi l'organismo.",
+    commonError: "L'errore piu' comune e' invertire tessuto e organo. Ricorda: il tessuto e' un gruppo di cellule simili, l'organo e' formato da piu' tessuti diversi.",
+    deepdive: "Esempio: le cellule muscolari cardiache formano il tessuto muscolare cardiaco; cuore = organo (piu' tessuti); sistema circolatorio = cuore + vasi; organismo = tutti i sistemi.",
+    difficulty: 1, topic: "Gerarchia strutturale"
+  },
+  {
+    text: "L'anatomia si occupa della descrizione della struttura degli organismi, la fisiologia delle loro funzioni.",
+    type: "truefalse",
+    statement: "L'anatomia si occupa della descrizione della struttura degli organismi, la fisiologia delle loro funzioni.",
+    answer: true,
+    explanation: "Corretto! L'anatomia descrive la forma e la struttura, la fisiologia spiega come funzionano le strutture.",
+    commonError: "Alcuni confondono le due discipline. Ricorda: anatomia = 'com'e' fatto', fisiologia = 'come funziona'.",
+    deepdive: "Struttura e funzione sono strettamente correlate. Ad esempio, la forma allungata delle cellule muscolari e' legata alla loro funzione contrattile.",
+    difficulty: 1, topic: "Gerarchia strutturale"
+  },
+  {
+    text: "Un tessuto e' formato da:",
+    type: "multiple",
+    options: ["Un insieme di cellule simili che svolgono la stessa funzione","Un singolo tipo di organo","Diversi sistemi di organi","Una sola cellula molto grande"],
+    answer: 0,
+    explanation: "Un tessuto e' un insieme di cellule dello stesso tipo che cooperano per svolgere una funzione specifica.",
+    commonError: "Non confondere tessuto con organo: l'organo e' formato da tessuti diversi, il tessuto da cellule simili.",
+    deepdive: "Esistono 4 tessuti fondamentali: epiteliale, connettivo, muscolare e nervoso. Ogni organo li combina in modo diverso.",
+    difficulty: 1, topic: "Gerarchia strutturale"
+  },
+  {
+    text: "Quanti sono i livelli della gerarchia strutturale del corpo umano?",
+    type: "numeric",
+    answer: 5,
+    tolerance: 0,
+    explanation: "I 5 livelli sono: cellula, tessuto, organo, sistema di organi, organismo.",
+    commonError: "Alcuni dimenticano di contare il livello 'sistema di organi' o confondono organo e sistema.",
+    deepdive: "Ogni livello emerge dalle proprieta' del livello precedente: le cellule cooperano nei tessuti, i tessuti negli organi, ecc. E' un esempio di organizzazione gerarchica.",
+    difficulty: 1, topic: "Gerarchia strutturale"
+  },
+
+  // TESSUTI GENERALE (5)
+  {
+    text: "Quanti tipi fondamentali di tessuto esistono nel corpo umano?",
+    type: "multiple",
+    options: ["4","3","5","6"],
+    answer: 0,
+    explanation: "I tessuti fondamentali sono 4: epiteliale, connettivo, muscolare e nervoso.",
+    commonError: "Alcuni aggiungono il sangue come tipo separato, ma il sangue e' un tessuto connettivo specializzato.",
+    deepdive: "Questi 4 tessuti si combinano in proporzioni diverse per formare tutti gli organi del corpo.",
+    difficulty: 1, topic: "Tessuti"
+  },
+  {
+    text: "Il tessuto che trasmette impulsi elettrici e' il tessuto:",
+    type: "multiple",
+    options: ["Nervoso","Muscolare","Epiteliale","Connettivo"],
+    answer: 0,
+    explanation: "Il tessuto nervoso e' specializzato nella trasmissione di impulsi elettrici tramite i neuroni.",
+    commonError: "Il tessuto muscolare risponde agli impulsi ma non li genera/trasmette come il nervoso.",
+    deepdive: "Il tessuto nervoso e' formato da neuroni (che trasmettono gli impulsi) e cellule gliali (che forniscono supporto, nutrimento e protezione).",
+    difficulty: 1, topic: "Tessuti"
+  },
+  {
+    text: "Il sangue e' un tipo di tessuto connettivo.",
+    type: "truefalse",
+    statement: "Il sangue e' classificato come tessuto connettivo.",
+    answer: true,
+    explanation: "Corretto! Il sangue e' un tessuto connettivo specializzato con matrice liquida (plasma).",
+    commonError: "Molti non considerano il sangue un tessuto. In realta' lo e': ha cellule (globuli) disperse in una matrice (plasma).",
+    deepdive: "Il sangue ha tutte le caratteristiche del connettivo: cellule (eritrociti, leucociti, piastrine) sparse in abbondante matrice extracellulare (il plasma).",
+    difficulty: 2, topic: "Tessuti"
+  },
+  {
+    text: "Quale tessuto ha la funzione principale di sostegno e collegamento?",
+    type: "multiple",
+    options: ["Connettivo","Epiteliale","Muscolare","Nervoso"],
+    answer: 0,
+    explanation: "Il tessuto connettivo ha funzione di sostegno, collegamento, trasporto e protezione.",
+    commonError: "L'epiteliale riveste e protegge ma non ha funzione di sostegno strutturale.",
+    deepdive: "Il connettivo include: lasso, denso, cartilagineo, osseo, sangue e adiposo. La caratteristica comune e' l'abbondante matrice extracellulare.",
+    difficulty: 1, topic: "Tessuti"
+  },
+  {
+    text: "Le cellule gliali fanno parte del tessuto:",
+    type: "multiple",
+    options: ["Nervoso","Connettivo","Epiteliale","Muscolare"],
+    answer: 0,
+    explanation: "Le cellule gliali (o neuroglia) fanno parte del tessuto nervoso e forniscono supporto ai neuroni.",
+    commonError: "Le cellule gliali non sono neuroni ma sono comunque parte del tessuto nervoso.",
+    deepdive: "Le cellule gliali sono molto piu' numerose dei neuroni (circa 10:1). Hanno funzioni di supporto, isolamento, nutrizione e difesa immunitaria nel sistema nervoso.",
+    difficulty: 2, topic: "Tessuti"
+  },
+
+  // TESSUTO EPITELIALE (6)
+  {
+    text: "Il tessuto epiteliale e' caratterizzato da:",
+    type: "multiple",
+    options: ["Cellule strettamente unite con poca matrice extracellulare","Cellule sparse in abbondante matrice","Cellule con capacita' contrattile","Cellule che trasmettono impulsi elettrici"],
+    answer: 0,
+    explanation: "L'epiteliale ha cellule strettamente unite, poca matrice, poggia su una membrana basale e non e' vascolarizzato.",
+    commonError: "L'opzione con abbondante matrice descrive il connettivo, non l'epiteliale.",
+    deepdive: "L'epitelio riceve nutrimento per diffusione dai capillari del tessuto connettivo sottostante, dato che non ha vasi propri.",
+    difficulty: 1, topic: "Tessuto epiteliale"
+  },
+  {
+    text: "L'epitelio pavimentoso semplice si trova negli alveoli polmonari perche':",
+    type: "multiple",
+    options: ["Essendo sottilissimo facilita gli scambi gassosi","E' molto resistente all'abrasione","Secerne muco per proteggere i polmoni","Ha ciglia per muovere l'aria"],
+    answer: 0,
+    explanation: "L'epitelio pavimentoso semplice (un solo strato di cellule piatte) e' ideale per gli scambi gassosi per diffusione.",
+    commonError: "L'epitelio ciliato della trachea e' pseudostratificato, non pavimentoso semplice.",
+    deepdive: "Struttura e funzione: cellule piatte e sottili = diffusione rapida. Negli alveoli, O2 e CO2 devono attraversare solo lo spessore di una cellula epiteliale e di una cellula endoteliale.",
+    difficulty: 2, topic: "Tessuto epiteliale"
+  },
+  {
+    text: "L'epidermide e' un esempio di epitelio pavimentoso stratificato.",
+    type: "truefalse",
+    statement: "L'epidermide della pelle e' formata da epitelio pavimentoso stratificato cheratinizzato.",
+    answer: true,
+    explanation: "Corretto! L'epidermide e' un epitelio pavimentoso stratificato, con cellule cheratinizzate in superficie per la protezione.",
+    commonError: "Non confondere 'stratificato' (piu' strati) con 'semplice' (un solo strato).",
+    deepdive: "La cheratinizzazione rende l'epidermide impermeabile e resistente. Le cellule piu' superficiali sono morte e piene di cheratina.",
+    difficulty: 2, topic: "Tessuto epiteliale"
+  },
+  {
+    text: "Le ghiandole endocrine riversano il loro secreto:",
+    type: "multiple",
+    options: ["Nel sangue","All'esterno del corpo","Nell'intestino","Nelle cavita' corporee"],
+    answer: 0,
+    explanation: "Le ghiandole endocrine sono prive di dotti e riversano ormoni direttamente nel sangue.",
+    commonError: "Le ghiandole esocrine hanno dotti e riversano all'esterno o in cavita'. Le endocrine NO.",
+    deepdive: "Esempi di ghiandole endocrine: tiroide, ipofisi, surreni, pancreas (nella parte endocrina). Producono ormoni che viaggiano nel sangue fino agli organi bersaglio.",
+    difficulty: 2, topic: "Tessuto epiteliale"
+  },
+  {
+    text: "L'epitelio pseudostratificato ciliato si trova nella:",
+    type: "multiple",
+    options: ["Trachea","Epidermide","Intestino","Rene"],
+    answer: 0,
+    explanation: "La trachea e i bronchi sono rivestiti da epitelio pseudostratificato ciliato che intrappola e rimuove particelle.",
+    commonError: "L'intestino ha epitelio cilindrico semplice, non pseudostratificato.",
+    deepdive: "Le ciglia dell'epitelio tracheale battono in modo coordinato per spingere il muco (con le particelle intrappolate) verso la faringe, dove viene deglutito. E' il cosiddetto 'ascensore mucociliare'.",
+    difficulty: 2, topic: "Tessuto epiteliale"
+  },
+  {
+    text: "L'epitelio cilindrico semplice dell'intestino e' specializzato per:",
+    type: "multiple",
+    options: ["L'assorbimento dei nutrienti","La protezione meccanica","Gli scambi gassosi","La secrezione di ormoni"],
+    answer: 0,
+    explanation: "L'epitelio cilindrico semplice dell'intestino ha microvilli che aumentano la superficie di assorbimento.",
+    commonError: "La protezione meccanica e' funzione dell'epitelio stratificato, non del semplice.",
+    deepdive: "I microvilli sulla superficie apicale delle cellule intestinali formano il cosiddetto 'orletto a spazzola', che aumenta enormemente la superficie di assorbimento.",
+    difficulty: 2, topic: "Tessuto epiteliale"
+  },
+
+  // TESSUTO CONNETTIVO (6)
+  {
+    text: "La proteina piu' abbondante nel corpo umano e':",
+    type: "multiple",
+    options: ["Il collagene","L'actina","La miosina","La cheratina"],
+    answer: 0,
+    explanation: "Il collagene e' la proteina piu' abbondante del corpo umano, presente in ossa, tendini, pelle e cartilagine.",
+    commonError: "La cheratina e' abbondante nella pelle e nei peli, ma il collagene la supera di gran lunga.",
+    deepdive: "Il collagene fornisce resistenza alla trazione. Le fibre di collagene sono organizzate in modo diverso nei vari tessuti: parallele nei tendini, intrecciate nella pelle.",
+    difficulty: 2, topic: "Tessuto connettivo"
+  },
+  {
+    text: "Il tessuto connettivo denso si trova nei:",
+    type: "multiple",
+    options: ["Tendini e legamenti","Alveoli polmonari","Neuroni","Muscoli cardiaci"],
+    answer: 0,
+    explanation: "Il connettivo denso e' ricco di fibre di collagene parallele (tendini) o intrecciate (legamenti) per resistere alla trazione.",
+    commonError: "I tendini collegano muscoli a ossa, i legamenti collegano ossa a ossa. Entrambi sono connettivo denso.",
+    deepdive: "Connettivo denso regolare (tendini): fibre parallele, resistono alla trazione in una direzione. Denso irregolare (derma): fibre intrecciate, resistono in tutte le direzioni.",
+    difficulty: 2, topic: "Tessuto connettivo"
+  },
+  {
+    text: "La matrice extracellulare del tessuto connettivo e' composta da:",
+    type: "multiple",
+    options: ["Sostanza fondamentale e fibre (collagene, elastiche, reticolari)","Solo cellule strettamente unite","Solo acqua e sali minerali","Neuroni e cellule gliali"],
+    answer: 0,
+    explanation: "La matrice del connettivo e' formata da sostanza fondamentale (gel acquoso) e fibre proteiche (collagene, elastiche, reticolari).",
+    commonError: "Le cellule strettamente unite sono tipiche dell'epitelio, non del connettivo.",
+    deepdive: "Le fibre elastiche danno elasticita' (pelle, arterie), le fibre reticolari formano reti di sostegno fine (linfonodi, milza, midollo osseo).",
+    difficulty: 2, topic: "Tessuto connettivo"
+  },
+  {
+    text: "Il tessuto adiposo ha funzione di:",
+    type: "multiple",
+    options: ["Riserva energetica, isolamento termico e protezione meccanica","Solo riserva energetica","Trasmissione degli impulsi nervosi","Produzione di anticorpi"],
+    answer: 0,
+    explanation: "Il tessuto adiposo ha tre funzioni principali: riserva di energia, isolamento termico e protezione meccanica degli organi.",
+    commonError: "Il tessuto adiposo non e' solo 'grasso inutile': e' un tessuto connettivo con importanti funzioni metaboliche e protettive.",
+    deepdive: "Il tessuto adiposo produce anche ormoni (leptina) e citochine. Il grasso bruno e' specializzato nella termogenesi, particolarmente importante nei neonati.",
+    difficulty: 1, topic: "Tessuto connettivo"
+  },
+  {
+    text: "La cartilagine e' un tessuto connettivo privo di vasi sanguigni.",
+    type: "truefalse",
+    statement: "Il tessuto cartilagineo e' avascolare (privo di vasi sanguigni).",
+    answer: true,
+    explanation: "Corretto! La cartilagine non ha vasi sanguigni e riceve nutrimento per diffusione. Per questo guarisce lentamente.",
+    commonError: "Non confondere con l'osso che e' ben vascolarizzato. La cartilagine e' avascolare.",
+    deepdive: "L'assenza di vasi sanguigni spiega perche' le lesioni cartilaginee (es. menisco del ginocchio) guariscono molto lentamente o non guariscono affatto.",
+    difficulty: 2, topic: "Tessuto connettivo"
+  },
+  {
+    text: "Le fibre elastiche del tessuto connettivo si trovano principalmente in:",
+    type: "multiple",
+    options: ["Pelle e pareti delle arterie","Tendini","Ossa","Cervello"],
+    answer: 0,
+    explanation: "Le fibre elastiche conferiscono elasticita' alla pelle e alle pareti arteriose, permettendo la dilatazione e il ritorno elastico.",
+    commonError: "I tendini contengono soprattutto collagene (resistenza), non fibre elastiche.",
+    deepdive: "Nelle arterie, le fibre elastiche permettono la dilatazione durante la sistole e il ritorno elastico durante la diastole, contribuendo a mantenere il flusso sanguigno continuo.",
+    difficulty: 2, topic: "Tessuto connettivo"
+  },
+
+  // SISTEMA TEGUMENTARIO (6)
+  {
+    text: "Quali sono i tre strati principali della cute, dall'esterno all'interno?",
+    type: "multiple",
+    options: ["Epidermide, derma, ipoderma","Derma, epidermide, ipoderma","Ipoderma, derma, epidermide","Epidermide, ipoderma, derma"],
+    answer: 0,
+    explanation: "La cute e' formata da: epidermide (esterna, epiteliale), derma (intermedio, connettivo) e ipoderma (profondo, adiposo).",
+    commonError: "L'ordine dall'esterno e': epidermide (sopra) -> derma (mezzo) -> ipoderma (sotto).",
+    deepdive: "L'epidermide e' epitelio pavimentoso stratificato cheratinizzato. Il derma e' connettivo denso con vasi e nervi. L'ipoderma e' tessuto adiposo che isola e ammortizza.",
+    difficulty: 1, topic: "Sistema tegumentario"
+  },
+  {
+    text: "La melanina e' prodotta dai:",
+    type: "multiple",
+    options: ["Melanociti","Cheratinociti","Osteoblasti","Fibroblasti"],
+    answer: 0,
+    explanation: "La melanina e' prodotta dai melanociti, cellule presenti nello strato basale dell'epidermide.",
+    commonError: "I cheratinociti producono cheratina, non melanina. Pero' accumulano la melanina trasferita dai melanociti.",
+    deepdive: "I melanociti trasferiscono la melanina ai cheratinociti circostanti tramite prolungamenti. La melanina si dispone sopra il nucleo come un 'ombrello' per proteggere il DNA dai raggi UV.",
+    difficulty: 1, topic: "Sistema tegumentario"
+  },
+  {
+    text: "La cheratina serve a:",
+    type: "multiple",
+    options: ["Impermeabilizzare e proteggere l'epidermide","Dare colore alla pelle","Trasmettere impulsi nervosi","Produrre vitamina D"],
+    answer: 0,
+    explanation: "La cheratina e' una proteina fibrosa che rende l'epidermide impermeabile e resistente all'abrasione.",
+    commonError: "Il colore della pelle e' dato dalla melanina, non dalla cheratina.",
+    deepdive: "La cheratina e' presente anche nei peli e nelle unghie. Le cellule dell'epidermide si cheratinizzano man mano che migrano verso la superficie, morendo e formando uno strato protettivo.",
+    difficulty: 1, topic: "Sistema tegumentario"
+  },
+  {
+    text: "La cute partecipa alla sintesi della vitamina D grazie ai raggi UV.",
+    type: "truefalse",
+    statement: "La cute sintetizza vitamina D quando esposta ai raggi ultravioletti del sole.",
+    answer: true,
+    explanation: "Corretto! I raggi UV convertono un precursore del colesterolo nella pelle in vitamina D3, che viene poi attivata nel fegato e nei reni.",
+    commonError: "La vitamina D non viene solo dalla dieta: la cute ne produce una quantita' significativa con l'esposizione solare.",
+    deepdive: "La vitamina D e' essenziale per l'assorbimento del calcio intestinale e la salute delle ossa. La carenza causa rachitismo nei bambini e osteomalacia negli adulti.",
+    difficulty: 2, topic: "Sistema tegumentario"
+  },
+  {
+    text: "Il derma contiene:",
+    type: "multiple",
+    options: ["Vasi sanguigni, terminazioni nervose e ghiandole","Solo cellule epiteliali","Solo tessuto adiposo","Solo fibre muscolari"],
+    answer: 0,
+    explanation: "Il derma e' tessuto connettivo denso che contiene vasi, nervi, follicoli piliferi e ghiandole sudoripare e sebacee.",
+    commonError: "L'epidermide e' avascolare; i vasi sono nel derma.",
+    deepdive: "Il derma ha due strati: papillare (superficiale, con papille dermiche che formano le impronte digitali) e reticolare (profondo, con fibre intrecciate).",
+    difficulty: 2, topic: "Sistema tegumentario"
+  },
+  {
+    text: "Quale strato della cute e' formato da tessuto adiposo?",
+    type: "multiple",
+    options: ["Ipoderma","Epidermide","Derma papillare","Derma reticolare"],
+    answer: 0,
+    explanation: "L'ipoderma (o tessuto sottocutaneo) e' formato da tessuto adiposo che funge da isolante termico e ammortizzatore.",
+    commonError: "Il derma e' connettivo denso, non adiposo. L'adiposo e' l'ipoderma.",
+    deepdive: "L'ipoderma varia di spessore nelle diverse regioni del corpo e tra uomo e donna. Funge anche da deposito energetico.",
+    difficulty: 1, topic: "Sistema tegumentario"
+  },
+
+  // ANNESSI CUTANEI (4)
+  {
+    text: "I peli sono formati principalmente da:",
+    type: "multiple",
+    options: ["Cheratina","Melanina","Collagene","Elastina"],
+    answer: 0,
+    explanation: "I peli sono strutture formate da cheratina indurita, prodotta dalle cellule del follicolo pilifero.",
+    commonError: "La melanina da' colore al pelo, ma la struttura e' di cheratina.",
+    deepdive: "Il pelo origina nel follicolo pilifero nel derma. Il muscolo erettore del pelo (muscolo liscio) causa la 'pelle d'oca' quando si contrae.",
+    difficulty: 1, topic: "Annessi cutanei"
+  },
+  {
+    text: "Le ghiandole sebacee producono:",
+    type: "multiple",
+    options: ["Sebo, che lubrifica pelle e peli","Sudore per la termoregolazione","Melanina per la protezione UV","Cheratina per la protezione"],
+    answer: 0,
+    explanation: "Le ghiandole sebacee producono sebo, una sostanza oleosa che lubrifica e impermeabilizza pelle e peli.",
+    commonError: "Il sudore e' prodotto dalle ghiandole sudoripare, non dalle sebacee.",
+    deepdive: "L'eccesso di sebo puo' ostruire i follicoli piliferi, causando acne. Le ghiandole sebacee sono associate ai follicoli piliferi.",
+    difficulty: 1, topic: "Annessi cutanei"
+  },
+  {
+    text: "Le ghiandole sudoripare eccrine si trovano su quasi tutto il corpo e producono sudore per la termoregolazione.",
+    type: "truefalse",
+    statement: "Le ghiandole sudoripare eccrine sono distribuite su quasi tutto il corpo e la loro funzione principale e' la termoregolazione.",
+    answer: true,
+    explanation: "Corretto! Le eccrine sono le piu' diffuse e producono sudore acquoso per raffreddare il corpo tramite evaporazione.",
+    commonError: "Le ghiandole apocrine si trovano solo in alcune zone (ascelle, inguine) e producono un sudore piu' denso.",
+    deepdive: "Le ghiandole eccrine producono un sudore acquoso (99% acqua + sali + urea). L'evaporazione del sudore sottrae calore al corpo, raffreddandolo.",
+    difficulty: 2, topic: "Annessi cutanei"
+  },
+  {
+    text: "La 'pelle d'oca' e' causata dalla contrazione del:",
+    type: "multiple",
+    options: ["Muscolo erettore del pelo","Muscolo scheletrico","Derma","Follicolo pilifero"],
+    answer: 0,
+    explanation: "Il muscolo erettore del pelo e' un piccolo muscolo liscio che, contraendosi, fa drizzare il pelo causando la 'pelle d'oca'.",
+    commonError: "Il follicolo pilifero contiene il pelo, ma e' il muscolo erettore che lo fa drizzare.",
+    deepdive: "Negli animali con pelo folto, questo meccanismo intrappola aria per l'isolamento termico. Nell'uomo ha perso questa funzione ma il riflesso persiste.",
+    difficulty: 2, topic: "Annessi cutanei"
+  },
+
+  // OMEOSTASI E FEEDBACK (5)
+  {
+    text: "L'omeostasi e' il mantenimento di condizioni interne stabili nonostante le variazioni esterne.",
+    type: "truefalse",
+    statement: "L'omeostasi e' la capacita' dell'organismo di mantenere condizioni interne relativamente stabili.",
+    answer: true,
+    explanation: "Corretto! L'omeostasi mantiene parametri come temperatura, pH, glicemia entro range ristretti.",
+    commonError: "Omeostasi non significa 'immobilita'', ma equilibrio dinamico: i parametri oscillano attorno a un valore ideale.",
+    deepdive: "L'omeostasi utilizza principalmente meccanismi a feedback negativo. Recettori rilevano le variazioni, un centro di controllo elabora, effettori rispondono riportando il parametro al valore normale.",
+    difficulty: 1, topic: "Omeostasi e feedback"
+  },
+  {
+    text: "Nel feedback negativo, la risposta:",
+    type: "multiple",
+    options: ["Riduce lo stimolo iniziale riportando il sistema all'equilibrio","Amplifica lo stimolo iniziale","Non ha effetto sullo stimolo","Distrugge il recettore"],
+    answer: 0,
+    explanation: "Nel feedback negativo la risposta si oppone alla variazione iniziale, riportando il parametro al valore normale.",
+    commonError: "'Negativo' non significa 'cattivo': e' il tipo piu' comune e utile di feedback perche' mantiene la stabilita'.",
+    deepdive: "Esempio: se la temperatura sale, i meccanismi di raffreddamento (sudore, vasodilatazione) la riabbassano. Quando raggiunge il valore normale, il meccanismo si spegne.",
+    difficulty: 1, topic: "Omeostasi e feedback"
+  },
+  {
+    text: "La termoregolazione e' un esempio di:",
+    type: "multiple",
+    options: ["Feedback negativo","Feedback positivo","Assenza di feedback","Feedback neutro"],
+    answer: 0,
+    explanation: "La termoregolazione e' il classico esempio di feedback negativo: la risposta (sudore o brividi) si oppone alla variazione di temperatura.",
+    commonError: "Il feedback positivo amplifica lo stimolo (es: parto). La termoregolazione riduce la variazione, quindi e' negativo.",
+    deepdive: "Se la temperatura sale: ipotalamo -> sudorazione + vasodilatazione -> temperatura scende. Se scende: ipotalamo -> brividi + vasocostrizione -> temperatura sale.",
+    difficulty: 1, topic: "Omeostasi e feedback"
+  },
+  {
+    text: "Il parto e' un esempio di feedback positivo perche' le contrazioni stimolano il rilascio di ossitocina, che aumenta le contrazioni.",
+    type: "truefalse",
+    statement: "Il parto e' un esempio di feedback positivo.",
+    answer: true,
+    explanation: "Corretto! Nel parto le contrazioni uterine stimolano il rilascio di ossitocina, che intensifica le contrazioni, fino alla nascita.",
+    commonError: "Il feedback positivo e' raro e porta a eventi 'esplosivi' con un punto finale definito (la nascita).",
+    deepdive: "Il feedback positivo e' utile quando serve una risposta rapida e intensa. Altri esempi: la coagulazione del sangue e la maturazione del frutto.",
+    difficulty: 2, topic: "Omeostasi e feedback"
+  },
+  {
+    text: "L'ipotalamo e' il principale centro di controllo della termoregolazione.",
+    type: "truefalse",
+    statement: "L'ipotalamo funziona come un 'termostato' che regola la temperatura corporea.",
+    answer: true,
+    explanation: "Corretto! L'ipotalamo rileva la temperatura del sangue e attiva le risposte appropriate di riscaldamento o raffreddamento.",
+    commonError: "Non confondere l'ipotalamo con l'ipofisi. L'ipotalamo controlla la termoregolazione, l'ipofisi e' la 'ghiandola maestra' degli ormoni.",
+    deepdive: "L'ipotalamo riceve informazioni dai termorecettori cutanei e dalla temperatura del sangue che lo attraversa. Attiva poi risposte autonome (sudorazione, vasodilatazione/costrizione, brividi).",
+    difficulty: 2, topic: "Omeostasi e feedback"
+  },
+
+  // SCHELETRO (5)
+  {
+    text: "Lo scheletro assile comprende:",
+    type: "multiple",
+    options: ["Cranio, colonna vertebrale e gabbia toracica","Arti superiori e inferiori","Cinto scapolare e pelvico","Solo la colonna vertebrale"],
+    answer: 0,
+    explanation: "Lo scheletro assile (asse del corpo) comprende cranio, colonna vertebrale (33 vertebre) e gabbia toracica (sterno + 12 paia di costole).",
+    commonError: "Gli arti e i cinti fanno parte dello scheletro appendicolare, non assile.",
+    deepdive: "Lo scheletro assile protegge organi vitali: il cranio il cervello, la colonna il midollo spinale, la gabbia toracica cuore e polmoni.",
+    difficulty: 1, topic: "Scheletro"
+  },
+  {
+    text: "Il cinto scapolare e' formato da:",
+    type: "multiple",
+    options: ["Clavicola e scapola","Femore e tibia","Sterno e costole","Ileo, ischio e pube"],
+    answer: 0,
+    explanation: "Il cinto scapolare (o toracico) collega gli arti superiori al tronco ed e' formato da clavicola e scapola.",
+    commonError: "Ileo, ischio e pube formano il cinto pelvico, non scapolare.",
+    deepdive: "La clavicola e' l'unico punto di articolazione ossea tra arto superiore e scheletro assile (tramite lo sterno). La scapola e' mantenuta in posizione dai muscoli.",
+    difficulty: 2, topic: "Scheletro"
+  },
+  {
+    text: "La colonna vertebrale e' formata da 33 vertebre.",
+    type: "truefalse",
+    statement: "La colonna vertebrale umana e' composta da 33 vertebre.",
+    answer: true,
+    explanation: "Corretto! 7 cervicali, 12 toraciche, 5 lombari, 5 sacrali (fuse), 4 coccigee (fuse).",
+    commonError: "Le vertebre sacrali e coccigee sono fuse nell'adulto ma si contano comunque.",
+    deepdive: "Le curve della colonna (cervicale, toracica, lombare, sacrale) aumentano la resistenza e la flessibilita'. La colonna protegge il midollo spinale.",
+    difficulty: 1, topic: "Scheletro"
+  },
+  {
+    text: "Una delle funzioni dello scheletro e' l'emopoiesi. Che cos'e'?",
+    type: "multiple",
+    options: ["La produzione di cellule del sangue nel midollo osseo rosso","La trasmissione degli impulsi nervosi","La contrazione muscolare","La digestione dei nutrienti"],
+    answer: 0,
+    explanation: "L'emopoiesi e' la produzione di cellule del sangue (eritrociti, leucociti, piastrine) nel midollo osseo rosso.",
+    commonError: "Il midollo osseo rosso (emopoietico) non va confuso con il midollo osseo giallo (grasso) o il midollo spinale (nervoso).",
+    deepdive: "Nell'adulto, il midollo rosso si trova principalmente nelle ossa piatte (sterno, bacino, cranio) e nelle epifisi delle ossa lunghe.",
+    difficulty: 2, topic: "Scheletro"
+  },
+  {
+    text: "Lo scheletro appendicolare comprende:",
+    type: "multiple",
+    options: ["Arti e cinti (scapolare e pelvico)","Cranio e colonna vertebrale","Solo le mani e i piedi","Solo la gabbia toracica"],
+    answer: 0,
+    explanation: "Lo scheletro appendicolare comprende gli arti superiori e inferiori e i cinti che li collegano allo scheletro assile.",
+    commonError: "Cranio e colonna vertebrale sono parte dello scheletro assile.",
+    deepdive: "Il cinto pelvico (bacino) e' piu' robusto del cinto scapolare perche' deve sostenere il peso del corpo e collegare gli arti inferiori.",
+    difficulty: 1, topic: "Scheletro"
+  },
+
+  // STRUTTURA DELL'OSSO (5)
+  {
+    text: "Gli osteoblasti hanno la funzione di:",
+    type: "multiple",
+    options: ["Costruire nuovo tessuto osseo depositando matrice","Demolire il tessuto osseo","Trasmettere impulsi nervosi","Produrre globuli rossi"],
+    answer: 0,
+    explanation: "Gli osteoblasti sono le cellule che costruiscono l'osso depositando nuova matrice ossea (collagene + minerali).",
+    commonError: "Gli osteoCLASTI demoliscono l'osso, gli osteoBLASTI lo costruiscono. Trucco: 'blast' come 'build'.",
+    deepdive: "Quando un osteoblasto rimane intrappolato nella matrice che ha prodotto, diventa un osteocita (cellula matura). Gli osteociti mantengono l'osso.",
+    difficulty: 1, topic: "Struttura dell'osso"
+  },
+  {
+    text: "Gli osteoclasti demoliscono il tessuto osseo.",
+    type: "truefalse",
+    statement: "Gli osteoclasti sono cellule che riassorbono (demoliscono) il tessuto osseo.",
+    answer: true,
+    explanation: "Corretto! Gli osteoclasti demoliscono l'osso rilasciando enzimi e acidi, permettendo il rimodellamento osseo.",
+    commonError: "Non confondere osteoclasti (demoliscono) con osteoblasti (costruiscono).",
+    deepdive: "Il rimodellamento osseo (osteoclasti che demoliscono + osteoblasti che ricostruiscono) avviene continuamente per tutta la vita. Permette la riparazione delle microfratture e l'adattamento alle sollecitazioni.",
+    difficulty: 1, topic: "Struttura dell'osso"
+  },
+  {
+    text: "L'unita' strutturale dell'osso compatto e' chiamata:",
+    type: "multiple",
+    options: ["Osteone (sistema di Havers)","Sarcomero","Neurone","Alveolo"],
+    answer: 0,
+    explanation: "L'osteone e' formato da lamelle ossee concentriche attorno al canale di Havers, che contiene vasi sanguigni e nervi.",
+    commonError: "Il sarcomero e' l'unita' del muscolo, non dell'osso.",
+    deepdive: "I canali di Havers sono collegati tra loro dai canali di Volkmann (perpendicolari). Gli osteociti comunicano attraverso i canalicoli nelle lamelle.",
+    difficulty: 2, topic: "Struttura dell'osso"
+  },
+  {
+    text: "L'osso spugnoso si trova:",
+    type: "multiple",
+    options: ["Nelle epifisi delle ossa lunghe e nelle ossa piatte","Solo nella diafisi","Solo nel cranio","Nei tendini"],
+    answer: 0,
+    explanation: "L'osso spugnoso, con le sue trabecole, si trova nelle epifisi (estremita') delle ossa lunghe e nelle ossa piatte.",
+    commonError: "La diafisi (parte centrale delle ossa lunghe) e' formata da osso compatto, non spugnoso.",
+    deepdive: "Le trabecole dell'osso spugnoso sono orientate lungo le linee di forza, ottimizzando la resistenza con il minimo peso. Gli spazi tra le trabecole contengono midollo osseo.",
+    difficulty: 2, topic: "Struttura dell'osso"
+  },
+  {
+    text: "Il canale di Havers contiene:",
+    type: "multiple",
+    options: ["Vasi sanguigni e nervi","Osteociti","Midollo osseo rosso","Cartilagine"],
+    answer: 0,
+    explanation: "Il canale di Havers, al centro dell'osteone, contiene vasi sanguigni e fibre nervose che nutrono l'osso compatto.",
+    commonError: "Gli osteociti sono nelle lacune tra le lamelle, non nel canale di Havers.",
+    deepdive: "I canali di Havers corrono longitudinalmente nell'osso e sono collegati trasversalmente dai canali di Volkmann. Questa rete vascolare e' essenziale per nutrire le cellule ossee.",
+    difficulty: 2, topic: "Struttura dell'osso"
+  },
+
+  // ARTICOLAZIONI (5)
+  {
+    text: "Le sinartrosi sono articolazioni:",
+    type: "multiple",
+    options: ["Fisse, che non permettono movimento","Semimobili","Molto mobili","Presenti solo negli arti"],
+    answer: 0,
+    explanation: "Le sinartrosi sono articolazioni fisse (es: suture del cranio) che non permettono alcun movimento.",
+    commonError: "Le articolazioni semimobili sono le anfiartrosi, quelle mobili le diartrosi.",
+    deepdive: "Le suture del cranio sono sinartrosi che permettono la crescita del cranio durante lo sviluppo e poi si ossificano completamente nell'adulto.",
+    difficulty: 1, topic: "Articolazioni"
+  },
+  {
+    text: "L'articolazione del ginocchio e' di tipo:",
+    type: "multiple",
+    options: ["A cerniera (ginglimo)","Enartrosi","A perno","Sinartrosi"],
+    answer: 0,
+    explanation: "Il ginocchio e' un'articolazione a cerniera che permette principalmente flessione ed estensione su un piano.",
+    commonError: "L'enartrosi (sfera nel guscio) permette movimento su tutti i piani, come spalla e anca.",
+    deepdive: "Il ginocchio e' la piu' grande articolazione del corpo. Contiene menischi (cuscinetti cartilaginei) e legamenti crociati che la stabilizzano.",
+    difficulty: 1, topic: "Articolazioni"
+  },
+  {
+    text: "Le diartrosi sono caratterizzate da:",
+    type: "multiple",
+    options: ["Capsula articolare e liquido sinoviale","Assenza di movimento","Fusione delle ossa","Solo cartilagine senza liquido"],
+    answer: 0,
+    explanation: "Le diartrosi (articolazioni mobili) hanno una capsula articolare che racchiude il liquido sinoviale, che lubrifica e nutre la cartilagine.",
+    commonError: "L'assenza di movimento e' caratteristica delle sinartrosi (fisse).",
+    deepdive: "Il liquido sinoviale ha proprieta' lubrificanti eccezionali (coefficiente d'attrito inferiore al ghiaccio su ghiaccio!) e nutre la cartilagine articolare per diffusione.",
+    difficulty: 2, topic: "Articolazioni"
+  },
+  {
+    text: "L'articolazione atlante-epistrofeo (tra le prime due vertebre cervicali) e' di tipo:",
+    type: "multiple",
+    options: ["A perno (permette la rotazione della testa)","A cerniera","Enartrosi","Sinartrosi"],
+    answer: 0,
+    explanation: "L'atlante-epistrofeo e' un'articolazione a perno che permette la rotazione della testa (dire 'no').",
+    commonError: "Il movimento di flesso-estensione (dire 'si') avviene tra l'atlante e l'osso occipitale, non all'atlante-epistrofeo.",
+    deepdive: "L'atlante (C1) e' una vertebra ad anello senza corpo. L'epistrofeo (C2) ha il dente dell'epistrofeo che funge da perno attorno al quale ruota l'atlante.",
+    difficulty: 3, topic: "Articolazioni"
+  },
+  {
+    text: "Le anfiartrosi permettono:",
+    type: "multiple",
+    options: ["Movimenti limitati","Nessun movimento","Movimenti ampi su tutti i piani","Solo rotazione"],
+    answer: 0,
+    explanation: "Le anfiartrosi sono articolazioni semimobili che permettono movimenti limitati (es: tra le vertebre, sinfisi pubica).",
+    commonError: "Le articolazioni tra le vertebre non sono fisse: permettono piccoli movimenti che, sommati, danno flessibilita' alla colonna.",
+    deepdive: "Tra le vertebre ci sono i dischi intervertebrali (fibro-cartilagine) che permettono piccoli movimenti e ammortizzano gli urti.",
+    difficulty: 1, topic: "Articolazioni"
+  },
+
+  // TESSUTO MUSCOLARE (4)
+  {
+    text: "Il muscolo scheletrico e':",
+    type: "multiple",
+    options: ["Striato e volontario","Striato e involontario","Liscio e volontario","Liscio e involontario"],
+    answer: 0,
+    explanation: "Il muscolo scheletrico e' striato (striature visibili al microscopio) e volontario (controllato dalla volonta').",
+    commonError: "Il muscolo cardiaco e' striato ma involontario. Il liscio e' non striato e involontario.",
+    deepdive: "Le striature del muscolo scheletrico sono dovute all'organizzazione regolare di actina e miosina nei sarcomeri. Le fibre sono multinucleate (sincizio).",
+    difficulty: 1, topic: "Tessuto muscolare"
+  },
+  {
+    text: "Il muscolo cardiaco e' striato e involontario.",
+    type: "truefalse",
+    statement: "Il tessuto muscolare cardiaco e' striato ma a contrazione involontaria.",
+    answer: true,
+    explanation: "Corretto! Il miocardio ha striature come lo scheletrico ma si contrae autonomamente (involontario), grazie al sistema di conduzione cardiaco.",
+    commonError: "Non esiste un muscolo 'striato volontario cardiaco': il cuore si contrae da solo.",
+    deepdive: "Le cellule cardiache sono collegate da dischi intercalari che permettono la propagazione rapida dell'impulso. Il cuore ha un pacemaker naturale (nodo senoatriale).",
+    difficulty: 1, topic: "Tessuto muscolare"
+  },
+  {
+    text: "Il muscolo liscio si trova:",
+    type: "multiple",
+    options: ["Nelle pareti degli organi interni e dei vasi sanguigni","Solo nello scheletro","Solo nel cuore","Solo nella pelle"],
+    answer: 0,
+    explanation: "Il muscolo liscio si trova nelle pareti di organi cavi (intestino, stomaco, vescica, utero) e dei vasi sanguigni.",
+    commonError: "Il muscolo della parete intestinale e' liscio (involontario), non scheletrico.",
+    deepdive: "Il muscolo liscio ha contrazioni lente e sostenute, ideali per la peristalsi intestinale e il controllo del diametro dei vasi sanguigni.",
+    difficulty: 1, topic: "Tessuto muscolare"
+  },
+  {
+    text: "I dischi intercalari sono caratteristici del tessuto muscolare:",
+    type: "multiple",
+    options: ["Cardiaco","Scheletrico","Liscio","Tutti e tre"],
+    answer: 0,
+    explanation: "I dischi intercalari sono giunzioni specializzate tra le cellule del muscolo cardiaco che permettono la propagazione dell'impulso.",
+    commonError: "Il muscolo scheletrico ha fibre multinucleate ma non dischi intercalari.",
+    deepdive: "I dischi intercalari contengono giunzioni comunicanti (gap junctions) che permettono il passaggio diretto degli ioni tra cellule adiacenti, sincronizzando la contrazione.",
+    difficulty: 2, topic: "Tessuto muscolare"
+  },
+
+  // STRUTTURA DEL MUSCOLO / SARCOMERO (5)
+  {
+    text: "Il sarcomero e' delimitato da:",
+    type: "multiple",
+    options: ["Due linee Z","Due bande A","Due zone H","Due bande I"],
+    answer: 0,
+    explanation: "Il sarcomero, unita' contrattile del muscolo striato, va da una linea Z alla successiva.",
+    commonError: "La banda A e' al centro del sarcomero, non ai bordi. Le linee Z delimitano il sarcomero.",
+    deepdive: "Le linee Z sono strutture a disco a cui sono ancorati i filamenti sottili (actina). Il sarcomero e' lungo circa 2-3 micrometri a riposo.",
+    difficulty: 1, topic: "Struttura del muscolo"
+  },
+  {
+    text: "I filamenti sottili del sarcomero sono formati da:",
+    type: "multiple",
+    options: ["Actina","Miosina","Collagene","Cheratina"],
+    answer: 0,
+    explanation: "I filamenti sottili sono composti principalmente da actina (con troponina e tropomiosina), ancorati alle linee Z.",
+    commonError: "La miosina forma i filamenti spessi, non quelli sottili.",
+    deepdive: "L'actina ha la forma di una doppia elica. Su di essa sono posizionate la tropomiosina (che copre i siti di legame) e la troponina (che lega il Ca2+).",
+    difficulty: 1, topic: "Struttura del muscolo"
+  },
+  {
+    text: "La banda A del sarcomero corrisponde a:",
+    type: "multiple",
+    options: ["L'intera lunghezza dei filamenti di miosina (banda scura)","Solo i filamenti di actina","La zona senza filamenti","Le linee Z"],
+    answer: 0,
+    explanation: "La banda A (anisotropa, scura) corrisponde all'intera lunghezza della miosina e non cambia dimensione durante la contrazione.",
+    commonError: "La banda I (chiara, solo actina) si accorcia durante la contrazione, la banda A no.",
+    deepdive: "Durante la contrazione: la banda I e la zona H si riducono (l'actina scorre sulla miosina), ma la banda A resta invariata perche' la miosina non cambia lunghezza.",
+    difficulty: 2, topic: "Struttura del muscolo"
+  },
+  {
+    text: "Durante la contrazione muscolare, quale struttura NON cambia lunghezza?",
+    type: "multiple",
+    options: ["La banda A","La banda I","La zona H","Il sarcomero intero"],
+    answer: 0,
+    explanation: "La banda A (lunghezza della miosina) resta invariata. Banda I, zona H e sarcomero si accorciano.",
+    commonError: "Il sarcomero nel suo complesso si accorcia! Solo la banda A resta costante.",
+    deepdive: "Questo e' un punto chiave della teoria dello scorrimento: i filamenti non si accorciano, ma scorrono l'uno sull'altro. La miosina resta della stessa lunghezza, quindi la banda A non cambia.",
+    difficulty: 3, topic: "Struttura del muscolo"
+  },
+  {
+    text: "La zona H del sarcomero contiene:",
+    type: "multiple",
+    options: ["Solo filamenti di miosina (zona centrale chiara della banda A)","Solo filamenti di actina","Sia actina che miosina","Le linee Z"],
+    answer: 0,
+    explanation: "La zona H e' la regione centrale della banda A dove ci sono solo filamenti spessi di miosina, senza sovrapposizione con l'actina.",
+    commonError: "La zona di sovrapposizione actina-miosina e' ai lati della banda A, non nella zona H.",
+    deepdive: "Durante la contrazione, i filamenti di actina scorrono verso il centro, invadendo la zona H che quindi si riduce fino a scomparire nella contrazione massima.",
+    difficulty: 2, topic: "Struttura del muscolo"
+  },
+
+  // CONTRAZIONE MUSCOLARE (5)
+  {
+    text: "Quale ione e' essenziale per innescare la contrazione muscolare?",
+    type: "multiple",
+    options: ["Calcio (Ca2+)","Sodio (Na+)","Potassio (K+)","Ferro (Fe2+)"],
+    answer: 0,
+    explanation: "Il Ca2+ rilasciato dal reticolo sarcoplasmatico si lega alla troponina, innescando la contrazione.",
+    commonError: "Na+ e K+ sono importanti per il potenziale d'azione, ma e' il Ca2+ che innesca direttamente la contrazione.",
+    deepdive: "Il Ca2+ si lega alla troponina C, che cambia conformazione e sposta la tropomiosina, scoprendo i siti di legame sull'actina per le teste della miosina.",
+    difficulty: 2, topic: "Contrazione muscolare"
+  },
+  {
+    text: "La tropomiosina, a riposo, copre i siti di legame sull'actina impedendo la contrazione.",
+    type: "truefalse",
+    statement: "A riposo, la tropomiosina blocca i siti di legame per la miosina sui filamenti di actina.",
+    answer: true,
+    explanation: "Corretto! La tropomiosina e' posizionata sopra i siti di legame dell'actina, impedendo alle teste della miosina di legarsi.",
+    commonError: "La troponina e' il sensore del Ca2+, la tropomiosina e' il 'blocco' fisico.",
+    deepdive: "Il rilassamento avviene quando il Ca2+ viene ripompato nel reticolo sarcoplasmatico (con consumo di ATP): la tropomiosina torna a coprire i siti di legame.",
+    difficulty: 2, topic: "Contrazione muscolare"
+  },
+  {
+    text: "L'ATP nella contrazione muscolare serve per:",
+    type: "multiple",
+    options: ["Sia il colpo di forza della miosina sia il distacco dall'actina","Solo il colpo di forza","Solo il rilassamento","La produzione di Ca2+"],
+    answer: 0,
+    explanation: "L'ATP e' necessario sia per il movimento della testa della miosina (colpo di forza) sia per staccare la miosina dall'actina dopo il colpo.",
+    commonError: "Senza ATP le teste della miosina restano attaccate all'actina (rigor mortis dopo la morte).",
+    deepdive: "Ciclo: 1) ATP si lega alla miosina e la stacca dall'actina. 2) ATP viene idrolizzato -> la testa si arma. 3) La testa si lega all'actina. 4) Rilascio ADP+Pi -> colpo di forza. Poi si ripete.",
+    difficulty: 3, topic: "Contrazione muscolare"
+  },
+  {
+    text: "La giunzione neuromuscolare e' il punto di contatto tra:",
+    type: "multiple",
+    options: ["Un neurone motorio e una fibra muscolare","Due fibre muscolari","Un osso e un muscolo","Due neuroni"],
+    answer: 0,
+    explanation: "La giunzione neuromuscolare (o placca motrice) e' la sinapsi tra il motoneurone e la fibra muscolare scheletrica.",
+    commonError: "Il punto di contatto osso-muscolo e' il tendine, non la giunzione neuromuscolare.",
+    deepdive: "Il neurotrasmettitore rilasciato e' l'acetilcolina (ACh), che si lega ai recettori sulla membrana muscolare causando depolarizzazione e contrazione.",
+    difficulty: 2, topic: "Contrazione muscolare"
+  },
+  {
+    text: "La teoria dello scorrimento dei filamenti afferma che durante la contrazione:",
+    type: "multiple",
+    options: ["I filamenti di actina scorrono su quelli di miosina, accorciando il sarcomero","I filamenti si accorciano","Le linee Z si allontanano","La banda A si allunga"],
+    answer: 0,
+    explanation: "I filamenti non cambiano lunghezza: l'actina scorre sulla miosina grazie ai ponti trasversali, avvicinando le linee Z.",
+    commonError: "I filamenti NON si accorciano ne' si piegano: scorrono l'uno sull'altro come i binari di un cassetto.",
+    deepdive: "Evidenza della teoria: la banda A non cambia lunghezza (i filamenti restano interi), mentre la banda I e la zona H si riducono (l'actina avanza sulla miosina).",
+    difficulty: 2, topic: "Contrazione muscolare"
+  },
+
+  // TIPI DI FIBRE MUSCOLARI (3)
+  {
+    text: "Le fibre muscolari lente (tipo I) sono adatte a:",
+    type: "multiple",
+    options: ["Attivita' di resistenza come la maratona","Sprint e scatti esplosivi","Sollevamento pesi massimale","Nessuna attivita' fisica"],
+    answer: 0,
+    explanation: "Le fibre lente sono aerobiche, ricche di mioglobina (rosse), resistenti alla fatica, ideali per attivita' prolungate.",
+    commonError: "Le fibre veloci (tipo IIb) sono adatte allo sprint, non le lente.",
+    deepdive: "Le fibre lente hanno molti mitocondri e capillari, usano il metabolismo aerobico, si contraggono lentamente ma per lungo tempo. I maratoneti hanno una alta percentuale di fibre lente.",
+    difficulty: 2, topic: "Tipi di fibre muscolari"
+  },
+  {
+    text: "Le fibre muscolari veloci (tipo IIb) sono:",
+    type: "multiple",
+    options: ["Anaerobiche, potenti ma si affaticano rapidamente","Aerobiche e resistenti alla fatica","Rosse e ricche di mioglobina","Presenti solo nel cuore"],
+    answer: 0,
+    explanation: "Le fibre veloci sono anaerobiche, bianche (poca mioglobina), generano molta forza ma si affaticano presto.",
+    commonError: "Le fibre rosse e ricche di mioglobina sono le lente, non le veloci.",
+    deepdive: "Gli sprinter hanno alta percentuale di fibre veloci. Queste usano la glicolisi anaerobica, producendo acido lattico che causa fatica muscolare.",
+    difficulty: 2, topic: "Tipi di fibre muscolari"
+  },
+  {
+    text: "Le fibre muscolari rosse devono il loro colore alla:",
+    type: "multiple",
+    options: ["Mioglobina","Melanina","Emoglobina presente nella fibra","Cheratina"],
+    answer: 0,
+    explanation: "La mioglobina e' una proteina che immagazzina ossigeno nel muscolo e conferisce il colore rosso alle fibre lente.",
+    commonError: "L'emoglobina e' nel sangue, la mioglobina e' nel muscolo. La melanina e' nella pelle.",
+    deepdive: "La mioglobina ha un'affinita' per l'ossigeno superiore all'emoglobina, quindi 'cattura' l'O2 dal sangue e lo rende disponibile ai mitocondri muscolari.",
+    difficulty: 2, topic: "Tipi di fibre muscolari"
+  },
+
+  // MUSCOLI ANTAGONISTI (3)
+  {
+    text: "I muscoli antagonisti lavorano in modo:",
+    type: "multiple",
+    options: ["Opposto: quando uno si contrae, l'altro si rilassa","Identico: si contraggono insieme","Indipendente: non si influenzano","Alternato: si contraggono a turno senza relazione"],
+    answer: 0,
+    explanation: "I muscoli antagonisti hanno azioni opposte: quando l'agonista si contrae, l'antagonista si rilassa, e viceversa.",
+    commonError: "Non lavorano in modo indipendente: la loro azione e' coordinata dal sistema nervoso.",
+    deepdive: "Esempio: il bicipite (flessore) e il tricipite (estensore) del braccio. Nella flessione il bicipite si contrae e il tricipite si rilassa; nell'estensione avviene il contrario.",
+    difficulty: 1, topic: "Muscoli antagonisti"
+  },
+  {
+    text: "Il bicipite e il tricipite sono un esempio di muscoli:",
+    type: "multiple",
+    options: ["Antagonisti","Sinergici","Identici","Non correlati"],
+    answer: 0,
+    explanation: "Bicipite (flessore) e tricipite (estensore) sono il classico esempio di coppia antagonista nel braccio.",
+    commonError: "I muscoli sinergici cooperano nello stesso movimento. Gli antagonisti hanno azione opposta.",
+    deepdive: "Il bicipite flette l'avambraccio (lo avvicina alla spalla), il tricipite lo estende (lo allontana). Senza antagonisti, il braccio potrebbe solo flettersi.",
+    difficulty: 1, topic: "Muscoli antagonisti"
+  },
+  {
+    text: "I tendini collegano:",
+    type: "multiple",
+    options: ["Muscoli alle ossa","Ossa ad ossa","Muscoli tra loro","Nervi ai muscoli"],
+    answer: 0,
+    explanation: "I tendini sono strutture di tessuto connettivo denso regolare che collegano i muscoli alle ossa.",
+    commonError: "I legamenti collegano ossa ad ossa, i tendini muscoli ad ossa.",
+    deepdive: "I tendini sono formati da fibre di collagene parallele, molto resistenti alla trazione. Il tendine d'Achille e' il piu' grande del corpo e collega il polpaccio al calcagno.",
+    difficulty: 1, topic: "Muscoli antagonisti"
+  }
+];
+
+const ULTRA_QUESTIONS = [
+  {
+    text: "Un paziente ha una frattura del femore. Spiega il processo di riparazione coinvolgendo osteoblasti, osteoclasti e osteociti, e il ruolo della matrice extracellulare. Quale tipo di tessuto si forma per primo nel callo osseo?",
+    type: "multiple",
+    options: ["Cartilagine (callo fibrocartilagineo), poi sostituita da osso","Osso compatto direttamente","Tessuto muscolare","Tessuto epiteliale"],
+    answer: 0,
+    explanation: "La riparazione ossea passa per: ematoma -> callo fibrocartilagineo (cartilagine) -> callo osseo (osso spugnoso) -> rimodellamento (osso compatto). Gli osteoblasti depositano nuova matrice, gli osteoclasti rimodellano.",
+    commonError: "L'osso non si ripara direttamente con osso compatto: prima si forma cartilagine che viene poi ossificata.",
+    deepdive: "Fasi: 1) Ematoma da frattura. 2) Callo fibrocartilagineo: fibroblasti e condroblasti producono cartilagine. 3) Callo osseo: osteoblasti sostituiscono la cartilagine con osso spugnoso. 4) Rimodellamento: osteoclasti e osteoblasti trasformano il callo in osso compatto.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Spiega perche' il rigor mortis (rigidita' cadaverica) e' collegato all'assenza di ATP nel muscolo. Quale struttura molecolare del sarcomero e' coinvolta?",
+    type: "multiple",
+    options: ["Senza ATP le teste della miosina restano legate all'actina, bloccando il muscolo","Senza ATP il Ca2+ non viene rilasciato","Senza ATP le linee Z si dissolvono","Senza ATP la troponina si distrugge"],
+    answer: 0,
+    explanation: "L'ATP e' necessario per staccare le teste della miosina dall'actina. Senza ATP dopo la morte, i ponti trasversali restano fissi e il muscolo si irrigidisce.",
+    commonError: "Il rigor mortis non e' causato dalla contrazione attiva ma dall'impossibilita' di rilassamento (distacco miosina-actina).",
+    deepdive: "Dopo la morte: 1) Le membrane si degradano, il Ca2+ esce dal reticolo sarcoplasmatico. 2) Il Ca2+ attiva la contrazione. 3) Ma l'ATP si esaurisce. 4) Senza ATP, la miosina non si stacca dall'actina. 5) Il muscolo resta rigido finche' le proteine non si degradano (24-48h).",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Un atleta si allena per una maratona. Come cambiano le sue fibre muscolari? Le fibre veloci si trasformano in lente?",
+    type: "multiple",
+    options: ["Le fibre intermedie (IIa) possono adattarsi, ma le veloci (IIb) non diventano completamente lente (I)","Tutte le fibre diventano lente","Le fibre lente diventano veloci","Non avviene nessun adattamento"],
+    answer: 0,
+    explanation: "L'allenamento di resistenza aumenta la capacita' aerobica delle fibre intermedie (IIa) e ne modifica parzialmente le caratteristiche, ma la conversione completa IIb->I e' molto limitata.",
+    commonError: "Le fibre muscolari possono adattarsi ma non cambiano completamente tipo. La genetica determina la proporzione base.",
+    deepdive: "L'allenamento aerobico aumenta: mitocondri, capillari, mioglobina, enzimi aerobici nelle fibre. Le fibre IIa diventano piu' resistenti. Ma la proporzione base I/II e' geneticamente determinata.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Collega i concetti: epidermide-cheratina-melanina con le funzioni di protezione UV e impermeabilizzazione. Se una persona albina (senza melanina) si espone al sole, quale funzione della cute viene compromessa e perche'?",
+    type: "multiple",
+    options: ["La protezione dai raggi UV, perche' la melanina assorbe le radiazioni UV proteggendo il DNA","L'impermeabilizzazione, perche' la melanina rende la pelle impermeabile","La termoregolazione, perche' la melanina controlla il sudore","La sensibilita' tattile, perche' la melanina e' nei recettori"],
+    answer: 0,
+    explanation: "La melanina assorbe i raggi UV, proteggendo il DNA delle cellule sottostanti. Senza melanina (albinismo), il DNA e' esposto ai danni UV, aumentando il rischio di tumori cutanei.",
+    commonError: "La cheratina impermeabilizza la pelle, non la melanina. La melanina protegge specificamente dai raggi UV.",
+    deepdive: "La melanina si posiziona come un cappello sopra il nucleo dei cheratinociti, assorbendo i raggi UV prima che raggiungano il DNA. Le persone albine devono proteggersi con creme solari ad altissima protezione.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Un veleno (curaro) blocca i recettori dell'acetilcolina sulla giunzione neuromuscolare. Quali effetti ha sulla contrazione muscolare e perche'?",
+    type: "multiple",
+    options: ["Il muscolo non si contrae perche' l'impulso nervoso non raggiunge la fibra muscolare","Il muscolo si contrae piu' forte","Il muscolo si contrae normalmente","Il muscolo si contrae e non si rilassa"],
+    answer: 0,
+    explanation: "Il curaro blocca i recettori dell'acetilcolina: l'impulso nervoso non puo' essere trasmesso al muscolo, che resta rilassato (paralisi flaccida).",
+    commonError: "Il curaro non causa rigidita' (come il rigor mortis) ma paralisi flaccida: il muscolo non riceve lo stimolo per contrarsi.",
+    deepdive: "Il curaro era usato dagli indigeni sudamericani sulle frecce per paralizzare le prede. In medicina, derivati del curaro sono usati come miorilassanti durante le operazioni chirurgiche.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  }
+];
+
+const EXAM_MC = [
+  {text:"Qual e' l'ordine corretto della gerarchia strutturale?",options:["Cellula -> Tessuto -> Organo -> Sistema -> Organismo","Tessuto -> Cellula -> Organo -> Sistema -> Organismo","Cellula -> Organo -> Tessuto -> Sistema -> Organismo","Organo -> Tessuto -> Cellula -> Sistema -> Organismo","Organismo -> Sistema -> Organo -> Tessuto -> Cellula"],answer:0,explanation:"L'ordine e': cellula, tessuto, organo, sistema di organi, organismo."},
+  {text:"L'osso compatto e' organizzato in unita' chiamate:",options:["Osteoni (sistemi di Havers)","Sarcomeri","Neuroni","Nefroni","Alveoli"],answer:0,explanation:"L'osteone e' l'unita' strutturale dell'osso compatto, con lamelle concentriche attorno al canale di Havers."},
+  {text:"Quale tessuto ha cellule strettamente unite e poca matrice extracellulare?",options:["Epiteliale","Connettivo","Muscolare","Nervoso","Osseo"],answer:0,explanation:"Il tessuto epiteliale ha cellule strettamente unite, poca matrice, poggia su membrana basale."},
+  {text:"Il feedback negativo nella termoregolazione funziona cosi':",options:["La risposta riduce lo stimolo iniziale riportando la temperatura al valore normale","La risposta amplifica lo stimolo iniziale","Non c'e' risposta allo stimolo","La temperatura aumenta sempre","La temperatura diminuisce sempre"],answer:0,explanation:"Nel feedback negativo la risposta si oppone alla variazione, ristabilendo l'equilibrio."},
+  {text:"I filamenti spessi del sarcomero sono formati da:",options:["Miosina","Actina","Collagene","Cheratina","Elastina"],answer:0,explanation:"I filamenti spessi sono di miosina, quelli sottili di actina."},
+  {text:"Le ghiandole endocrine riversano il secreto:",options:["Nel sangue","All'esterno del corpo","Nell'intestino","Sulla pelle","Nelle ossa"],answer:0,explanation:"Le ghiandole endocrine sono prive di dotti e rilasciano ormoni direttamente nel sangue."},
+  {text:"Le articolazioni mobili (diartrosi) sono caratterizzate da:",options:["Capsula articolare e liquido sinoviale","Fusione completa delle ossa","Assenza di cartilagine","Immobilita' totale","Solo tessuto osseo"],answer:0,explanation:"Le diartrosi hanno capsula articolare, liquido sinoviale, cartilagine articolare e permettono ampi movimenti."},
+  {text:"Durante la contrazione muscolare, quale banda del sarcomero NON cambia lunghezza?",options:["Banda A","Banda I","Zona H","Linea Z","Tutte cambiano"],answer:0,explanation:"La banda A corrisponde alla lunghezza della miosina che non cambia. Banda I e zona H si accorciano."},
+  {text:"Il Ca2+ nella contrazione muscolare si lega a:",options:["Troponina","Tropomiosina","Actina direttamente","Miosina","ATP"],answer:0,explanation:"Il Ca2+ si lega alla troponina C, che sposta la tropomiosina scoprendo i siti di legame sull'actina."},
+  {text:"I tendini collegano:",options:["Muscoli alle ossa","Ossa ad ossa","Muscoli tra loro","Nervi ai muscoli","Vasi ai muscoli"],answer:0,explanation:"I tendini sono tessuto connettivo denso che collega muscoli a ossa. I legamenti collegano ossa a ossa."}
+];
+
+const EXAM_OPEN = [
+  {
+    text: "Descrivi la struttura del sarcomero, indicando: linee Z, filamenti sottili e spessi, banda A, banda I, zona H. Spiega cosa succede a ciascuna di queste strutture durante la contrazione muscolare secondo la teoria dello scorrimento dei filamenti.",
+    solution: "Il sarcomero e' l'unita' contrattile, delimitato da due linee Z.\n- Filamenti sottili (actina): ancorati alle linee Z\n- Filamenti spessi (miosina): al centro\n- Banda I: solo actina (chiara)\n- Banda A: tutta la lunghezza della miosina (scura)\n- Zona H: solo miosina, al centro della banda A\n\nDurante la contrazione:\n- Le linee Z si avvicinano (il sarcomero si accorcia)\n- La banda I si riduce (l'actina scorre verso il centro)\n- La zona H si riduce o scompare\n- La banda A resta INVARIATA (la miosina non cambia lunghezza)\n- I filamenti non si accorciano: scorrono l'uno sull'altro"
+  },
+  {
+    text: "Confronta i tre tipi di tessuto muscolare (scheletrico, cardiaco, liscio) indicando per ciascuno: aspetto al microscopio, tipo di controllo (volontario/involontario), localizzazione e caratteristiche specifiche.",
+    solution: "SCHELETRICO: striato, volontario, muscoli attaccati alle ossa, fibre multinucleate, contrazione rapida e potente.\n\nCARDIACO: striato, involontario, pareti del cuore, cellule ramificate con dischi intercalari, contrazione ritmica autonoma (pacemaker).\n\nLISCIO: non striato, involontario, pareti organi cavi (intestino, vasi, utero), cellule fusiformi mononucleate, contrazione lenta e sostenuta.\n\nDifferenze chiave: solo lo scheletrico e' volontario; scheletrico e cardiaco sono striati; il cardiaco ha i dischi intercalari; il liscio e' l'unico senza striature."
+  },
+  {
+    text: "Spiega il meccanismo della contrazione muscolare dal momento in cui l'impulso nervoso arriva alla giunzione neuromuscolare fino allo scorrimento dei filamenti. Indica il ruolo di: acetilcolina, Ca2+, troponina, tropomiosina, ATP, actina e miosina.",
+    solution: "1) L'impulso nervoso arriva alla giunzione neuromuscolare\n2) Il motoneurone rilascia acetilcolina (ACh)\n3) L'ACh si lega ai recettori sulla fibra muscolare, causando depolarizzazione\n4) La depolarizzazione si propaga lungo la fibra e nel reticolo sarcoplasmatico\n5) Il reticolo sarcoplasmatico rilascia Ca2+ nel citoplasma\n6) Il Ca2+ si lega alla troponina\n7) La troponina cambia forma e sposta la tropomiosina\n8) I siti di legame sull'actina si scoprono\n9) Le teste della miosina si legano all'actina (ponte trasversale)\n10) L'ATP viene idrolizzato: la testa della miosina tira l'actina (colpo di forza)\n11) Un nuovo ATP si lega alla miosina, che si stacca dall'actina\n12) Il ciclo si ripete finche' c'e' Ca2+ e ATP\n\nRilassamento: il Ca2+ viene ripompato nel reticolo (con ATP), la tropomiosina copre di nuovo i siti di legame."
+  }
+];
+
+const PROF_SVG_HAPPY = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <defs><radialGradient id="glowG" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:#06d6a0;stop-opacity:0.2"/><stop offset="100%" style="stop-color:#06d6a0;stop-opacity:0"/></radialGradient></defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowG)"/>
+  <path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#f0f0f0" stroke="#ddd" stroke-width="2"/>
+  <path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#e0e0e0" stroke="none"/>
+  <rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/>
+  <ellipse cx="110" cy="105" rx="46" ry="50" fill="#deb887"/>
+  <path d="M64 90 Q60 50 85 38 Q100 30 110 28 Q120 30 135 38 Q160 50 156 90" fill="#3b2210" stroke="#2a1808" stroke-width="1"/>
+  <path d="M64 90 Q58 110 55 130 Q54 140 58 145" fill="#3b2210" stroke="#2a1808" stroke-width="1"/>
+  <path d="M156 90 Q162 110 165 130 Q166 140 162 145" fill="#3b2210" stroke="#2a1808" stroke-width="1"/>
+  <path d="M64 90 Q60 100 58 115" fill="#3b2210"/><path d="M156 90 Q160 100 162 115" fill="#3b2210"/>
+  <circle cx="75" cy="75" r="5" fill="#3b2210"/><circle cx="145" cy="75" r="5" fill="#3b2210"/>
+  <circle cx="80" cy="65" r="4" fill="#3b2210"/><circle cx="140" cy="65" r="4" fill="#3b2210"/>
+  <circle cx="90" cy="50" r="5" fill="#3b2210"/><circle cx="130" cy="50" r="5" fill="#3b2210"/>
+  <circle cx="110" cy="42" r="6" fill="#3b2210"/>
+  <rect x="78" y="94" width="26" height="20" rx="5" fill="none" stroke="#1a1a2e" stroke-width="2.5"/>
+  <rect x="116" y="94" width="26" height="20" rx="5" fill="none" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="104" y1="103" x2="116" y2="103" stroke="#1a1a2e" stroke-width="2"/>
+  <line x1="78" y1="101" x2="68" y2="97" stroke="#1a1a2e" stroke-width="2"/>
+  <line x1="142" y1="101" x2="152" y2="97" stroke="#1a1a2e" stroke-width="2"/>
+  <path d="M85 103 Q91 97 97 103" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M123 103 Q129 97 135 103" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M80 88 Q91 82 100 86" fill="none" stroke="#3b2210" stroke-width="2" stroke-linecap="round"/>
+  <path d="M120 86 Q129 82 140 88" fill="none" stroke="#3b2210" stroke-width="2" stroke-linecap="round"/>
+  <path d="M95 128 Q110 138 125 128" fill="none" stroke="#c4956a" stroke-width="2.5" stroke-linecap="round"/>
+  <g transform="translate(165,140) rotate(-15)">
+    <rect x="0" y="12" width="18" height="26" rx="5" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/>
+    <rect x="4" y="-8" width="12" height="24" rx="6" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/>
+  </g>
+  <circle cx="180" cy="45" r="18" fill="#06d6a0"/>
+  <path d="M171 45 L177 51 L189 39" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+const PROF_SVG_ANGRY = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <defs><radialGradient id="glowR" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:#ef476f;stop-opacity:0.2"/><stop offset="100%" style="stop-color:#ef476f;stop-opacity:0"/></radialGradient></defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowR)"/>
+  <path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#f0f0f0" stroke="#ddd" stroke-width="2"/>
+  <path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#e0e0e0" stroke="none"/>
+  <rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/>
+  <ellipse cx="110" cy="105" rx="46" ry="50" fill="#deb887"/>
+  <path d="M64 90 Q60 50 85 38 Q100 30 110 28 Q120 30 135 38 Q160 50 156 90" fill="#3b2210" stroke="#2a1808" stroke-width="1"/>
+  <path d="M64 90 Q58 110 55 130 Q54 140 58 145" fill="#3b2210" stroke="#2a1808" stroke-width="1"/>
+  <path d="M156 90 Q162 110 165 130 Q166 140 162 145" fill="#3b2210" stroke="#2a1808" stroke-width="1"/>
+  <path d="M64 90 Q60 100 58 115" fill="#3b2210"/><path d="M156 90 Q160 100 162 115" fill="#3b2210"/>
+  <circle cx="75" cy="75" r="5" fill="#3b2210"/><circle cx="145" cy="75" r="5" fill="#3b2210"/>
+  <circle cx="80" cy="65" r="4" fill="#3b2210"/><circle cx="140" cy="65" r="4" fill="#3b2210"/>
+  <circle cx="90" cy="50" r="5" fill="#3b2210"/><circle cx="130" cy="50" r="5" fill="#3b2210"/>
+  <circle cx="110" cy="42" r="6" fill="#3b2210"/>
+  <rect x="78" y="94" width="26" height="20" rx="5" fill="none" stroke="#1a1a2e" stroke-width="2.5"/>
+  <rect x="116" y="94" width="26" height="20" rx="5" fill="none" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="104" y1="103" x2="116" y2="103" stroke="#1a1a2e" stroke-width="2"/>
+  <line x1="78" y1="101" x2="68" y2="97" stroke="#1a1a2e" stroke-width="2"/>
+  <line x1="142" y1="101" x2="152" y2="97" stroke="#1a1a2e" stroke-width="2"/>
+  <circle cx="91" cy="102" r="3" fill="#1a1a2e"/>
+  <circle cx="129" cy="102" r="3" fill="#1a1a2e"/>
+  <path d="M80 90 Q90 84 100 90" fill="none" stroke="#3b2210" stroke-width="2.5" stroke-linecap="round" transform="rotate(8,90,87)"/>
+  <path d="M120 90 Q130 84 140 90" fill="none" stroke="#3b2210" stroke-width="2.5" stroke-linecap="round" transform="rotate(-8,130,87)"/>
+  <path d="M95 130 Q110 123 125 130" fill="none" stroke="#c4956a" stroke-width="2.5" stroke-linecap="round"/>
+  <g transform="translate(152,120) rotate(10)">
+    <rect x="0" y="0" width="22" height="14" rx="5" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/>
+    <rect x="3" y="-6" width="5" height="10" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/>
+    <rect x="9" y="-8" width="5" height="12" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/>
+    <rect x="15" y="-6" width="5" height="10" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/>
+  </g>
+  <circle cx="180" cy="45" r="18" fill="#ef476f"/>
+  <path d="M173 38 L187 52 M187 38 L173 52" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+  <g transform="translate(55,55)"><path d="M0 5 L5 0 L10 5 L5 10 Z" fill="none" stroke="#ef476f" stroke-width="2"/></g>
+</svg>`;
+
+const PROF_SVG_NEUTRAL = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <defs><radialGradient id="glowN" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:#4361ee;stop-opacity:0.15"/><stop offset="100%" style="stop-color:#4361ee;stop-opacity:0"/></radialGradient></defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowN)"/>
+  <path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#f0f0f0" stroke="#ddd" stroke-width="2"/>
+  <path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#e0e0e0" stroke="none"/>
+  <rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/>
+  <ellipse cx="110" cy="105" rx="46" ry="50" fill="#deb887"/>
+  <path d="M64 90 Q60 50 85 38 Q100 30 110 28 Q120 30 135 38 Q160 50 156 90" fill="#3b2210" stroke="#2a1808" stroke-width="1"/>
+  <path d="M64 90 Q58 110 55 130 Q54 140 58 145" fill="#3b2210"/><path d="M156 90 Q162 110 165 130 Q166 140 162 145" fill="#3b2210"/>
+  <circle cx="75" cy="75" r="5" fill="#3b2210"/><circle cx="145" cy="75" r="5" fill="#3b2210"/>
+  <circle cx="90" cy="50" r="5" fill="#3b2210"/><circle cx="130" cy="50" r="5" fill="#3b2210"/>
+  <circle cx="110" cy="42" r="6" fill="#3b2210"/>
+  <rect x="78" y="94" width="26" height="20" rx="5" fill="none" stroke="#1a1a2e" stroke-width="2.5"/>
+  <rect x="116" y="94" width="26" height="20" rx="5" fill="none" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="104" y1="103" x2="116" y2="103" stroke="#1a1a2e" stroke-width="2"/>
+  <line x1="78" y1="101" x2="68" y2="97" stroke="#1a1a2e" stroke-width="2"/>
+  <line x1="142" y1="101" x2="152" y2="97" stroke="#1a1a2e" stroke-width="2"/>
+  <circle cx="91" cy="102" r="2.5" fill="#1a1a2e"/><circle cx="129" cy="102" r="2.5" fill="#1a1a2e"/>
+  <path d="M82 88 Q91 84 100 87" fill="none" stroke="#3b2210" stroke-width="2" stroke-linecap="round"/>
+  <path d="M120 87 Q129 84 138 88" fill="none" stroke="#3b2210" stroke-width="2" stroke-linecap="round"/>
+  <path d="M100 130 L120 130" fill="none" stroke="#c4956a" stroke-width="2" stroke-linecap="round"/>
+</svg>`;
+
+(function initProfSVG(){
+  document.getElementById('prof-svg-happy').innerHTML = PROF_SVG_HAPPY;
+  document.getElementById('prof-svg-angry').innerHTML = PROF_SVG_ANGRY;
+  document.getElementById('prof-header-svg').innerHTML = PROF_SVG_NEUTRAL;
+})();
+
+const PROF_CORRECT_PHRASES = [
+  "Bene! Anatomia studiata con precisione.",
+  "Corretto. Conosci bene la struttura del corpo umano.",
+  "Ottimo! Questo lo sai davvero.",
+  "Bravo! Vesalio sarebbe fiero di te.",
+  "Si', perfetto. Il ragionamento e' chiaro.",
+  "Esatto. Vedo che hai studiato gli appunti.",
+  "Risposta corretta! Continua cosi'.",
+  "Perfetto. La biologia non ha segreti per te.",
+  "Bene bene. Un futuro medico tra noi?",
+  "Corretto. Non ti servira' neanche il ripasso.",
+  "Giusto! Hai una buona memoria anatomica.",
+  "Ok, non male. Questa classe ha speranza."
+];
+
+const PROF_WRONG_PHRASES = [
+  "No. Qui hai confuso le strutture.",
+  "Attenzione: rivedi bene questo argomento.",
+  "Errore. Torna sugli appunti di anatomia.",
+  "Questa risposta non regge. Riprova.",
+  "Fermati: qui c'e' da ripassare.",
+  "No, no, no. Rileggi il capitolo.",
+  "Sbagliato. Ma l'errore e' un'occasione per imparare.",
+  "Questo errore lo vedo ogni anno. Leggi la spiegazione.",
+  "Non ci siamo. Apri il libro e rileggi.",
+  "Errore. Ma il bello dell'anatomia e' che si puo' visualizzare.",
+  "Risposta sbagliata. Concentrati sulle strutture.",
+  "No. Rivedi la differenza tra i tessuti."
+];
+
+/* ============================================
+   VARIABILI DI STATO
+   ============================================ */
+let currentQuestions = [];
+let currentIndex = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let history = [];
+let topicStats = {};
+let errorQuestionIds = [];
+let answered = false;
+
+/* ============================================
+   INIZIALIZZAZIONE
+   ============================================ */
+(function init() {
+  const topics = [...new Set(QUESTIONS.map(q => q.topic))];
+  const grid = document.getElementById('topic-filters');
+  topics.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'topic-item';
+    div.innerHTML = '<input type="checkbox" checked value="' + t + '" class="topic-cb"> ' + t;
+    grid.appendChild(div);
+  });
+  loadPreviousStats();
+  initNotesContent();
+})();
+
+function loadPreviousStats() {
+  const saved = localStorage.getItem('anatomia_stats');
+  if (saved) {
+    const data = JSON.parse(saved);
+    document.getElementById('prev-stats').style.display = 'block';
+    document.getElementById('prev-stats-text').textContent =
+      data.correct + '/' + data.total + ' corrette (' + data.percentage + '%) - ' + data.date;
+    const savedErrors = localStorage.getItem('anatomia_errors');
+    if (savedErrors && JSON.parse(savedErrors).length > 0) {
+      document.getElementById('btn-errors').style.display = 'inline-block';
+    }
+  }
+}
+
+function clearProgress() {
+  localStorage.removeItem('anatomia_stats');
+  localStorage.removeItem('anatomia_errors');
+  document.getElementById('prev-stats').style.display = 'none';
+  document.getElementById('btn-errors').style.display = 'none';
+}
+
+/* ============================================
+   AVVIO QUIZ
+   ============================================ */
+function startQuiz(mode) {
+  currentIndex = 0; correctCount = 0; wrongCount = 0;
+  history = []; topicStats = {}; errorQuestionIds = []; answered = false;
+
+  const selectedTopics = [...document.querySelectorAll('.topic-cb:checked')].map(cb => cb.value);
+
+  if (mode === 'ultra') {
+    currentQuestions = [...ULTRA_QUESTIONS];
+  } else if (mode === 'errors') {
+    const savedErrors = localStorage.getItem('anatomia_errors');
+    if (savedErrors) {
+      const errorIds = JSON.parse(savedErrors);
+      currentQuestions = errorIds.map(id => QUESTIONS[id]).filter(q => q);
+    }
+    if (!currentQuestions || currentQuestions.length === 0) {
+      alert('Non ci sono errori salvati da ripassare!');
+      return;
+    }
+  } else {
+    currentQuestions = QUESTIONS.filter(q => selectedTopics.includes(q.topic));
+    if (currentQuestions.length === 0) {
+      alert('Seleziona almeno un argomento!');
+      return;
+    }
+  }
+
+  if (mode === 'random') shuffleArray(currentQuestions);
+  else if (mode === 'all') currentQuestions.sort((a, b) => a.difficulty - b.difficulty);
+
+  const topics = [...new Set(currentQuestions.map(q => q.topic))];
+  topics.forEach(t => { topicStats[t] = { correct: 0, wrong: 0, total: 0 }; });
+
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('total-q').textContent = currentQuestions.length;
+  showQuestion();
+}
+
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+/* ============================================
+   MOSTRA DOMANDA
+   ============================================ */
+function showQuestion() {
+  answered = false;
+  const q = currentQuestions[currentIndex];
+  document.getElementById('current-q').textContent = currentIndex + 1;
+  document.getElementById('score-correct').textContent = correctCount;
+  document.getElementById('score-wrong').textContent = wrongCount;
+  document.getElementById('progress-bar').style.width = ((currentIndex) / currentQuestions.length * 100) + '%';
+
+  const meta = document.getElementById('question-meta');
+  const diffLabels = ['Facile', 'Media', 'Difficile'];
+  const typeLabels = { multiple: 'Scelta multipla', truefalse: 'Vero/Falso', numeric: 'Esercizio numerico' };
+  meta.innerHTML = '<span class="badge badge-topic">' + q.topic + '</span>' +
+    '<span class="badge badge-diff-' + q.difficulty + '">' + diffLabels[q.difficulty - 1] + '</span>' +
+    '<span class="badge badge-type">' + typeLabels[q.type] + '</span>';
+
+  document.getElementById('question-text').textContent = q.text;
+  const area = document.getElementById('answer-area');
+  area.innerHTML = '';
+  document.getElementById('submit-area').style.display = 'none';
+
+  if (q.type === 'multiple') {
+    const indices = q.options.map((_, i) => i);
+    shuffleArray(indices);
+    q._shuffledIndices = indices;
+    const container = document.createElement('div');
+    container.className = 'options-container';
+    indices.forEach((origIdx, displayIdx) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = q.options[origIdx];
+      btn.onclick = () => handleMultipleChoice(displayIdx);
+      btn.id = 'opt-' + displayIdx;
+      btn.dataset.origIdx = origIdx;
+      container.appendChild(btn);
+    });
+    area.appendChild(container);
+  } else if (q.type === 'truefalse') {
+    const stmt = document.createElement('p');
+    stmt.style.cssText = 'font-style:italic;margin-bottom:15px;padding:12px;background:#f0f0f0;border-radius:8px;';
+    stmt.textContent = '"' + q.statement + '"';
+    area.appendChild(stmt);
+    const container = document.createElement('div');
+    container.className = 'options-container';
+    ['Vero', 'Falso'].forEach((label, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = label;
+      btn.onclick = () => handleTrueFalse(i === 0);
+      container.appendChild(btn);
+    });
+    area.appendChild(container);
+  } else if (q.type === 'numeric') {
+    const container = document.createElement('div');
+    container.className = 'answer-input-container';
+    container.innerHTML = '<input type="text" class="answer-input" id="numeric-input" placeholder="Scrivi il valore numerico..." onkeydown="if(event.key===\'Enter\')checkOpenAnswer()">';
+    area.appendChild(container);
+    document.getElementById('submit-area').style.display = 'block';
+  }
+
+  document.getElementById('feedback-box').style.display = 'none';
+  document.getElementById('deepdive-box').style.display = 'none';
+  document.getElementById('next-btn-container').style.display = 'none';
+  document.getElementById('prof-container').className = 'prof-container';
+}
+
+/* ============================================
+   GESTIONE RISPOSTE
+   ============================================ */
+function handleMultipleChoice(displayIdx) {
+  if (answered) return;
+  answered = true;
+  const q = currentQuestions[currentIndex];
+  const origSelected = q._shuffledIndices[displayIdx];
+  const isCorrect = origSelected === q.answer;
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    const origIdx = parseInt(btn.dataset.origIdx);
+    if (origIdx === q.answer) btn.classList.add('correct');
+    if (i === displayIdx && !isCorrect) btn.classList.add('wrong');
+  });
+  processAnswer(isCorrect, q);
+}
+
+function handleTrueFalse(selected) {
+  if (answered) return;
+  answered = true;
+  const q = currentQuestions[currentIndex];
+  const isCorrect = selected === q.answer;
+  const correctIdx = q.answer ? 0 : 1;
+  const selectedIdx = selected ? 0 : 1;
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (i === correctIdx) btn.classList.add('correct');
+    if (i === selectedIdx && !isCorrect) btn.classList.add('wrong');
+  });
+  processAnswer(isCorrect, q);
+}
+
+function checkOpenAnswer() {
+  if (answered) return;
+  answered = true;
+  const q = currentQuestions[currentIndex];
+  let isCorrect = false;
+  if (q.type === 'numeric') {
+    const input = document.getElementById('numeric-input');
+    const val = parseFloat(input.value.replace(',', '.'));
+    isCorrect = !isNaN(val) && Math.abs(val - q.answer) <= q.tolerance;
+    input.style.borderColor = isCorrect ? 'var(--success)' : 'var(--danger)';
+    input.style.background = isCorrect ? 'var(--success-light)' : 'var(--danger-light)';
+  }
+  processAnswer(isCorrect, q);
+}
+
+function processAnswer(isCorrect, q) {
+  if (isCorrect) { correctCount++; topicStats[q.topic].correct++; }
+  else { wrongCount++; topicStats[q.topic].wrong++;
+    const globalIdx = QUESTIONS.indexOf(q);
+    if (globalIdx !== -1) errorQuestionIds.push(globalIdx);
+  }
+  topicStats[q.topic].total++;
+  history.push({ question: q.text, topic: q.topic, correct: isCorrect, difficulty: q.difficulty });
+  showFeedback(isCorrect, q);
+  document.getElementById('score-correct').textContent = correctCount;
+  document.getElementById('score-wrong').textContent = wrongCount;
+}
+
+/* ============================================
+   FEEDBACK
+   ============================================ */
+function showFeedback(isCorrect, q) {
+  const fb = document.getElementById('feedback-box');
+  const dd = document.getElementById('deepdive-box');
+  const prof = document.getElementById('prof-container');
+
+  prof.className = 'prof-container show ' + (isCorrect ? 'correct' : 'wrong');
+  const phrases = isCorrect ? PROF_CORRECT_PHRASES : PROF_WRONG_PHRASES;
+  document.getElementById('prof-phrase').textContent = phrases[Math.floor(Math.random() * phrases.length)];
+  document.getElementById('prof-name').textContent = 'Prof.ssa Rossi';
+
+  fb.style.display = 'block';
+  fb.className = 'feedback-box ' + (isCorrect ? 'feedback-correct' : 'feedback-wrong');
+
+  if (isCorrect) {
+    document.getElementById('feedback-title').textContent = 'Risposta corretta!';
+    document.getElementById('feedback-text').textContent = q.explanation;
+    dd.style.display = 'none';
+  } else {
+    document.getElementById('feedback-title').textContent = 'Risposta sbagliata';
+    document.getElementById('feedback-text').innerHTML =
+      '<strong>Errore comune:</strong> ' + q.commonError + '<br><br><strong>Spiegazione:</strong> ' + q.explanation;
+    dd.style.display = 'block';
+    document.getElementById('deepdive-text').textContent = q.deepdive;
+  }
+
+  document.getElementById('next-btn-container').style.display = 'block';
+  prof.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/* ============================================
+   NAVIGAZIONE
+   ============================================ */
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= currentQuestions.length) endQuiz();
+  else { showQuestion(); document.getElementById('question-card').scrollIntoView({ behavior: 'smooth' }); }
+}
+
+/* ============================================
+   FINE QUIZ E RIEPILOGO
+   ============================================ */
+function endQuiz() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'block';
+
+  const total = correctCount + wrongCount;
+  const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+
+  const scoreEl = document.getElementById('final-score');
+  scoreEl.textContent = pct + '%';
+  scoreEl.className = 'big-score ' + (pct >= 70 ? 'good' : pct >= 50 ? 'medium' : 'bad');
+  document.getElementById('final-score-label').textContent = correctCount + ' corrette su ' + total + ' domande';
+
+  const profSummary = document.getElementById('prof-summary');
+  let summaryPhrase, summaryClass;
+  if (pct >= 90) { summaryPhrase = "Eccellente. Risultato da primo della classe. Quasi quasi ti metto 10."; summaryClass = 'correct'; }
+  else if (pct >= 70) { summaryPhrase = "Bene, risultato solido. Ma non adagiarti: c'e' ancora margine."; summaryClass = 'correct'; }
+  else if (pct >= 50) { summaryPhrase = "Sufficiente, ma di poco. Hai le basi, pero' devi ripassare."; summaryClass = 'wrong'; }
+  else { summaryPhrase = "Insufficiente. Ci vediamo al recupero. Studia."; summaryClass = 'wrong'; }
+
+  profSummary.className = 'prof-container show ' + summaryClass;
+  document.getElementById('prof-summary-svg').innerHTML = pct >= 70 ? PROF_SVG_HAPPY : PROF_SVG_ANGRY;
+  document.getElementById('prof-summary-phrase').textContent = summaryPhrase;
+  document.getElementById('prof-summary-name').textContent = 'Prof.ssa Rossi';
+
+  document.getElementById('stats-grid').innerHTML =
+    '<div class="stat-box"><div class="stat-number">' + total + '</div><div class="stat-label">Domande totali</div></div>' +
+    '<div class="stat-box"><div class="stat-number" style="color:var(--success)">' + correctCount + '</div><div class="stat-label">Corrette</div></div>' +
+    '<div class="stat-box"><div class="stat-number" style="color:var(--danger)">' + wrongCount + '</div><div class="stat-label">Errate</div></div>' +
+    '<div class="stat-box"><div class="stat-number">' + pct + '%</div><div class="stat-label">Percentuale</div></div>';
+
+  const topicDiv = document.getElementById('topic-results');
+  topicDiv.innerHTML = '';
+  const weakTopics = [];
+  for (const [topic, stats] of Object.entries(topicStats)) {
+    if (stats.total === 0) continue;
+    const topicPct = Math.round((stats.correct / stats.total) * 100);
+    const cls = topicPct >= 70 ? 'strong' : topicPct >= 50 ? 'medium-res' : 'weak';
+    const barColor = topicPct >= 70 ? 'var(--success)' : topicPct >= 50 ? 'var(--warning)' : 'var(--danger)';
+    if (topicPct < 70) weakTopics.push(topic);
+    topicDiv.innerHTML += '<div class="topic-result-item ' + cls + '"><span><strong>' + topic + '</strong> - ' + stats.correct + '/' + stats.total + ' (' + topicPct + '%)</span><div class="topic-bar"><div class="topic-bar-fill" style="width:' + topicPct + '%;background:' + barColor + '"></div></div></div>';
+  }
+
+  const sugDiv = document.getElementById('suggestions');
+  if (weakTopics.length > 0) {
+    sugDiv.innerHTML = '<h3>Suggerimenti per il ripasso</h3><p>Concentrati su:</p><ul>' +
+      weakTopics.map(t => '<li><strong>' + t + '</strong></li>').join('') +
+      '</ul><p style="margin-top:8px;">Usa "Ripassa gli errori" per rifare le domande sbagliate.</p>';
+  } else {
+    sugDiv.innerHTML = '<h3>Ottimo lavoro!</h3><p>Hai risposto bene su tutti gli argomenti!</p>';
+  }
+
+  const histDiv = document.getElementById('history-list');
+  histDiv.innerHTML = '';
+  history.forEach((h, i) => {
+    histDiv.innerHTML += '<div class="history-item"><span>' + (i+1) + '. ' + h.question.substring(0,60) + (h.question.length > 60 ? '...' : '') + '</span><span class="' + (h.correct ? 'correct-mark' : 'wrong-mark') + '">' + (h.correct ? 'Corretta' : 'Errata') + '</span></div>';
+  });
+
+  localStorage.setItem('anatomia_stats', JSON.stringify({
+    total: total, correct: correctCount, wrong: wrongCount, percentage: pct,
+    date: new Date().toLocaleDateString('it-IT')
+  }));
+  localStorage.setItem('anatomia_errors', JSON.stringify(errorQuestionIds));
+}
+
+/* ============================================
+   APPUNTI
+   ============================================ */
+const noteIds = ['gerarchia','tessuti','epiteliale','connettivo','tegumentario','annessi','omeostasi','scheletro','osso','articolazioni','muscolare','sarcomero','contrazione','fibre','antagonisti'];
+const noteLabels = ['Gerarchia','Tessuti','Epiteliale','Connettivo','Tegumentario','Annessi cutanei','Omeostasi','Scheletro','Struttura osso','Articolazioni','Muscolare','Sarcomero','Contrazione','Fibre muscolari','Antagonisti'];
+
+function initNotesContent() {
+  // Build notes content dynamically
+  const notesContainer = document.getElementById('notes-content');
+  const notesData = [
+    {id:'gerarchia',title:'1. Gerarchia strutturale',body:'<p>Cellula -> Tessuto -> Organo -> Sistema di organi -> Organismo</p><ul><li><strong>Cellula:</strong> unita\' fondamentale della vita</li><li><strong>Tessuto:</strong> cellule simili con la stessa funzione</li><li><strong>Organo:</strong> tessuti diversi che cooperano</li><li><strong>Sistema:</strong> organi correlati</li><li><strong>Organismo:</strong> tutti i sistemi insieme</li></ul><div class="note-tip">Anatomia = struttura; Fisiologia = funzione</div>'},
+    {id:'tessuti',title:'2. I quattro tessuti fondamentali',body:'<ul><li><strong>Epiteliale:</strong> riveste superfici, poca matrice, cellule unite</li><li><strong>Connettivo:</strong> sostegno, abbondante matrice (osso, sangue, cartilagine)</li><li><strong>Muscolare:</strong> contrazione (scheletrico, cardiaco, liscio)</li><li><strong>Nervoso:</strong> impulsi elettrici (neuroni + cellule gliali)</li></ul>'},
+    {id:'epiteliale',title:'3. Tessuto epiteliale',body:'<h4>Classificazione:</h4><ul><li>Per forma: pavimentoso, cubico, cilindrico</li><li>Per strati: semplice, stratificato, pseudostratificato</li><li>Per funzione: di rivestimento, ghiandolare</li></ul><h4>Esempi:</h4><ul><li>Pavimentoso semplice: alveoli (scambi gassosi)</li><li>Pavimentoso stratificato: epidermide (protezione)</li><li>Cilindrico semplice: intestino (assorbimento)</li><li>Pseudostratificato ciliato: trachea</li></ul><div class="note-tip">Esocrine = secreto all\'esterno (dotti). Endocrine = ormoni nel sangue (senza dotti).</div>'},
+    {id:'connettivo',title:'4. Tessuto connettivo',body:'<p>Caratteristica: abbondante matrice extracellulare</p><h4>Tipi:</h4><ul><li>Lasso, denso, cartilagineo, osseo, sangue, adiposo</li></ul><h4>Fibre:</h4><ul><li><strong>Collagene:</strong> resistenza (proteina piu\' abbondante)</li><li><strong>Elastiche:</strong> elasticita\' (pelle, arterie)</li><li><strong>Reticolari:</strong> sostegno fine</li></ul><div class="note-tip">Il sangue e\' connettivo liquido: plasma = matrice, globuli = cellule</div>'},
+    {id:'tegumentario',title:'5. Sistema tegumentario',body:'<h4>Strati della cute:</h4><ul><li><strong>Epidermide:</strong> epitelio stratificato cheratinizzato</li><li><strong>Derma:</strong> connettivo denso con vasi e nervi</li><li><strong>Ipoderma:</strong> tessuto adiposo</li></ul><h4>Molecole chiave:</h4><ul><li><strong>Cheratina:</strong> impermeabilizza e protegge</li><li><strong>Melanina:</strong> protegge dai raggi UV</li></ul><h4>Funzioni:</h4><ul><li>Protezione, termoregolazione, percezione, sintesi vitamina D, escrezione</li></ul>'},
+    {id:'annessi',title:'6. Annessi cutanei',body:'<ul><li><strong>Peli:</strong> cheratina, follicolo pilifero, muscolo erettore</li><li><strong>Unghie:</strong> cheratina indurita</li><li><strong>Ghiandole sudoripare:</strong> eccrine (tutto il corpo) e apocrine (ascelle)</li><li><strong>Ghiandole sebacee:</strong> sebo per lubrificare pelle e peli</li></ul>'},
+    {id:'omeostasi',title:'7. Omeostasi e feedback',body:'<p><strong>Omeostasi</strong> = equilibrio interno stabile</p><h4>Feedback negativo (piu\' comune):</h4><p>La risposta RIDUCE lo stimolo. Es: termoregolazione</p><h4>Feedback positivo (raro):</h4><p>La risposta AMPLIFICA lo stimolo. Es: parto, coagulazione</p><div class="note-tip">L\'ipotalamo e\' il termostato del corpo. Rileva la temperatura e attiva sudorazione o brividi.</div>'},
+    {id:'scheletro',title:'8. Sistema scheletrico',body:'<h4>Scheletro assile:</h4><ul><li>Cranio, colonna vertebrale (33 vertebre), gabbia toracica</li></ul><h4>Scheletro appendicolare:</h4><ul><li>Arti + cinto scapolare (clavicola+scapola) + cinto pelvico (bacino)</li></ul><h4>Funzioni:</h4><ul><li>Sostegno, protezione, movimento, riserva minerali, emopoiesi</li></ul>'},
+    {id:'osso',title:'9. Struttura dell\'osso',body:'<h4>Cellule:</h4><ul><li><strong>Osteoblasti:</strong> costruiscono (depositano matrice)</li><li><strong>Osteociti:</strong> cellule mature, mantengono l\'osso</li><li><strong>Osteoclasti:</strong> demoliscono (riassorbimento)</li></ul><h4>Osso compatto vs spugnoso:</h4><ul><li>Compatto: osteoni con canale di Havers (vasi+nervi)</li><li>Spugnoso: trabecole con midollo osseo</li></ul><div class="note-tip">Trucco: osteoBLASTi = Build (costruiscono), osteoCLASTi = Crash (demoliscono)</div>'},
+    {id:'articolazioni',title:'10. Articolazioni',body:'<ul><li><strong>Sinartrosi:</strong> fisse (suture cranio)</li><li><strong>Anfiartrosi:</strong> semimobili (vertebre)</li><li><strong>Diartrosi:</strong> mobili (capsula + liquido sinoviale)</li></ul><h4>Tipi di diartrosi:</h4><ul><li>Enartrosi: tutti i piani (spalla, anca)</li><li>Cerniera: un piano (gomito, ginocchio)</li><li>Perno: rotazione (atlante-epistrofeo)</li></ul>'},
+    {id:'muscolare',title:'11. Tessuto muscolare',body:'<ul><li><strong>Scheletrico:</strong> striato, volontario, multinucleato</li><li><strong>Cardiaco:</strong> striato, involontario, dischi intercalari</li><li><strong>Liscio:</strong> non striato, involontario, organi interni</li></ul>'},
+    {id:'sarcomero',title:'12. Struttura del muscolo e sarcomero',body:'<p>Muscolo -> fascicoli -> fibra muscolare -> miofibrille -> sarcomero</p><h4>Sarcomero (da linea Z a linea Z):</h4><ul><li><strong>Linee Z:</strong> delimitano il sarcomero</li><li><strong>Actina (sottili):</strong> ancorate alle linee Z</li><li><strong>Miosina (spessi):</strong> al centro</li><li><strong>Banda I:</strong> solo actina (chiara)</li><li><strong>Banda A:</strong> lunghezza miosina (scura, NON cambia)</li><li><strong>Zona H:</strong> solo miosina, al centro</li></ul><div class="note-tip">Nella contrazione: banda I e zona H si accorciano, banda A resta uguale!</div>'},
+    {id:'contrazione',title:'13. Contrazione muscolare',body:'<ol><li>Impulso nervoso alla giunzione neuromuscolare</li><li>Rilascio Ca2+ dal reticolo sarcoplasmatico</li><li>Ca2+ lega troponina -> tropomiosina si sposta</li><li>Siti di legame su actina scoperti</li><li>Teste miosina legano actina (ponte trasversale)</li><li>ATP idrolizzato -> colpo di forza</li><li>Nuovo ATP -> miosina si stacca</li></ol><div class="note-tip">Senza ATP = rigor mortis (miosina resta attaccata all\'actina)</div>'},
+    {id:'fibre',title:'14. Tipi di fibre muscolari',body:'<ul><li><strong>Lente (tipo I):</strong> aerobiche, rosse (mioglobina), resistenti, maratona</li><li><strong>Intermedie (IIa):</strong> miste aerobiche/anaerobiche</li><li><strong>Veloci (IIb):</strong> anaerobiche, bianche, potenti, sprint, si affaticano</li></ul>'},
+    {id:'antagonisti',title:'15. Muscoli antagonisti',body:'<p>Muscoli antagonisti: azione opposta (uno si contrae, l\'altro si rilassa)</p><ul><li><strong>Bicipite:</strong> flessore (flette l\'avambraccio)</li><li><strong>Tricipite:</strong> estensore (estende l\'avambraccio)</li></ul><p><strong>Tendini</strong> = collegano muscoli a ossa</p><p><strong>Legamenti</strong> = collegano ossa a ossa</p><div class="note-tip">I muscoli possono solo tirare, mai spingere. Per questo servono coppie antagoniste.</div>'}
+  ];
+
+  let html = '';
+  notesData.forEach(n => {
+    html += '<div class="note-section" id="note-' + n.id + '"><h3 class="note-title" onclick="toggleNote(\'' + n.id + '\')">' + n.title + ' <span class="note-toggle">&#9660;</span></h3><div class="note-body" id="body-' + n.id + '">' + n.body + '</div></div>';
+  });
+  notesContainer.innerHTML = html;
+
+  // Init notes nav
+  const nav = document.getElementById('notes-nav');
+  noteIds.forEach((id, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = noteLabels[i];
+    btn.onclick = () => {
+      const body = document.getElementById('body-' + id);
+      if (!body.classList.contains('open')) toggleNote(id);
+      document.getElementById('note-' + id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    nav.appendChild(btn);
+  });
+}
+
+function showNotes() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'block';
+}
+
+function hideNotes() {
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+
+function toggleNote(id) {
+  const body = document.getElementById('body-' + id);
+  const toggle = body.previousElementSibling.querySelector('.note-toggle');
+  body.classList.toggle('open');
+  toggle.innerHTML = body.classList.contains('open') ? '&#9650;' : '&#9660;';
+}
+
+/* ============================================
+   SIMULAZIONE VERIFICA - UNA DOMANDA ALLA VOLTA
+   ============================================ */
+var examTimer = null;
+var examSeconds = 3000;
+var examIndex = 0;
+var examCorrect = 0;
+var examTotal = 0;
+var examAllQuestions = [];
+var examHistory = [];
+var examAnswered = false;
+
+function showExam() {
+  examIndex = 0;
+  examCorrect = 0;
+  examHistory = [];
+  examAnswered = false;
+  examSeconds = 3000;
+
+  /* Costruisci la lista domande esame: 10 MC + 3 aperte */
+  examAllQuestions = [];
+  for (var i = 0; i < EXAM_MC.length; i++) {
+    var q = EXAM_MC[i];
+    var indices = q.options.map(function(_, j) { return j; });
+    shuffleArray(indices);
+    examAllQuestions.push({ text: q.text, options: q.options, answer: q.answer, explanation: q.explanation, type: 'mc', _shuffled: indices });
+  }
+  for (var i = 0; i < EXAM_OPEN.length; i++) {
+    examAllQuestions.push({ text: EXAM_OPEN[i].text, solution: EXAM_OPEN[i].solution, type: 'open' });
+  }
+  examTotal = examAllQuestions.length;
+
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'block';
+  document.getElementById('exam-result').style.display = 'none';
+  document.getElementById('exam-total').textContent = examTotal;
+
+  showExamQuestion();
+  startExamTimer();
+  window.scrollTo(0, 0);
+}
+
+function hideExam() {
+  clearInterval(examTimer);
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+
+function resetExam() { showExam(); }
+
+function showExamQuestion() {
+  examAnswered = false;
+  var q = examAllQuestions[examIndex];
+  document.getElementById('exam-current').textContent = examIndex + 1;
+  var pct = (examIndex / examTotal) * 100;
+  document.getElementById('exam-progress-bar').style.width = pct + '%';
+  document.getElementById('exam-next-container').style.display = 'none';
+  document.getElementById('exam-question-card').style.display = 'block';
+
+  var meta = document.getElementById('exam-question-meta');
+  if (examIndex === 0) {
+    var warning = document.createElement('div');
+    warning.style.cssText = 'background:linear-gradient(135deg,#1d3557,#457b9d);color:white;padding:18px 24px;border-radius:12px;text-align:center;margin-bottom:16px;font-size:1.1em;font-weight:700;letter-spacing:1px;';
+    warning.innerHTML = 'ATTENZIONE — ESAME<br><span style="font-size:0.8em;font-weight:400;opacity:0.9;">Rispondi con attenzione. Hai 50 minuti di tempo.</span>';
+    document.getElementById('exam-answer-area').before(warning);
+  }
+
+  if (q.type === 'mc') {
+    meta.innerHTML = '<span class="badge badge-topic">Verifica</span><span class="badge badge-type">Domanda ' + (examIndex + 1) + '/' + examTotal + '</span>';
+  } else {
+    meta.innerHTML = '<span class="badge badge-topic">Verifica</span><span class="badge badge-diff-3">Domanda aperta</span>';
+  }
+
+  document.getElementById('exam-question-text').textContent = q.text;
+
+  var area = document.getElementById('exam-answer-area');
+  area.innerHTML = '';
+
+  if (q.type === 'mc') {
+    var container = document.createElement('div');
+    container.className = 'options-container';
+    var letters = ['A','B','C','D','E'];
+    for (var di = 0; di < q._shuffled.length; di++) {
+      var origIdx = q._shuffled[di];
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'option-btn';
+      btn.textContent = letters[di] + '. ' + q.options[origIdx];
+      btn.dataset.origIdx = origIdx;
+      btn.dataset.dispIdx = di;
+      btn.onclick = (function(oIdx, dIdx) { return function() { handleExamMC(oIdx, dIdx); }; })(origIdx, di);
+      container.appendChild(btn);
+    }
+    area.appendChild(container);
+  } else {
+    var ta = document.createElement('textarea');
+    ta.style.cssText = 'width:100%;min-height:150px;padding:14px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit;font-size:1em;resize:vertical;';
+    ta.placeholder = 'Scrivi qui la tua risposta...';
+    ta.id = 'exam-open-textarea';
+    area.appendChild(ta);
+    var showBtn = document.createElement('button');
+    showBtn.type = 'button';
+    showBtn.className = 'btn btn-primary';
+    showBtn.style.marginTop = '12px';
+    showBtn.textContent = 'Mostra soluzione';
+    showBtn.onclick = function() { handleExamOpen(); };
+    area.appendChild(showBtn);
+  }
+}
+
+function handleExamMC(origIdx, dispIdx) {
+  if (examAnswered) return;
+  examAnswered = true;
+  var q = examAllQuestions[examIndex];
+  var isCorrect = origIdx === q.answer;
+  if (isCorrect) examCorrect++;
+  examHistory.push({ text: q.text, correct: isCorrect, type: 'mc' });
+
+  var btns = document.querySelectorAll('#exam-answer-area .option-btn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.add('disabled');
+    var oi = parseInt(btns[i].dataset.origIdx);
+    if (oi === q.answer) btns[i].classList.add('correct');
+    if (parseInt(btns[i].dataset.dispIdx) === dispIdx && !isCorrect) btns[i].classList.add('wrong');
+  }
+
+  /* Mostra spiegazione */
+  var fb = document.createElement('div');
+  fb.style.cssText = 'margin-top:14px;padding:14px 18px;border-radius:10px;line-height:1.6;';
+  if (isCorrect) {
+    fb.style.background = 'var(--success-light)';
+    fb.style.borderLeft = '4px solid var(--success)';
+    fb.innerHTML = '<strong style="color:var(--success)">Corretta!</strong> ' + q.explanation;
+  } else {
+    fb.style.background = 'var(--danger-light)';
+    fb.style.borderLeft = '4px solid var(--danger)';
+    fb.innerHTML = '<strong style="color:var(--danger)">Sbagliata.</strong> ' + q.explanation;
+  }
+  document.getElementById('exam-answer-area').appendChild(fb);
+  document.getElementById('exam-next-container').style.display = 'block';
+}
+
+function handleExamOpen() {
+  if (examAnswered) return;
+  examAnswered = true;
+  var q = examAllQuestions[examIndex];
+  examHistory.push({ text: q.text, correct: null, type: 'open' });
+
+  var fb = document.createElement('div');
+  fb.style.cssText = 'margin-top:14px;padding:14px 18px;border-radius:10px;line-height:1.6;background:var(--success-light);border-left:4px solid var(--success);';
+  fb.innerHTML = '<strong>Soluzione:</strong><pre style="white-space:pre-wrap;font-family:inherit;margin-top:8px;">' + q.solution + '</pre>';
+  document.getElementById('exam-answer-area').appendChild(fb);
+  document.getElementById('exam-next-container').style.display = 'block';
+}
+
+function nextExamQuestion() {
+  examIndex++;
+  if (examIndex >= examTotal) {
+    endExam();
+  } else {
+    showExamQuestion();
+    document.getElementById('exam-question-card').scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+function endExam() {
+  clearInterval(examTimer);
+  document.getElementById('exam-question-card').style.display = 'none';
+  document.getElementById('exam-next-container').style.display = 'none';
+  document.getElementById('exam-result').style.display = 'block';
+  document.getElementById('exam-progress-bar').style.width = '100%';
+
+  var mcTotal = EXAM_MC.length;
+  var grade = (examCorrect / mcTotal * 10).toFixed(1);
+  var gradeEl = document.getElementById('exam-grade');
+  gradeEl.textContent = grade + '/10';
+  gradeEl.className = 'big-score ' + (examCorrect >= 7 ? 'good' : examCorrect >= 5 ? 'medium' : 'bad');
+  document.getElementById('exam-grade-detail').innerHTML =
+    examCorrect + '/' + mcTotal + ' risposte multiple corrette<br>Le domande aperte vanno confrontate con le soluzioni mostrate.';
+
+  /* Cronologia esame */
+  var reviewHtml = '<h3 style="margin:20px 0 10px;">Riepilogo risposte</h3>';
+  for (var i = 0; i < examHistory.length; i++) {
+    var h = examHistory[i];
+    var mark = h.type === 'open' ? '<span style="color:var(--gray)">Aperta</span>' : (h.correct ? '<span class="correct-mark">Corretta</span>' : '<span class="wrong-mark">Errata</span>');
+    reviewHtml += '<div class="history-item"><span>' + (i+1) + '. ' + h.text.substring(0,50) + (h.text.length > 50 ? '...' : '') + '</span>' + mark + '</div>';
+  }
+  document.getElementById('exam-review').innerHTML = reviewHtml;
+  document.getElementById('exam-result').scrollIntoView({ behavior: 'smooth' });
+}
+
+function startExamTimer() {
+  examSeconds = 3000;
+  clearInterval(examTimer);
+  updateTimerDisplay();
+  examTimer = setInterval(function() {
+    examSeconds--;
+    updateTimerDisplay();
+    if (examSeconds <= 0) { clearInterval(examTimer); endExam(); }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  var m = Math.floor(examSeconds / 60);
+  var s = examSeconds % 60;
+  var sStr = s < 10 ? '0' + s : '' + s;
+  var el = document.getElementById('exam-timer');
+  el.textContent = m + ':' + sStr;
+  el.style.color = examSeconds < 300 ? 'var(--danger)' : 'var(--dark)';
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz di Studio — Matteo</title>
+<style>
+  :root{
+    --primary:#4361ee;
+    --dark:#1d3557;
+    --light:#f8f9fa;
+    --gray:#6c757d;
+    --success:#06d6a0;
+    --warning:#ffd166;
+    --danger:#ef476f;
+    --purple:#7c3aed;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:linear-gradient(160deg,#0f0c29 0%,#302b63 50%,#24243e 100%);
+    min-height:100vh;
+    color:var(--dark);
+    padding:20px 16px 60px;
+  }
+  .container{max-width:760px;margin:0 auto;}
+  header{
+    text-align:center;
+    color:white;
+    margin-bottom:30px;
+    padding:20px 10px;
+  }
+  header h1{
+    font-size:2.2em;
+    margin-bottom:6px;
+    background:linear-gradient(135deg,#fff,#a5b4fc);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+    background-clip:text;
+  }
+  header p{
+    color:rgba(255,255,255,0.75);
+    font-size:1em;
+  }
+  .quiz-grid{
+    display:grid;
+    gap:14px;
+  }
+  .quiz-card{
+    background:white;
+    border-radius:14px;
+    padding:18px 20px;
+    box-shadow:0 6px 24px rgba(0,0,0,0.15);
+    text-decoration:none;
+    color:var(--dark);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    transition:transform 0.2s,box-shadow 0.2s;
+    border-left:5px solid var(--primary);
+  }
+  .quiz-card:active{transform:scale(0.98);}
+  .quiz-card:hover{box-shadow:0 12px 30px rgba(0,0,0,0.25);transform:translateY(-2px);}
+  .quiz-card .info{flex:1;min-width:0;}
+  .quiz-card h2{
+    font-size:1.15em;
+    margin-bottom:4px;
+    line-height:1.3;
+  }
+  .quiz-card p{
+    color:var(--gray);
+    font-size:0.88em;
+    line-height:1.4;
+  }
+  .quiz-card .arrow{
+    font-size:1.6em;
+    color:var(--primary);
+    font-weight:bold;
+    flex-shrink:0;
+  }
+  .card-fisica{border-left-color:var(--primary);}
+  .card-fisica .arrow{color:var(--primary);}
+  .card-anatomia{border-left-color:var(--success);}
+  .card-anatomia .arrow{color:var(--success);}
+  .card-filosofia{border-left-color:var(--purple);}
+  .card-filosofia .arrow{color:var(--purple);}
+  .card-mate{border-left-color:var(--warning);}
+  .card-mate .arrow{color:#c89a00;}
+  .badge-new{
+    display:inline-block;
+    background:var(--danger);
+    color:white;
+    font-size:0.7em;
+    padding:2px 8px;
+    border-radius:8px;
+    font-weight:700;
+    text-transform:uppercase;
+    margin-left:6px;
+    vertical-align:middle;
+  }
+  footer{
+    text-align:center;
+    margin-top:40px;
+    color:rgba(255,255,255,0.5);
+    font-size:0.85em;
+    padding:20px;
+  }
+  @media (max-width:480px){
+    header h1{font-size:1.7em;}
+    .quiz-card{padding:16px;}
+    .quiz-card h2{font-size:1.05em;}
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Quiz di Studio</h1>
+      <p>Prof. Paludetto ti aspetta</p>
+    </header>
+
+    <div class="quiz-grid">
+
+      <a class="quiz-card card-fisica" href="energia_potenziale_quiz.html">
+        <div class="info">
+          <h2>Fisica — Energia Potenziale e Condensatori<span class="badge-new">Nuovo</span></h2>
+          <p>Energia potenziale elettrica, potenziale, capacità, condensatori, dimostrazioni</p>
+        </div>
+        <div class="arrow">→</div>
+      </a>
+
+      <a class="quiz-card card-fisica" href="elettrostatica_quiz.html">
+        <div class="info">
+          <h2>Fisica — Elettrostatica</h2>
+          <p>Coulomb, campo elettrico, linee di campo, flusso, legge di Gauss, dimostrazioni</p>
+        </div>
+        <div class="arrow">→</div>
+      </a>
+
+      <a class="quiz-card card-anatomia" href="anatomia_quiz.html">
+        <div class="info">
+          <h2>Anatomia</h2>
+          <p>Quiz di anatomia umana</p>
+        </div>
+        <div class="arrow">→</div>
+      </a>
+
+      <a class="quiz-card card-filosofia" href="filosofia_quiz.html">
+        <div class="info">
+          <h2>Filosofia</h2>
+          <p>Quiz di filosofia</p>
+        </div>
+        <div class="arrow">→</div>
+      </a>
+
+      <a class="quiz-card card-mate" href="straight_lines_quiz.html">
+        <div class="info">
+          <h2>Matematica — Rette</h2>
+          <p>Quiz sulle rette e geometria analitica</p>
+        </div>
+        <div class="arrow">→</div>
+      </a>
+
+    </div>
+
+    <footer>
+      Salva questa pagina nei preferiti del telefono per accesso rapido
+    </footer>
+  </div>
+</body>
+</html>

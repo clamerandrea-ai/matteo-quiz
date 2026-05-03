@@ -1,0 +1,4182 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Energia Potenziale Elettrica e Condensatori - Allenamento e Verifica</title>
+<style>
+/* ============================================
+   STILI GENERALI
+   ============================================ */
+:root {
+  --primary: #4361ee;
+  --primary-light: #e8ecff;
+  --success: #06d6a0;
+  --success-light: #e6faf4;
+  --danger: #ef476f;
+  --danger-light: #fde8ed;
+  --warning: #ffd166;
+  --dark: #1d3557;
+  --gray: #6c757d;
+  --light: #f8f9fa;
+  --white: #ffffff;
+  --shadow: 0 6px 24px rgba(0,0,0,0.10);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.15);
+  --radius: 14px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(160deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  min-height: 100vh;
+  color: var(--dark);
+  line-height: 1.6;
+}
+
+/* ============================================
+   PROF. PALUDETTO — PERSONAGGIO CARTOON
+   ============================================ */
+.prof-container {
+  display: none;
+  position: relative;
+  margin: 20px auto;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.prof-container.show {
+  display: flex;
+  animation: profAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes profAppear {
+  0% { opacity: 0; transform: translateY(60px) scale(0.5); }
+  60% { transform: translateY(-10px) scale(1.05); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes profBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes profShake {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(-5deg); }
+  30% { transform: rotate(5deg); }
+  45% { transform: rotate(-4deg); }
+  60% { transform: rotate(4deg); }
+  75% { transform: rotate(-2deg); }
+}
+
+.prof-svg-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 0 auto;
+}
+
+.prof-container.correct .prof-svg-container {
+  animation: profBounce 0.8s ease 0.3s;
+  filter: drop-shadow(0 8px 30px rgba(6, 214, 160, 0.35));
+}
+
+.prof-container.wrong .prof-svg-container {
+  animation: profShake 0.6s ease;
+  filter: drop-shadow(0 8px 30px rgba(239, 71, 111, 0.35));
+}
+
+/* Fumetto / Bubble */
+.prof-bubble {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 18px 24px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  font-size: 1.1em;
+  font-weight: 600;
+  line-height: 1.5;
+  max-width: 480px;
+  margin-top: -10px;
+}
+
+.prof-bubble::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+  border-bottom-color: var(--white);
+}
+
+.prof-container.correct .prof-bubble {
+  border: 3px solid var(--success);
+  background: linear-gradient(135deg, #f0fff8, var(--white));
+}
+
+.prof-container.wrong .prof-bubble {
+  border: 3px solid var(--danger);
+  background: linear-gradient(135deg, #fff5f7, var(--white));
+}
+
+.prof-container.correct .prof-bubble::before { border-bottom-color: var(--success); }
+.prof-container.wrong .prof-bubble::before { border-bottom-color: var(--danger); }
+
+.prof-name {
+  font-size: 0.7em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+
+.prof-container.correct .prof-name { color: var(--success); }
+.prof-container.wrong .prof-name { color: var(--danger); }
+
+/* SVG nascosti/mostrati */
+.prof-svg-correct, .prof-svg-wrong { display: none; }
+.prof-container.correct .prof-svg-correct { display: block; }
+.prof-container.wrong .prof-svg-wrong { display: block; }
+
+/* Header start screen - versione piccola */
+.prof-header-container {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 10px;
+}
+
+.container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Sfondo decorativo sottile */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 20%, rgba(67, 97, 238, 0.05) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, rgba(124, 58, 237, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ============================================
+   SCHERMATA INIZIALE
+   ============================================ */
+#start-screen {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  margin-top: 30px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+#start-screen h1 {
+  font-size: 2.1em;
+  color: var(--dark);
+  margin-bottom: 6px;
+}
+
+#start-screen h1 span {
+  background: linear-gradient(135deg, var(--primary), #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#start-screen .subtitle {
+  color: var(--gray);
+  font-size: 1em;
+  margin-bottom: 10px;
+}
+
+.prof-welcome {
+  font-size: 0.9em;
+  color: var(--dark);
+  background: var(--light);
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.topic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.topic-item {
+  background: var(--primary-light);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topic-item input[type="checkbox"] { accent-color: var(--primary); }
+
+.mode-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.btn {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+.btn:active { transform: translateY(0) scale(0.97); }
+
+.btn-primary { background: var(--primary); color: var(--white); }
+.btn-success { background: var(--success); color: var(--white); }
+.btn-warning { background: var(--warning); color: var(--dark); }
+.btn-danger { background: var(--danger); color: var(--white); }
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+}
+
+.btn-ultra {
+  background: linear-gradient(135deg, #ff6a00, #ee0979);
+  color: var(--white);
+  position: relative;
+  overflow: hidden;
+}
+.btn-ultra::after {
+  content: '🔥';
+  margin-left: 6px;
+}
+
+.btn-exam {
+  background: linear-gradient(135deg, #1d3557, #457b9d);
+  color: var(--white);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.btn-demo {
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: var(--white);
+  font-weight: 700;
+}
+
+/* Sezioni menu principale */
+.menu-section {
+  background: var(--light);
+  border: 1px solid #e0e0e0;
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.menu-section-title {
+  font-size: 0.85em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--gray);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.menu-section-title .section-icon {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.section-icon.test { background: var(--primary); }
+.section-icon.study { background: var(--success); }
+
+/* ============================================
+   SEZIONE ESAME
+   ============================================ */
+#exam-screen .exam-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 30px 34px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+
+.exam-header {
+  text-align: center;
+  border-bottom: 2px solid var(--dark);
+  padding-bottom: 14px;
+  margin-bottom: 24px;
+}
+
+.exam-header h2 { font-size: 1.4em; margin-bottom: 4px; letter-spacing: 1px; }
+.exam-header .exam-info {
+  display: flex; justify-content: space-between; font-size: 0.9em; color: var(--gray);
+  margin-top: 8px;
+}
+
+.exam-question {
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #eee;
+}
+
+.exam-question:last-child { border-bottom: none; }
+
+.exam-question .eq-number {
+  font-weight: 700;
+  color: var(--primary);
+  margin-right: 6px;
+}
+
+.exam-question .eq-text {
+  font-size: 1.02em;
+  margin-bottom: 10px;
+  line-height: 1.7;
+}
+
+.exam-options { padding-left: 10px; }
+
+.exam-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 10px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.exam-option:hover { background: var(--light); }
+.exam-option input[type="radio"] { margin-top: 4px; accent-color: var(--primary); }
+.exam-option label { cursor: pointer; line-height: 1.5; }
+
+.exam-option.correct-highlight { background: var(--success-light); }
+.exam-option.wrong-highlight { background: var(--danger-light); }
+
+.exam-open-area {
+  margin-top: 10px;
+}
+
+.exam-open-area textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95em;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.exam-open-area textarea:focus { border-color: var(--primary); }
+
+.exam-section-title {
+  font-size: 1.1em;
+  font-weight: 700;
+  color: var(--dark);
+  margin: 24px 0 14px;
+  padding: 8px 12px;
+  background: var(--light);
+  border-radius: 6px;
+}
+
+.exam-correction {
+  display: none;
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.93em;
+  line-height: 1.6;
+}
+
+.exam-correction.show { display: block; }
+.exam-correction.correct-box { background: var(--success-light); border-left: 4px solid var(--success); }
+.exam-correction.wrong-box { background: var(--danger-light); border-left: 4px solid var(--danger); }
+
+.exam-result-bar {
+  text-align: center;
+  padding: 20px;
+  background: var(--light);
+  border-radius: var(--radius);
+  margin-top: 20px;
+}
+
+.exam-result-bar .exam-grade {
+  font-size: 2.5em;
+  font-weight: 800;
+}
+
+.exam-timer {
+  font-weight: 600;
+  font-size: 1.1em;
+  color: var(--danger);
+}
+
+.prev-stats {
+  margin-top: 25px;
+  padding: 15px;
+  background: var(--light);
+  border-radius: 8px;
+  font-size: 0.9em;
+}
+
+/* ============================================
+   SCHERMATA QUIZ
+   ============================================ */
+#quiz-screen {
+  display: none;
+  margin-top: 20px;
+}
+
+.quiz-header {
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 16px 24px;
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.progress-info { font-weight: 600; color: var(--dark); }
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), #7c3aed, #a855f7);
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+}
+
+.score-display {
+  display: flex;
+  gap: 15px;
+  font-size: 0.9em;
+}
+
+.score-correct { color: var(--success); font-weight: 600; }
+.score-wrong { color: var(--danger); font-weight: 600; }
+
+.question-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 16px;
+  border: 1px solid rgba(0,0,0,0.04);
+  animation: cardAppear 0.4s ease;
+}
+
+@keyframes cardAppear {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.question-meta {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+.badge-topic { background: var(--primary-light); color: var(--primary); }
+.badge-diff-1 { background: #d4edda; color: #155724; }
+.badge-diff-2 { background: #fff3cd; color: #856404; }
+.badge-diff-3 { background: #f8d7da; color: #721c24; }
+.badge-type { background: #e2e3e5; color: #383d41; }
+
+.question-text {
+  font-size: 1.15em;
+  font-weight: 500;
+  margin-bottom: 20px;
+  line-height: 1.7;
+}
+
+/* Opzioni scelta multipla */
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  background: var(--white);
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.option-btn:hover:not(.disabled) {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: translateX(6px);
+  box-shadow: 0 3px 12px rgba(67, 97, 238, 0.15);
+}
+
+.option-btn.selected { border-color: var(--primary); background: var(--primary-light); }
+.option-btn.correct {
+  border-color: var(--success);
+  background: var(--success-light);
+  animation: correctPulse 0.4s ease;
+}
+.option-btn.wrong {
+  border-color: var(--danger);
+  background: var(--danger-light);
+  animation: wrongShake 0.4s ease;
+}
+.option-btn.disabled { cursor: default; opacity: 0.85; }
+
+@keyframes correctPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+@keyframes wrongShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* Input per risposte aperte/numeriche */
+.answer-input-container { margin-top: 10px; }
+
+.answer-input {
+  width: 100%;
+  padding: 14px 18px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1em;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.answer-input:focus { border-color: var(--primary); }
+
+.submit-answer-btn {
+  margin-top: 12px;
+}
+
+/* Feedback */
+.feedback-box {
+  display: none;
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.feedback-correct {
+  background: var(--success-light);
+  border-left: 5px solid var(--success);
+}
+
+.feedback-wrong {
+  background: var(--danger-light);
+  border-left: 5px solid var(--danger);
+}
+
+.feedback-title {
+  font-weight: 700;
+  font-size: 1.1em;
+  margin-bottom: 8px;
+}
+
+.feedback-correct .feedback-title { color: var(--success); }
+.feedback-wrong .feedback-title { color: var(--danger); }
+
+.feedback-text { margin-bottom: 10px; line-height: 1.7; }
+
+/* Approfondimento */
+.deepdive-box {
+  display: none;
+  background: #fff8e1;
+  border-left: 5px solid var(--warning);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  animation: slideIn 0.4s ease;
+}
+
+.deepdive-title {
+  font-weight: 700;
+  color: #e65100;
+  margin-bottom: 8px;
+}
+
+.deepdive-text { line-height: 1.7; }
+
+.next-btn-container {
+  text-align: center;
+  margin: 16px 0;
+}
+
+/* ============================================
+   SCHERMATA RIEPILOGO
+   ============================================ */
+#summary-screen {
+  display: none;
+  margin-top: 20px;
+}
+
+.summary-card {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 34px;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 16px;
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.summary-card h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--dark);
+}
+
+.big-score {
+  text-align: center;
+  font-size: 3em;
+  font-weight: 800;
+  margin: 10px 0;
+}
+
+.big-score.good { color: var(--success); }
+.big-score.medium { color: var(--warning); }
+.big-score.bad { color: var(--danger); }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.stat-box {
+  background: var(--light);
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-number { font-size: 1.8em; font-weight: 700; }
+.stat-label { font-size: 0.85em; color: var(--gray); }
+
+.topic-results { margin: 20px 0; }
+
+.topic-result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.topic-result-item.weak { background: var(--danger-light); }
+.topic-result-item.strong { background: var(--success-light); }
+.topic-result-item.medium-res { background: #fff3cd; }
+
+.topic-bar {
+  width: 100px;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.topic-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.suggestions {
+  background: var(--primary-light);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-top: 15px;
+}
+
+.suggestions h3 { color: var(--primary); margin-bottom: 8px; }
+.suggestions ul { padding-left: 20px; }
+.suggestions li { margin-bottom: 5px; }
+
+.history-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9em;
+}
+
+.history-item .correct-mark { color: var(--success); font-weight: 700; }
+.history-item .wrong-mark { color: var(--danger); font-weight: 700; }
+
+/* ============================================
+   SEZIONE APPUNTI
+   ============================================ */
+.notes-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.notes-nav button {
+  padding: 6px 14px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: var(--light);
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.notes-nav button:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.note-section {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.note-title {
+  padding: 14px 18px;
+  margin: 0;
+  cursor: pointer;
+  background: var(--light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+  user-select: none;
+}
+
+.note-title:hover { background: var(--primary-light); }
+
+.note-toggle { font-size: 0.8em; color: var(--gray); transition: transform 0.3s; }
+
+.note-body {
+  padding: 18px 20px;
+  line-height: 1.8;
+  display: none;
+}
+
+.note-body.open { display: block; }
+
+.note-body h4 {
+  margin: 14px 0 8px;
+  color: var(--primary);
+}
+
+.note-body ul, .note-body ol {
+  padding-left: 22px;
+  margin: 8px 0;
+}
+
+.note-body li { margin-bottom: 4px; }
+
+.formula-box {
+  background: linear-gradient(135deg, #e8ecff, #f0e6ff);
+  border-left: 4px solid var(--primary);
+  padding: 14px 18px;
+  margin: 12px 0;
+  font-size: 1.15em;
+  font-weight: 600;
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  border-radius: 0 8px 8px 0;
+}
+
+.note-tip {
+  background: #fff8e1;
+  border-left: 4px solid var(--warning);
+  padding: 10px 14px;
+  margin: 12px 0;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.95em;
+}
+
+/* Passaggi dimostrazione */
+.demo-step {
+  background: var(--light);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 12px 0;
+  border-left: 4px solid var(--primary);
+  position: relative;
+}
+
+.demo-step .step-num {
+  display: inline-block;
+  background: var(--primary);
+  color: var(--white);
+  font-weight: 700;
+  font-size: 0.8em;
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-right: 8px;
+}
+
+.demo-step .step-label {
+  font-weight: 600;
+  color: var(--dark);
+}
+
+.demo-step p { margin-top: 8px; }
+.demo-step ul { margin-top: 6px; padding-left: 20px; }
+.demo-step li { margin-bottom: 3px; }
+
+/* Infografiche */
+.infographic {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  border: 2px solid #e0e7ff;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 18px;
+  text-align: center;
+  overflow-x: auto;
+}
+
+.infographic svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.info-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 10px 0;
+}
+
+.info-block {
+  background: var(--white);
+  border: 2px solid var(--primary);
+  border-radius: 10px;
+  padding: 10px 16px;
+  min-width: 110px;
+  text-align: center;
+  position: relative;
+}
+
+.info-block.highlight {
+  background: linear-gradient(135deg, #e8ecff, #f0e6ff);
+  border-color: #7c3aed;
+}
+
+.info-block.result {
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
+  border-color: var(--success);
+}
+
+.info-block .ib-title {
+  font-size: 0.75em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gray);
+  margin-bottom: 4px;
+}
+
+.info-block .ib-formula {
+  font-size: 1.1em;
+  font-weight: 700;
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  color: var(--dark);
+}
+
+.info-block .ib-note {
+  font-size: 0.78em;
+  color: var(--gray);
+  margin-top: 3px;
+}
+
+.info-arrow {
+  font-size: 1.5em;
+  color: var(--primary);
+  padding: 0 6px;
+  font-weight: 700;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.info-card {
+  background: var(--white);
+  border-radius: 10px;
+  padding: 12px;
+  border-left: 4px solid var(--primary);
+  text-align: left;
+}
+
+.info-card.green { border-left-color: var(--success); }
+.info-card.red { border-left-color: var(--danger); }
+.info-card.purple { border-left-color: #7c3aed; }
+.info-card.orange { border-left-color: #ff6a00; }
+
+.info-card .ic-title {
+  font-size: 0.8em;
+  font-weight: 700;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-card .ic-content {
+  font-size: 0.95em;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.info-card .ic-formula {
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  font-weight: 700;
+  font-size: 1.05em;
+}
+
+.info-visual {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+
+.info-visual-item {
+  text-align: center;
+}
+
+.info-visual-item .iv-icon {
+  font-size: 2.5em;
+  line-height: 1.2;
+}
+
+.info-visual-item .iv-label {
+  font-size: 0.82em;
+  color: var(--gray);
+  margin-top: 2px;
+}
+
+.info-step-flow {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.info-step-box {
+  background: var(--white);
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  min-width: 100px;
+  max-width: 160px;
+  text-align: center;
+  font-size: 0.88em;
+  line-height: 1.4;
+}
+
+.info-step-box.active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.info-step-box .isb-num {
+  display: inline-block;
+  background: var(--primary);
+  color: var(--white);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 0.8em;
+  font-weight: 700;
+  line-height: 22px;
+  margin-bottom: 4px;
+}
+
+.info-step-box .isb-formula {
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  font-weight: 700;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 600px) {
+  .container { padding: 10px; }
+  #start-screen { padding: 20px; }
+  .question-card { padding: 20px; }
+  .quiz-header { padding: 12px 16px; }
+  #start-screen h1 { font-size: 1.5em; }
+  .prof-svg-container { width: 160px; height: 160px; }
+  .prof-bubble { font-size: 0.95em; padding: 14px 18px; }
+  .info-step-flow { gap: 4px; }
+  .info-arrow { font-size: 1em; padding: 0 2px; }
+  .info-step-box { min-width: 70px; max-width: 110px; font-size: 0.78em; padding: 6px 8px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ============================================
+       SCHERMATA INIZIALE
+       ============================================ -->
+  <div id="start-screen">
+    <div class="prof-header-container" id="prof-header-svg"></div>
+    <h1>Quiz di <span>Energia Potenziale Elettrica</span></h1>
+    <p class="subtitle">Energia potenziale, potenziale, condensatori, superfici equipotenziali — IV Liceo Scientifico</p>
+    <div class="prof-welcome">Prof. Paludetto dice: "Sentiamo se hai capito i condensatori."</div>
+
+    <!-- SEZIONE 1: TEST E PREPARAZIONE -->
+    <div class="menu-section">
+      <div class="menu-section-title"><span class="section-icon test"></span> Test e Preparazione</div>
+
+      <h3 style="margin-bottom:10px; text-align:left; font-size:0.95em;">Filtra per argomento:</h3>
+      <div class="topic-grid" id="topic-filters"></div>
+
+      <div class="mode-buttons">
+        <button class="btn btn-primary" onclick="startQuiz('all')">Test completo</button>
+        <button class="btn btn-warning" onclick="startQuiz('random')">Modalita casuale</button>
+        <button class="btn btn-danger" onclick="startQuiz('errors')" id="btn-errors" style="display:none;">Ripassa gli errori</button>
+        <button class="btn btn-ultra" onclick="startQuiz('ultra')">Ultra Preparazione</button>
+      </div>
+      <div class="mode-buttons" style="margin-top:10px;">
+        <button class="btn btn-exam" onclick="showExam()">Simulazione Verifica</button>
+        <button class="btn btn-demo" onclick="showDemoExam()">Verifica Dimostrazioni</button>
+      </div>
+    </div>
+
+    <!-- SEZIONE 2: STUDIO -->
+    <div class="menu-section">
+      <div class="menu-section-title"><span class="section-icon study"></span> Studio e Ripasso</div>
+      <div class="mode-buttons">
+        <button class="btn btn-outline" style="border-color:var(--success);color:var(--success);" onclick="showNotes()">Appunti e Teoria</button>
+        <button class="btn btn-outline" style="border-color:#7c3aed;color:#7c3aed;" onclick="showNotes('dimostrazioni')">Dimostrazioni</button>
+      </div>
+    </div>
+
+    <div class="prev-stats" id="prev-stats" style="display:none;">
+      <strong>Sessione precedente:</strong>
+      <span id="prev-stats-text"></span>
+      <br><button class="btn btn-outline" style="margin-top:8px; padding:6px 16px; font-size:0.85em;" onclick="clearProgress()">Cancella progressi</button>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA QUIZ
+       ============================================ -->
+  <div id="quiz-screen">
+    <div class="quiz-header">
+      <div class="progress-info">
+        Domanda <span id="current-q">1</span> di <span id="total-q">0</span>
+      </div>
+      <div class="score-display">
+        <span class="score-correct">Corrette: <span id="score-correct">0</span></span>
+        <span class="score-wrong">Errate: <span id="score-wrong">0</span></span>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="question-card" id="question-card">
+      <div class="question-meta" id="question-meta"></div>
+      <div class="question-text" id="question-text"></div>
+      <div id="answer-area"></div>
+      <div class="submit-answer-btn" id="submit-area" style="display:none;">
+        <button class="btn btn-primary" onclick="checkOpenAnswer()">Verifica risposta</button>
+      </div>
+    </div>
+
+    <!-- Prof. Paludetto — Cartoon -->
+    <div class="prof-container" id="prof-container">
+      <div class="prof-svg-container">
+        <div class="prof-svg-correct" id="prof-svg-happy"></div>
+        <div class="prof-svg-wrong" id="prof-svg-angry"></div>
+      </div>
+      <div class="prof-bubble">
+        <div class="prof-name" id="prof-name">Prof. Paludetto</div>
+        <div id="prof-phrase"></div>
+      </div>
+    </div>
+
+    <div class="feedback-box" id="feedback-box">
+      <div class="feedback-title" id="feedback-title"></div>
+      <div class="feedback-text" id="feedback-text"></div>
+    </div>
+
+    <div class="deepdive-box" id="deepdive-box">
+      <div class="deepdive-title">Approfondimento</div>
+      <div class="deepdive-text" id="deepdive-text"></div>
+    </div>
+
+    <div class="next-btn-container" id="next-btn-container" style="display:none;">
+      <button class="btn btn-primary" onclick="nextQuestion()">Prossima domanda</button>
+      <button class="btn btn-outline" style="margin-left:8px;" onclick="endQuiz()">Termina</button>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA RIEPILOGO
+       ============================================ -->
+  <div id="summary-screen">
+    <div class="summary-card">
+      <h2>Riepilogo della Sessione</h2>
+
+      <!-- Prof nel riepilogo -->
+      <div class="prof-container show" id="prof-summary" style="margin-bottom:16px;">
+        <div class="prof-svg-container" id="prof-summary-svg"></div>
+        <div class="prof-bubble">
+          <div class="prof-name" id="prof-summary-name">Prof. Paludetto</div>
+          <div id="prof-summary-phrase"></div>
+        </div>
+      </div>
+
+      <div class="big-score" id="final-score"></div>
+      <p style="text-align:center;color:var(--gray);" id="final-score-label"></p>
+
+      <div class="stats-grid" id="stats-grid"></div>
+
+      <h3 style="margin:20px 0 10px;">Risultati per argomento</h3>
+      <div class="topic-results" id="topic-results"></div>
+
+      <div class="suggestions" id="suggestions"></div>
+
+      <h3 style="margin:20px 0 10px;">Cronologia risposte</h3>
+      <div class="history-list" id="history-list"></div>
+    </div>
+
+    <div style="text-align:center; margin:20px 0 40px;">
+      <button class="btn btn-primary" onclick="location.reload()">Ricomincia</button>
+      <button class="btn btn-danger" style="margin-left:10px;" onclick="startQuiz('errors')">Ripassa gli errori</button>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA SIMULAZIONE VERIFICA
+       ============================================ -->
+  <div id="exam-screen" style="display:none; margin-top:20px;">
+
+    <div class="exam-card">
+      <div class="exam-header">
+        <h2>VERIFICA DI FISICA — ENERGIA POTENZIALE E CONDENSATORI</h2>
+        <div class="exam-info">
+          <span>Nome: _______________&nbsp;&nbsp; Cognome: _______________</span>
+          <span>Classe: 4°&nbsp;&nbsp; Data: ___/___/______</span>
+        </div>
+        <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+          <span class="exam-timer" id="exam-timer">Tempo: 50:00</span>
+          <button class="btn btn-outline" style="padding:6px 14px; font-size:0.85em;" onclick="hideExam()">Torna al menu</button>
+        </div>
+      </div>
+
+      <!-- PARTE 1: Scelta multipla (10 domande, 5 opzioni A-E) -->
+      <div class="exam-section-title">PARTE 1 — Domande a risposta multipla (10 domande)</div>
+      <div id="exam-mc-questions"></div>
+
+      <!-- PARTE 2: Domande aperte / dimostrative (3 domande) -->
+      <div class="exam-section-title">PARTE 2 — Domande aperte e dimostrazioni (3 domande)</div>
+      <div id="exam-open-questions"></div>
+
+      <div style="text-align:center; margin-top:24px;">
+        <button class="btn btn-primary" onclick="submitExam()" id="exam-submit-btn" style="padding:14px 40px; font-size:1.05em;">Consegna Verifica</button>
+      </div>
+
+      <div class="exam-result-bar" id="exam-result" style="display:none;">
+        <p style="font-size:1.1em; margin-bottom:8px;">Risultato della verifica:</p>
+        <div class="exam-grade" id="exam-grade"></div>
+        <p id="exam-grade-detail" style="color:var(--gray);margin-top:6px;"></p>
+        <div style="margin-top:16px;">
+          <button class="btn btn-primary" onclick="resetExam()">Ripeti la verifica</button>
+          <button class="btn btn-outline" style="margin-left:8px;" onclick="hideExam()">Torna al menu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA VERIFICA DIMOSTRAZIONI
+       ============================================ -->
+  <div id="demo-exam-screen" style="display:none; margin-top:20px;">
+    <div class="exam-card">
+      <div class="exam-header" style="border-bottom-color:#7c3aed;">
+        <h2 style="color:#7c3aed;">VERIFICA DIMOSTRAZIONI — ENERGIA POTENZIALE E CONDENSATORI</h2>
+        <p style="font-size:0.9em; color:var(--gray); margin-top:4px;">Riproduci ogni dimostrazione passo per passo, come se fosse un compito in classe.</p>
+        <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+          <span class="exam-timer" id="demo-exam-timer">Tempo: 40:00</span>
+          <button class="btn btn-outline" style="padding:6px 14px; font-size:0.85em;" onclick="hideDemoExam()">Torna al menu</button>
+        </div>
+      </div>
+
+      <div id="demo-exam-questions"></div>
+
+      <div style="text-align:center; margin-top:24px;">
+        <button class="btn btn-demo" onclick="submitDemoExam()" id="demo-exam-submit-btn" style="padding:14px 40px; font-size:1.05em;">Consegna Verifica</button>
+      </div>
+
+      <div class="exam-result-bar" id="demo-exam-result" style="display:none;">
+        <p style="font-size:1.1em; margin-bottom:8px;">Verifica consegnata!</p>
+        <p id="demo-exam-grade-detail" style="color:var(--gray);"></p>
+        <div style="margin-top:16px;">
+          <button class="btn btn-demo" onclick="resetDemoExam()">Ripeti la verifica</button>
+          <button class="btn btn-outline" style="margin-left:8px;" onclick="hideDemoExam()">Torna al menu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA APPUNTI
+       ============================================ -->
+  <div id="notes-screen" style="display:none; margin-top:20px;">
+    <div class="summary-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:20px;">
+        <h2 style="margin:0;">Appunti di Energia Potenziale Elettrica</h2>
+        <button class="btn btn-outline" onclick="hideNotes()" style="padding:8px 18px; font-size:0.9em;">Torna al menu</button>
+      </div>
+
+      <!-- Navigazione argomenti -->
+      <div class="notes-nav" id="notes-nav"></div>
+
+      <!-- Contenuto argomenti -->
+      <div id="notes-content">
+
+                <div class="note-section" id="note-energia">
+          <h3 class="note-title" onclick="toggleNote('energia')">1. Energia Potenziale Elettrica <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-energia">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px; font-size:1.05em;">Energia Potenziale Elettrica — Mappa concettuale</div>
+              <div class="info-flow">
+                <div class="info-block"><div class="ib-title">Definizione</div><div class="ib-formula">U = capacita' di compiere L</div><div class="ib-note">L = U_A − U_B</div></div>
+                <div class="info-arrow">→</div>
+                <div class="info-block highlight"><div class="ib-title">Campo uniforme</div><div class="ib-formula">U = q₀·E·h</div></div>
+                <div class="info-arrow">→</div>
+                <div class="info-block result"><div class="ib-title">Cariche puntiformi</div><div class="ib-formula">U = K·q₁·q₂/r</div></div>
+              </div>
+              <div class="info-grid" style="margin-top:14px;">
+                <div class="info-card"><div class="ic-title">Gravitazionale</div><div class="ic-content ic-formula">Eg = m·g·h</div></div>
+                <div class="info-card green"><div class="ic-title">Elastica</div><div class="ic-content ic-formula">Ex = ½·K·Δx²</div></div>
+                <div class="info-card red"><div class="ic-title">Carica in campo E</div><div class="ic-content ic-formula">U = q₀·E·h</div></div>
+                <div class="info-card purple"><div class="ic-title">Tra cariche</div><div class="ic-content ic-formula">U = K·q₁q₂/r</div></div>
+              </div>
+            </div>
+
+            <p>L'energia potenziale e' la <strong>capacita' di compiere lavoro</strong> da parte di un sistema in virtu' della sua configurazione. Per ogni forza conservativa esiste una U.</p>
+
+            <h4>Energia potenziale gravitazionale (movimenti verticali)</h4>
+            <div class="formula-box">Eg = L = F·s = m·g·h</div>
+
+            <h4>Energia potenziale elastica</h4>
+            <div class="formula-box">Ex = ½·K·Δx²</div>
+            <p>Si ricava dall'area sotto F = K·Δx (legge di Hooke): un triangolo di base Δx e altezza KΔx, area = ½·K·Δx².</p>
+
+            <h4>Lavoro su una carica che si sposta da A a B</h4>
+            <div class="formula-box">L_AB = U_A − U_B</div>
+            <p>Per una forza conservativa, il lavoro e' la differenza tra energia iniziale e finale.</p>
+
+            <h4>Carica in campo elettrico uniforme</h4>
+            <p>Se F = q₀E e lo spostamento avviene tra due piastre a distanza h:</p>
+            <div class="formula-box">L_AB = q₀·E·h_A − q₀·E·h_B = q₀·E·(h_A − h_B)</div>
+            <p>Definendo:</p>
+            <div class="formula-box">U = q₀·E·h</div>
+
+            <h4>Energia potenziale di due cariche puntiformi</h4>
+            <div class="formula-box">U = K·q₁·q₂/r = (1/4πε₀) · q₁q₂/r</div>
+            <ul>
+              <li><strong>Cariche concordi (++ o −−):</strong> U &gt; 0, sistema 'tendono ad allontanarsi'.</li>
+              <li><strong>Cariche discordi (+−):</strong> U &lt; 0, sistema legato.</li>
+              <li>Va come <strong>1/r</strong> (mentre F va come 1/r²).</li>
+            </ul>
+
+            <h4>Sistema di n cariche puntiformi</h4>
+            <p>L'energia potenziale di n cariche e' la somma dell'energia di tutte le possibili coppie:</p>
+            <div class="formula-box">U_tot = Σ_{i&lt;j} K·q_i·q_j / r_ij</div>
+            <p>Per n cariche le coppie distinte sono <strong>n(n−1)/2</strong>.</p>
+
+            <div class="note-tip">Importante: il lavoro della forza elettrica equivale alla DIMINUZIONE di U. Se la carica 'cade' verso potenziali piu' bassi il sistema cede energia.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-potenziale">
+          <h3 class="note-title" onclick="toggleNote('potenziale')">2. Potenziale Elettrico (V) <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-potenziale">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px; font-size:1.05em;">Potenziale Elettrico — Schema visuale</div>
+              <div class="info-flow">
+                <div class="info-block"><div class="ib-title">Definizione</div><div class="ib-formula">V = U / q₀</div><div class="ib-note">Energia per unita' di carica</div></div>
+                <div class="info-arrow">→</div>
+                <div class="info-block highlight"><div class="ib-title">Carica puntiforme</div><div class="ib-formula">V = K·q / r</div></div>
+                <div class="info-arrow">→</div>
+                <div class="info-block result"><div class="ib-title">Unita'</div><div class="ib-formula">Volt = J/C</div></div>
+              </div>
+              <div class="info-grid" style="margin-top:14px;">
+                <div class="info-card green"><div class="ic-title">Campo uniforme</div><div class="ic-content ic-formula">V = E·h</div></div>
+                <div class="info-card orange"><div class="ic-title">Differenza di potenziale</div><div class="ic-content ic-formula">ΔV = V_B − V_A</div></div>
+                <div class="info-card purple"><div class="ic-title">Tensione</div><div class="ic-content">ΔV ≡ tensione elettrica</div></div>
+                <div class="info-card red"><div class="ic-title">Lavoro & ΔV</div><div class="ic-content ic-formula">L_AB = −q₀·ΔV</div></div>
+              </div>
+            </div>
+
+            <p>Il potenziale elettrico generalizza l'idea di energia potenziale rendendola indipendente dalla carica di prova.</p>
+            <div class="formula-box">V = U / q₀</div>
+            <p>Unita' di misura: <strong>Volt (V) = J/C</strong>.</p>
+
+            <h4>Differenza di potenziale (tensione)</h4>
+            <div class="formula-box">ΔV = V_B − V_A = U_B/q₀ − U_A/q₀ = − L_AB / q₀</div>
+            <p>La differenza di potenziale e' detta anche <strong>tensione elettrica</strong>.</p>
+
+            <h4>Potenziale in un campo uniforme</h4>
+            <p>Da U = q₀·E·h e V = U/q₀ si ricava:</p>
+            <div class="formula-box">V = E·h</div>
+            <p>Conseguenza: il campo si misura anche in <strong>V/m</strong>, equivalenti a N/C.</p>
+
+            <h4>Potenziale di una carica puntiforme</h4>
+            <div class="formula-box">V = K·q/r = (1/4πε₀) · q/r</div>
+            <ul>
+              <li><strong>q &gt; 0:</strong> V &gt; 0 (potenziale positivo, decresce con r).</li>
+              <li><strong>q &lt; 0:</strong> V &lt; 0 (potenziale negativo, cresce verso 0 con r → ∞).</li>
+              <li>Riferimento: V = 0 all'infinito.</li>
+            </ul>
+
+            <h4>Lavoro e ΔV</h4>
+            <div class="formula-box">L_AB = − q₀ · ΔV</div>
+            <p>Una carica positiva si muove spontaneamente verso V decrescente (L &gt; 0).</p>
+
+            <div class="note-tip">Confronto chiave: U dipende dalla carica di prova q₀, V no. V e' una proprieta' dello SPAZIO; U e' l'energia che ASSUME la carica posta in quello spazio.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-condensatori">
+          <h3 class="note-title" onclick="toggleNote('condensatori')">3. Capacita' e Condensatori <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-condensatori">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px; font-size:1.05em;">Capacita' & Condensatori — Mappa concettuale</div>
+              <div class="info-flow">
+                <div class="info-block"><div class="ib-title">Definizione</div><div class="ib-formula">C = q / V</div></div>
+                <div class="info-arrow">→</div>
+                <div class="info-block highlight"><div class="ib-title">Condensatore piano</div><div class="ib-formula">C = ε₀·A/d</div></div>
+                <div class="info-arrow">→</div>
+                <div class="info-block result"><div class="ib-title">Unita'</div><div class="ib-formula">Farad (F) = C/V</div></div>
+              </div>
+              <div class="info-grid" style="margin-top:14px;">
+                <div class="info-card green"><div class="ic-title">+ Area</div><div class="ic-content">C aumenta proporzionalmente</div></div>
+                <div class="info-card red"><div class="ic-title">+ Distanza</div><div class="ic-content">C diminuisce (1/d)</div></div>
+                <div class="info-card purple"><div class="ic-title">Dielettrico</div><div class="ic-content">C → ε_r · C (ε_r &gt; 1)</div></div>
+                <div class="info-card orange"><div class="ic-title">Sfera</div><div class="ic-content ic-formula">C = 4π·ε₀·R</div></div>
+              </div>
+            </div>
+
+            <p>Un <strong>condensatore</strong> e' un dispositivo che racchiude/accumula cariche elettriche (accumulatore). E' formato da due armature conduttrici separate da un isolante.</p>
+
+            <h4>Definizione di capacita'</h4>
+            <div class="formula-box">C = q / V</div>
+            <p>Unita' di misura: <strong>Farad (F) = C/V = C²/J</strong>. E' un'unita' MOLTO grande: nella pratica si usano μF, nF, pF.</p>
+
+            <h4>Proporzionalita'</h4>
+            <ul>
+              <li><strong>C ↔ q:</strong> direttamente proporzionali (a parita' di V).</li>
+              <li><strong>C ↔ 1/V:</strong> inversamente proporzionali (a parita' di q).</li>
+            </ul>
+            <p>NB: in realta' C e' fissata dalla geometria. La relazione C = q/V e' definitoria.</p>
+
+            <h4>Come aumentare la capacita'</h4>
+            <ul>
+              <li><strong>Aumentare</strong> l'area A delle armature.</li>
+              <li><strong>Avvicinare</strong> le armature (diminuire d).</li>
+              <li><strong>Inserire un dielettrico</strong> (isolante tra le piastre): C → ε_r·C con ε_r &gt; 1.</li>
+            </ul>
+
+            <h4>Relazione fondamentale tra ΔV e campo</h4>
+            <div class="formula-box">ΔV = E · d</div>
+
+            <h4>Capacita' del condensatore piano nel vuoto</h4>
+            <div class="formula-box">C = ε₀ · A / d</div>
+            <p>Con dielettrico: <span class="ic-formula">C = ε_r · ε₀ · A / d</span>.</p>
+
+            <h4>Capacita' della sfera conduttrice (riferimento all'infinito)</h4>
+            <div class="formula-box">C_sfera = 4π · ε₀ · R</div>
+
+            <div class="note-tip">Allontanare le armature in un condensatore CARICO ed ISOLATO (Q fisso) fa aumentare V (perche' C scende e Q = CV resta costante). Quindi U = ½Q²/C aumenta: hai fatto lavoro contro il campo.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-equipotenziali">
+          <h3 class="note-title" onclick="toggleNote('equipotenziali')">4. Superfici Equipotenziali <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-equipotenziali">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px; font-size:1.05em;">Superfici Equipotenziali — Le 3 regole</div>
+              <div class="info-grid">
+                <div class="info-card"><div class="ic-title">Regola 1</div><div class="ic-content">V costante su tutta la superficie</div></div>
+                <div class="info-card green"><div class="ic-title">Regola 2</div><div class="ic-content"><strong>E ⊥ superficie</strong><br>(sempre)</div></div>
+                <div class="info-card purple"><div class="ic-title">Regola 3</div><div class="ic-content">Spostarsi su essa<br>L = 0</div></div>
+              </div>
+              <div class="info-flow" style="margin-top:14px;">
+                <div class="info-block"><div class="ib-title">Carica puntiforme</div><div class="ib-formula">sfere concentriche</div></div>
+                <div class="info-arrow">→</div>
+                <div class="info-block"><div class="ib-title">Condensatore piano</div><div class="ib-formula">piani paralleli</div></div>
+                <div class="info-arrow">→</div>
+                <div class="info-block highlight"><div class="ib-title">Relazione locale</div><div class="ib-formula">E = − ΔV / Δs</div></div>
+              </div>
+            </div>
+
+            <p>Una <strong>superficie equipotenziale</strong> e' una superficie sulla quale il potenziale elettrico V e' lo stesso in ogni punto.</p>
+
+            <h4>Proprieta' chiave</h4>
+            <ul>
+              <li>Il campo E e' sempre <strong>perpendicolare</strong> alla superficie equipotenziale.</li>
+              <li>Spostarsi su una superficie equipotenziale non richiede lavoro (ΔV = 0 → L = 0).</li>
+              <li>Le linee di campo 'attraversano' le equipotenziali ad angolo retto.</li>
+            </ul>
+
+            <h4>Esempi</h4>
+            <ul>
+              <li><strong>Carica puntiforme:</strong> sfere concentriche centrate sulla carica.</li>
+              <li><strong>Condensatore piano:</strong> piani paralleli alle armature.</li>
+              <li><strong>Conduttore in equilibrio:</strong> tutta la sua superficie e' equipotenziale.</li>
+            </ul>
+
+            <h4>Relazione locale tra E e V</h4>
+            <p>Su un piccolo tratto Δs lungo la direzione di massima variazione di V:</p>
+            <div class="formula-box">E = − ΔV / Δs</div>
+            <p>Il segno meno indica che E punta verso V decrescenti.</p>
+
+            <div class="note-tip">Analogia geografica: le curve di livello (altezza costante) sono 'equipotenziali gravitazionali'. La pendenza massima (campo) e' sempre perpendicolare alle curve di livello.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-eV-millikan">
+          <h3 class="note-title" onclick="toggleNote('eV-millikan')">5. Elettronvolt e Millikan <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-eV-millikan">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px; font-size:1.05em;">Elettronvolt & Quantizzazione carica</div>
+              <div class="info-flow">
+                <div class="info-block"><div class="ib-title">1 eV</div><div class="ib-formula">= e · 1 V</div><div class="ib-note">= 1,60 × 10⁻¹⁹ J</div></div>
+                <div class="info-arrow">→</div>
+                <div class="info-block highlight"><div class="ib-title">Definizione</div><div class="ib-note">energia di un elettrone che attraversa una d.d.p. di 1 V</div></div>
+              </div>
+              <div class="info-grid" style="margin-top:14px;">
+                <div class="info-card"><div class="ic-title">e (carica elementare)</div><div class="ic-content ic-formula">1,60 × 10⁻¹⁹ C</div></div>
+                <div class="info-card green"><div class="ic-title">Millikan</div><div class="ic-content">Goccia d'olio<br>1909</div></div>
+                <div class="info-card purple"><div class="ic-title">Risultato</div><div class="ic-content">Carica quantizzata<br>q = n·e</div></div>
+              </div>
+            </div>
+
+            <h4>Elettronvolt (eV)</h4>
+            <p>L'<strong>elettronvolt</strong> e' la variazione di energia potenziale subita da un elettrone quando attraversa una differenza di potenziale di 1 V.</p>
+            <div class="formula-box">1 eV = 1,60 × 10⁻¹⁹ J</div>
+            <p>Si usa nella fisica atomica e nucleare perche' le energie tipiche sono dell'ordine di eV (atomiche) o MeV (nucleari).</p>
+
+            <h4>Esperimento di Millikan (goccia d'olio)</h4>
+            <p>Prima volta in cui si parla di carica <strong>quantizzata</strong>. Millikan misuro' direttamente la carica di gocce d'olio caricate elettricamente, equilibrandole tra peso e forza elettrica in un condensatore.</p>
+            <p>Risultato: la carica delle gocce era sempre un <strong>multiplo intero</strong> di una stessa quantita' fondamentale, la <strong>carica elementare</strong>:</p>
+            <div class="formula-box">e = 1,60 × 10⁻¹⁹ C</div>
+            <p>In natura, le cariche libere osservate sono multipli interi di e (positivi o negativi).</p>
+
+            <div class="note-tip">L'elettronvolt e' un'unita' di ENERGIA, non di tensione. Un protone accelerato attraverso 1000 V acquista 1000 eV = 1 keV di energia cinetica.</div>
+          </div>
+        </div>
+
+        <!-- ============================================
+             SEZIONE DIMOSTRAZIONI
+             ============================================ -->
+        <div style="margin-top:30px; padding-top:20px; border-top:3px solid var(--primary);">
+          <h2 style="color:var(--primary); margin-bottom:16px;">Dimostrazioni da sapere</h2>
+        </div>
+
+        <div class="note-section" id="note-dim-energia-cond">
+          <h3 class="note-title" onclick="toggleNote('dim-energia-cond')">DIM 1. Energia immagazzinata in un condensatore <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-dim-energia-cond">
+            <div class="infographic" style="border-color:#c3b1e1;">
+              <div style="font-weight:700; color:#7c3aed; margin-bottom:10px;">Flusso della dimostrazione — Energia condensatore</div>
+              <div class="info-step-flow">
+                <div class="info-step-box"><div class="isb-num">1</div><br><span class="isb-formula">ΔL = V·Δq</span><br>V = q/C</div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">2</div><br><span class="isb-formula">ΔL = (q/C)·Δq</span></div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">3</div><br>Area triangolo<br><span class="isb-formula">L = ½·Q²/C</span></div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box active"><div class="isb-num">4</div><br>3 forme<br><span class="isb-formula">½Q²/C = ½QV = ½CV²</span></div>
+              </div>
+            </div>
+
+            <p><strong>Obiettivo:</strong> calcolare il lavoro necessario per caricare un condensatore piano fino alla carica Q.</p>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 1</span>
+              <span class="step-label">Lavoro infinitesimo per spostare dq</span>
+              <p>Quando sul condensatore c'e' una carica q', la d.d.p. e' V' = q'/C. Per portare un altro Δq da una armatura all'altra serve:</p>
+              <div class="formula-box">ΔL = V'·Δq = (q'/C)·Δq</div>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 2</span>
+              <span class="step-label">La carica aumenta nel tempo</span>
+              <p>Sto caricando il condensatore: V' aumenta perche' q' aumenta. Quindi il lavoro per Δq cresce mano a mano che q' cresce.</p>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 3</span>
+              <span class="step-label">Lavoro totale = area sotto la retta V'(q')</span>
+              <p>La relazione V' = q'/C e' lineare. Il lavoro totale per portare la carica da 0 a Q e' l'area del triangolo:</p>
+              <div class="formula-box">L = (Q · V) / 2 = ½·Q · (Q/C) = ½·Q²/C</div>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 4</span>
+              <span class="step-label">L'energia si immagazzina (forza conservativa)</span>
+              <p>La forza elettrica e' conservativa, quindi il lavoro speso si conserva come energia potenziale elettrica:</p>
+              <div class="formula-box">U = ½ · Q² / C</div>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 5</span>
+              <span class="step-label">Le tre forme equivalenti</span>
+              <p>Sostituendo Q = C·V:</p>
+              <div class="formula-box">U = ½·Q²/C = ½·Q·V = ½·C·V²</div>
+              <p>Le tre formule sono interscambiabili.</p>
+            </div>
+
+            <div class="note-tip">Verifica veloce: U = ½·Q·V e' come l'area del triangolo (base Q, altezza V). Il fattore ½ riflette che la tensione cresce GRADUALMENTE da 0 a V durante la carica.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-dim-densita">
+          <h3 class="note-title" onclick="toggleNote('dim-densita')">DIM 2. Densita' di energia in un condensatore <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-dim-densita">
+            <div class="infographic" style="border-color:#c3b1e1;">
+              <div style="font-weight:700; color:#7c3aed; margin-bottom:10px;">Flusso della dimostrazione — Densita' di energia</div>
+              <div class="info-step-flow">
+                <div class="info-step-box"><div class="isb-num">1</div><br>Parto da<br><span class="isb-formula">U = ½CV²</span></div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">2</div><br>Sostituisci<br><span class="isb-formula">C = ε₀A/d</span><br><span class="isb-formula">V = E·d</span></div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">3</div><br><span class="isb-formula">U = ½ε₀(A·d)E²</span></div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">4</div><br>÷ volume A·d<br><span class="isb-formula">u = ½ε₀E²</span></div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box active"><div class="isb-num">5</div><br>Con dielettrico<br><span class="isb-formula">u = ½ε_r·ε₀·E²</span></div>
+              </div>
+            </div>
+
+            <p><strong>Obiettivo:</strong> ricavare la densita' di energia (J/m³) all'interno del condensatore.</p>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 1</span>
+              <span class="step-label">Punto di partenza</span>
+              <p>Sappiamo che U = ½·C·V². Inoltre, per il condensatore piano:</p>
+              <div class="formula-box">C = ε₀ · A / d &nbsp;&nbsp; e &nbsp;&nbsp; V = E · d</div>
+              <p>Quindi V² = E² · d².</p>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 2</span>
+              <span class="step-label">Sostituzione</span>
+              <div class="formula-box">U = ½ · (ε₀·A/d) · (E²·d²)</div>
+              <p>Semplifico una d:</p>
+              <div class="formula-box">U = ½ · ε₀ · (A · d) · E²</div>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 3</span>
+              <span class="step-label">Riconosco il volume</span>
+              <p>A·d e' il volume V_olume interno al condensatore (area armatura × distanza).</p>
+              <div class="formula-box">U = ½ · ε₀ · V_olume · E²</div>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 4</span>
+              <span class="step-label">Densita' = energia / volume</span>
+              <div class="formula-box">u = U / V_olume = ½ · ε₀ · E²</div>
+              <p>Unita' di misura: <strong>J/m³</strong>.</p>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 5</span>
+              <span class="step-label">In presenza di dielettrico</span>
+              <p>Sostituendo ε₀ → ε_r·ε₀:</p>
+              <div class="formula-box">u = ½ · ε_r · ε₀ · E²</div>
+            </div>
+
+            <div class="note-tip">Concetto chiave: l'energia non e' 'sulle armature', ma DISTRIBUITA nel campo elettrico. Dove c'e' campo, c'e' energia. Questo e' il primo passo verso l'idea di campo come ente fisico autonomo.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-dim-condensatore-piano">
+          <h3 class="note-title" onclick="toggleNote('dim-condensatore-piano')">DIM 3. Capacita' di un condensatore piano <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-dim-condensatore-piano">
+            <div class="infographic" style="border-color:#c3b1e1;">
+              <div style="font-weight:700; color:#7c3aed; margin-bottom:10px;">Flusso della dimostrazione — Condensatore piano</div>
+              <div class="info-step-flow">
+                <div class="info-step-box"><div class="isb-num">1</div><br>Definizione<br><span class="isb-formula">C = Q/ΔV</span></div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">2</div><br>ΔV = E·d<br><span class="isb-formula">C = Q/(E·d)</span></div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">3</div><br>Q = σA<br>E = σ/ε₀</div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">4</div><br><span class="isb-formula">C = σA / (σd/ε₀)</span></div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box active"><div class="isb-num">5</div><br><span class="isb-formula" style="font-size:1.1em;">C = ε₀·A/d</span></div>
+              </div>
+            </div>
+
+            <p><strong>Obiettivo:</strong> dimostrare la formula della capacita' del condensatore piano nel vuoto.</p>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 1</span>
+              <span class="step-label">Definizione di capacita'</span>
+              <div class="formula-box">C = Q / ΔV</div>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 2</span>
+              <span class="step-label">d.d.p. e campo</span>
+              <p>Tra le armature il campo e' uniforme: ΔV = E·d. Quindi:</p>
+              <div class="formula-box">C = Q / (E · d)</div>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 3</span>
+              <span class="step-label">Esprimo Q ed E</span>
+              <ul>
+                <li>Carica sulle armature: <strong>Q = σ · A</strong> (densita' superficiale × area).</li>
+                <li>Campo tra le armature: <strong>E = σ / ε₀</strong> (deriva dal campo della piastra carica, raddoppiato per la sovrapposizione delle due armature).</li>
+              </ul>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 4</span>
+              <span class="step-label">Sostituisci</span>
+              <div class="formula-box">C = (σ·A) / [(σ/ε₀) · d] = (σ·A·ε₀) / (σ·d)</div>
+              <p>σ si cancella sopra e sotto.</p>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 5</span>
+              <span class="step-label">Risultato finale</span>
+              <div class="formula-box">C = ε₀ · A / d</div>
+              <p>Con dielettrico (costante dielettrica relativa ε_r):</p>
+              <div class="formula-box">C = ε_r · ε₀ · A / d</div>
+              <p>Per la sfera conduttrice: <span class="ic-formula">C_sfera = 4π · ε₀ · R</span>.</p>
+            </div>
+
+            <div class="note-tip">Notare la dipendenza: C ∝ A (piu' area = piu' carica accumulabile), C ∝ 1/d (piu' vicine = piu' campo a parita' di carica = meno V). Il dielettrico aumenta C indebolendo il campo a parita' di carica.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================
+   BANCA DATI DOMANDE
+   Ogni domanda ha: text, type, options (se multipla),
+   answer, explanation, commonError, deepdive,
+   difficulty (1-3), topic
+   ============================================ */
+
+const QUESTIONS = [
+
+  // =============================================
+  // ENERGIA POTENZIALE ELETTRICA
+  // =============================================
+  {
+    text: "Cosa indica l'energia potenziale di un sistema?",
+    type: "multiple",
+    options: [
+      "L'attrito interno tra le particelle del sistema",
+      "Il lavoro che il sistema puo' compiere grazie alla sua configurazione",
+      "La velocita' istantanea con cui le cariche si muovono",
+      "La differenza tra energia cinetica iniziale e finale"
+    ],
+    answer: 1,
+    explanation: "L'energia potenziale e' la capacita' di un sistema di compiere un lavoro: U = L compibile. Vale per tutte le energie potenziali (gravitazionale, elastica, elettrica).",
+    commonError: "Confondere energia potenziale con energia cinetica. La cinetica dipende dal moto, la potenziale dalla posizione/configurazione.",
+    deepdive: "La definizione e' generale: ogni volta che una forza conservativa agisce su un sistema, possiamo associare un'energia potenziale. La forza elettrica e' conservativa, quindi anche per essa esiste una U.",
+    difficulty: 1,
+    topic: "Energia Potenziale Elettrica"
+  },
+  {
+    text: "Qual e' la formula dell'energia potenziale gravitazionale per moti verticali?",
+    type: "multiple",
+    options: [
+      "Eg = ½ m v²",
+      "Eg = ½ k x²",
+      "Eg = m g h",
+      "Eg = G M m / r"
+    ],
+    answer: 2,
+    explanation: "Per movimenti verticali in prossimita' della superficie terrestre l'energia potenziale gravitazionale e' Eg = mgh, dove h e' l'altezza rispetto al riferimento.",
+    commonError: "Confondere mgh (uniforme) con GMm/r (gravitazione universale). La prima vale per piccole altezze, la seconda nello spazio.",
+    deepdive: "Eg = mgh deriva da L = F·s con F = mg (peso) e s = h (spostamento verticale). Il riferimento e' arbitrario: si puo' scegliere h=0 a piacere.",
+    difficulty: 1,
+    topic: "Energia Potenziale Elettrica"
+  },
+  {
+    text: "Qual e' la formula dell'energia potenziale elastica?",
+    type: "multiple",
+    options: [
+      "Ex = ½ K Δx²",
+      "Ex = K Δx",
+      "Ex = K / Δx²",
+      "Ex = 2 K Δx"
+    ],
+    answer: 0,
+    explanation: "L'energia elastica e' Ex = ½K(Δx)², dove K e' la costante elastica della molla e Δx l'allungamento o la compressione.",
+    commonError: "Confondere la forza F = KΔx (legge di Hooke, lineare) con l'energia ½KΔx² (quadratica).",
+    deepdive: "Si ricava calcolando il lavoro come area sotto il grafico F-Δx. Essendo F = KΔx una retta passante per l'origine, l'area e' un triangolo: L = (KΔx · Δx)/2 = ½KΔx² = Ex.",
+    difficulty: 2,
+    topic: "Energia Potenziale Elettrica"
+  },
+  {
+    text: "In un campo elettrico uniforme E, una carica q₀ a distanza h da una piastra ha energia potenziale:",
+    type: "multiple",
+    options: [
+      "U = q₀ E / h",
+      "U = ½ q₀ E h²",
+      "U = q₀² E h",
+      "U = q₀ E h"
+    ],
+    answer: 3,
+    explanation: "In un campo uniforme l'energia potenziale di una carica vale U = q₀·E·h, in piena analogia con U = mgh nel caso gravitazionale.",
+    commonError: "Aggiungere un fattore ½ pensando all'analogia elastica. Nel campo uniforme la dipendenza e' lineare in h, non quadratica.",
+    deepdive: "Si ricava da L_AB = q₀E(h_A - h_B). Definendo U = q₀Eh il lavoro diventa L_AB = U_A - U_B, conforme alla definizione di energia potenziale.",
+    difficulty: 2,
+    topic: "Energia Potenziale Elettrica"
+  },
+  {
+    text: "Il lavoro compiuto dal campo per spostare una carica da A a B vale:",
+    type: "multiple",
+    options: [
+      "L_AB = U_B - U_A",
+      "L_AB = U_A - U_B",
+      "L_AB = U_A + U_B",
+      "L_AB = U_A · U_B"
+    ],
+    answer: 1,
+    explanation: "Il lavoro della forza elettrica e' la differenza tra energia potenziale iniziale e finale: L_AB = U_A - U_B.",
+    commonError: "Invertire l'ordine: scrivere U_B - U_A da' il segno opposto. Ricorda: il sistema 'perde' energia potenziale e questa diventa lavoro.",
+    deepdive: "La relazione L = -ΔU vale per tutte le forze conservative. Se la carica va 'in discesa' nel potenziale (U_B < U_A) il lavoro e' positivo (campo che spinge).",
+    difficulty: 2,
+    topic: "Energia Potenziale Elettrica"
+  },
+  {
+    text: "L'energia potenziale elettrica di due cariche puntiformi q₁ e q₂ a distanza r vale:",
+    type: "multiple",
+    options: [
+      "U = K q₁ q₂ / r²",
+      "U = K (q₁ + q₂) / r",
+      "U = K q₁ q₂ / r",
+      "U = ½ K q₁ q₂ / r"
+    ],
+    answer: 2,
+    explanation: "U = K·q₁·q₂/r = (1/4πε₀)·q₁q₂/r. Notare la differenza con la forza F = Kq₁q₂/r²: la U scala con 1/r, la F con 1/r².",
+    commonError: "Mettere r² al denominatore (confusione con la forza). U va come 1/r, F va come 1/r².",
+    deepdive: "Il segno di U conta: cariche concordi danno U > 0 (sistema 'tende ad allontanarsi'), cariche discordi danno U < 0 (sistema legato, tipo elettrone-protone).",
+    difficulty: 2,
+    topic: "Energia Potenziale Elettrica"
+  },
+  {
+    text: "L'energia potenziale di un sistema di n cariche puntiformi e':",
+    type: "truefalse",
+    statement: "L'energia potenziale di n cariche e' la somma delle energie di tutte le possibili coppie del sistema.",
+    answer: true,
+    explanation: "Esatto: per n cariche si sommano tutte le coppie distinte, ciascuna con la propria U_ij = K·q_i·q_j/r_ij.",
+    commonError: "Sommare solo le interazioni di una carica 'centrale' con le altre: si perdono le interazioni tra le 'altre' tra loro.",
+    deepdive: "Per 3 cariche le coppie sono 3 (12, 13, 23). Per 4 cariche sono 6. In generale n(n-1)/2 coppie. Ogni coppia va contata UNA volta sola.",
+    difficulty: 2,
+    topic: "Energia Potenziale Elettrica"
+  },
+
+  // =============================================
+  // POTENZIALE ELETTRICO
+  // =============================================
+  {
+    text: "Qual e' la definizione di potenziale elettrico V in un punto?",
+    type: "multiple",
+    options: [
+      "V = q₀ / U",
+      "V = U / q₀",
+      "V = U · q₀",
+      "V = U + q₀"
+    ],
+    answer: 1,
+    explanation: "Il potenziale elettrico e' V = U/q₀, ovvero l'energia potenziale per unita' di carica. Si misura in Volt (V = J/C).",
+    commonError: "Invertire numeratore e denominatore. Ricorda: V e' 'energia per ogni Coulomb', quindi U sopra e q₀ sotto.",
+    deepdive: "V dipende solo dalla sorgente del campo, non dalla carica di prova q₀. Analogo al campo elettrico E = F/q₀: anche V e' una proprieta' dello spazio.",
+    difficulty: 1,
+    topic: "Potenziale Elettrico"
+  },
+  {
+    text: "Qual e' l'unita' di misura del potenziale elettrico?",
+    type: "multiple",
+    options: [
+      "Newton al Coulomb (N/C)",
+      "Joule per Coulomb al quadrato (J/C²)",
+      "Coulomb per metro (C/m)",
+      "Volt (V), pari a Joule su Coulomb (J/C)"
+    ],
+    answer: 3,
+    explanation: "L'unita' SI del potenziale e' il Volt. 1 V = 1 J/C.",
+    commonError: "Confondere V (Volt, potenziale) con E (campo, N/C). Sono grandezze diverse: V scalare, E vettoriale.",
+    deepdive: "Dalla definizione V = U/q₀ le unita' sono [J]/[C] = J/C = Volt. Il nome viene da Alessandro Volta, inventore della pila.",
+    difficulty: 1,
+    topic: "Potenziale Elettrico"
+  },
+  {
+    text: "La differenza di potenziale ΔV tra due punti A e B e':",
+    type: "multiple",
+    options: [
+      "ΔV = V_A · V_B",
+      "ΔV = V_A + V_B",
+      "ΔV = V_B - V_A",
+      "ΔV = V_A / V_B"
+    ],
+    answer: 2,
+    explanation: "ΔV = V_B - V_A. La differenza di potenziale e' detta anche tensione elettrica.",
+    commonError: "Invertire l'ordine: V_A - V_B da' il segno opposto. Convenzione: stato finale meno stato iniziale.",
+    deepdive: "ΔV puo' essere positiva o negativa. Se ΔV > 0 il punto B e' a potenziale maggiore di A. Le cariche positive 'cadono' spontaneamente verso potenziali piu' bassi.",
+    difficulty: 1,
+    topic: "Potenziale Elettrico"
+  },
+  {
+    text: "La differenza di potenziale ΔV viene chiamata anche:",
+    type: "truefalse",
+    statement: "La differenza di potenziale tra due punti e' detta anche tensione elettrica.",
+    answer: true,
+    explanation: "Corretto. ΔV e tensione elettrica sono sinonimi. In elettronica quando si parla di '12 Volt' si intende sempre una differenza di potenziale.",
+    commonError: "Confondere tensione (ΔV) con corrente (I): sono grandezze diverse legate dalla legge di Ohm V = R·I.",
+    deepdive: "Il potenziale 'assoluto' V dipende dal riferimento (di solito posto a 0 all'infinito). Solo le DIFFERENZE di potenziale hanno significato fisico misurabile.",
+    difficulty: 1,
+    topic: "Potenziale Elettrico"
+  },
+  {
+    text: "In un campo elettrico uniforme E con piastre a distanza h, il potenziale vale:",
+    type: "multiple",
+    options: [
+      "V = E / h",
+      "V = ½ E h²",
+      "V = E h",
+      "V = E + h"
+    ],
+    answer: 2,
+    explanation: "Da U = q₀·E·h e V = U/q₀ si ricava V = E·h. Vale solo nel campo uniforme (es. dentro un condensatore).",
+    commonError: "Aggiungere un fattore ½ pensando all'energia elastica. La relazione e' lineare: V cresce in modo proporzionale all'altezza.",
+    deepdive: "Da V = E·h si ricava anche E = V/h. Per questo il campo elettrico si misura anche in Volt al metro (V/m), unita' equivalente a N/C.",
+    difficulty: 2,
+    topic: "Potenziale Elettrico"
+  },
+  {
+    text: "Il potenziale di una carica puntiforme q a distanza r vale:",
+    type: "multiple",
+    options: [
+      "V = K q / r²",
+      "V = K q²/ r",
+      "V = K q / r",
+      "V = K q · r"
+    ],
+    answer: 2,
+    explanation: "Per una carica puntiforme V = K·q/r = (1/4πε₀)·q/r. Notare: V scala con 1/r mentre E scala con 1/r².",
+    commonError: "Mettere r² al denominatore per analogia con il campo. Ma V e' un'energia per unita' di carica e va come 1/r.",
+    deepdive: "Il potenziale ha segno: V > 0 se q > 0, V < 0 se q < 0. Il riferimento V = 0 e' all'infinito (r → ∞).",
+    difficulty: 2,
+    topic: "Potenziale Elettrico"
+  },
+  {
+    text: "Il lavoro per spostare una carica q₀ da A a B in termini di ΔV vale:",
+    type: "multiple",
+    options: [
+      "L_AB = -q₀ · ΔV",
+      "L_AB = ½ q₀ · ΔV",
+      "L_AB = q₀ / ΔV",
+      "L_AB = q₀ · ΔV²"
+    ],
+    answer: 0,
+    explanation: "Da ΔV = -L_AB/q₀ si ricava L_AB = -q₀·ΔV. Il segno meno indica che la carica positiva si muove spontaneamente verso potenziali decrescenti.",
+    commonError: "Dimenticare il segno meno. La relazione corretta e' L = -q·ΔV: se ΔV < 0 (carica scende) il lavoro e' positivo.",
+    deepdive: "Ricorda la coerenza: L_AB = U_A - U_B = -ΔU = -q₀·ΔV. Il lavoro e' positivo se la carica perde energia potenziale.",
+    difficulty: 3,
+    topic: "Potenziale Elettrico"
+  },
+  {
+    text: "Calcola il potenziale V a 0,3 m da una carica puntiforme q = 5 nC. (K = 9 × 10⁹ N·m²/C²). Rispondi in Volt.",
+    type: "numeric",
+    answer: 150,
+    tolerance: 5,
+    explanation: "V = Kq/r = 9×10⁹ × 5×10⁻⁹ / 0,3 = 45/0,3 = 150 V.",
+    commonError: "Dimenticare di convertire i nC in C (1 nC = 10⁻⁹ C). Oppure usare r² per il potenziale (errore tipico: confusione con il campo).",
+    deepdive: "Con la stessa carica e distanza: E = Kq/r² = 9×10⁹ × 5×10⁻⁹ / 0,09 = 500 N/C. Verifica V = E·r solo in caso particolare? No: V = Kq/r e E = Kq/r², quindi V = E·r solo per il punto specifico.",
+    difficulty: 2,
+    topic: "Potenziale Elettrico"
+  },
+
+  // =============================================
+  // CAPACITA' E CONDENSATORI
+  // =============================================
+  {
+    text: "Cosa rappresenta un condensatore?",
+    type: "multiple",
+    options: [
+      "Un dispositivo che produce energia chimica dalle reazioni interne",
+      "Un dispositivo che racchiude e accumula cariche elettriche",
+      "Un materiale isolante usato per bloccare la corrente",
+      "Un componente che amplifica la tensione del circuito"
+    ],
+    answer: 1,
+    explanation: "Il condensatore e' un accumulatore di carica: due armature separate da un isolante (dielettrico) capaci di immagazzinare cariche e quindi energia elettrica.",
+    commonError: "Confonderlo con una batteria (genera corrente) o con un resistore (dissipa energia). Il condensatore accumula, non produce ne' dissipa.",
+    deepdive: "Nei circuiti i condensatori si caricano e scaricano in tempi rapidi. Sono fondamentali in filtri, oscillatori, alimentatori. La loro caratteristica chiave e' la capacita' C.",
+    difficulty: 1,
+    topic: "Capacita' e Condensatori"
+  },
+  {
+    text: "Qual e' la definizione di capacita' di un condensatore?",
+    type: "multiple",
+    options: [
+      "C = q / V",
+      "C = V / q",
+      "C = q · V",
+      "C = V - q"
+    ],
+    answer: 0,
+    explanation: "La capacita' e' C = q/V: rapporto tra la carica accumulata e la differenza di potenziale tra le armature.",
+    commonError: "Invertire numeratore e denominatore. Ricorda: piu' carica accumulo a parita' di V, piu' grande e' la capacita'.",
+    deepdive: "C dipende solo dalla geometria del condensatore (area armature, distanza, dielettrico), NON da q o V: caricandolo di piu', V cresce di pari passo.",
+    difficulty: 1,
+    topic: "Capacita' e Condensatori"
+  },
+  {
+    text: "Qual e' l'unita' di misura della capacita'?",
+    type: "multiple",
+    options: [
+      "Volt (V)",
+      "Ohm (Ω)",
+      "Farad (F)",
+      "Watt (W)"
+    ],
+    answer: 2,
+    explanation: "La capacita' si misura in Farad, dal nome di Faraday. 1 F = 1 C/V.",
+    commonError: "Scambiare F (Farad, capacita') con V (Volt, potenziale) o Ω (Ohm, resistenza).",
+    deepdive: "Il Farad e' un'unita' MOLTO grande: i condensatori comuni si misurano in μF (10⁻⁶), nF (10⁻⁹) o pF (10⁻¹²). Un Farad richiederebbe armature enormi.",
+    difficulty: 1,
+    topic: "Capacita' e Condensatori"
+  },
+  {
+    text: "Tra C, q e V vale: C ed q sono direttamente proporzionali, mentre C e V sono:",
+    type: "multiple",
+    options: [
+      "Direttamente proporzionali",
+      "Inversamente proporzionali",
+      "Indipendenti tra loro",
+      "Legate da relazione quadratica"
+    ],
+    answer: 1,
+    explanation: "Da C = q/V: a parita' di carica q, se V aumenta C diminuisce (inversa). A parita' di V, q e C sono direttamente proporzionali.",
+    commonError: "Pensare che C dipenda dalla tensione applicata. In realta' C dipende dalla GEOMETRIA: la formula C = q/V e' definitoria, non causale.",
+    deepdive: "Un condensatore reale ha C fissa: cambiando V cambia automaticamente q in modo proporzionale. La 'definizione' C = q/V e' un modo per misurarla.",
+    difficulty: 2,
+    topic: "Capacita' e Condensatori"
+  },
+  {
+    text: "Quale di queste azioni NON aumenta la capacita' di un condensatore piano?",
+    type: "multiple",
+    options: [
+      "Aumentare l'area delle armature",
+      "Inserire un dielettrico tra le armature",
+      "Allontanare le armature",
+      "Avvicinare le armature"
+    ],
+    answer: 2,
+    explanation: "Allontanare le armature DIMINUISCE la capacita' (C = ε₀A/d, d al denominatore). Aumentano la capacita': area piu' grande, dielettrico, armature piu' vicine.",
+    commonError: "Pensare che allontanare le armature aumenti la capacita' perche' 'piu' spazio'. In realta', meno spazio = piu' campo = piu' carica accumulabile a parita' di V.",
+    deepdive: "Riassumendo: C aumenta con A (proporzionale), diminuisce con d (inversamente proporzionale), aumenta inserendo un dielettrico (fattore ε_r > 1).",
+    difficulty: 2,
+    topic: "Capacita' e Condensatori"
+  },
+  {
+    text: "Cosa fa un dielettrico inserito tra le armature di un condensatore?",
+    type: "multiple",
+    options: [
+      "Ne diminuisce la capacita'",
+      "Ne aumenta la capacita'",
+      "Non ne modifica la capacita'",
+      "Ne annulla la capacita'"
+    ],
+    answer: 1,
+    explanation: "Il dielettrico aumenta la capacita': C = ε_r·ε₀·A/d, con ε_r > 1 (costante dielettrica relativa).",
+    commonError: "Pensare che un isolante 'blocchi' la carica e quindi diminuisca C. In realta' il dielettrico polarizzandosi indebolisce il campo interno, riducendo V e aumentando C = q/V.",
+    deepdive: "ε_r vale per esempio: aria ≈ 1, carta ≈ 3,5, acqua ≈ 80, mica ≈ 7. I dielettrici servono anche per evitare scariche tra le armature.",
+    difficulty: 2,
+    topic: "Capacita' e Condensatori"
+  },
+  {
+    text: "Per un condensatore piano (vuoto tra le armature) la capacita' vale:",
+    type: "multiple",
+    options: [
+      "C = ε₀ · d / A",
+      "C = ε₀ · A / d",
+      "C = ε₀ · A · d",
+      "C = ε₀ · A · d²"
+    ],
+    answer: 1,
+    explanation: "C = ε₀·A/d, con A area di una armatura e d distanza tra le armature. Aumenta con A, diminuisce con d.",
+    commonError: "Invertire A e d (errore frequente!): mettere d al numeratore e A al denominatore.",
+    deepdive: "Si ricava da C = q/V combinando q = σA, E = σ/ε₀ e V = E·d. Sostituendo: C = σA / (σ·d/ε₀) = ε₀A/d.",
+    difficulty: 2,
+    topic: "Capacita' e Condensatori"
+  },
+  {
+    text: "La capacita' di una sfera conduttrice di raggio R nel vuoto vale:",
+    type: "multiple",
+    options: [
+      "C_sfera = 4π ε₀ R",
+      "C_sfera = ε₀ R²",
+      "C_sfera = ε₀ / (4π R)",
+      "C_sfera = 4π ε₀ / R"
+    ],
+    answer: 0,
+    explanation: "Per una sfera isolata vale C = 4πε₀R. Cresce linearmente col raggio.",
+    commonError: "Mettere R al denominatore. Ricorda: piu' grande la sfera, piu' carica puo' contenere a parita' di V.",
+    deepdive: "Confrontando con il piano: per il piano serve un'altra armatura, per la sfera no (il riferimento e' all'infinito). E' un caso 'autocapacitivo'.",
+    difficulty: 3,
+    topic: "Capacita' e Condensatori"
+  },
+  {
+    text: "Calcola la capacita' di un condensatore piano con A = 0,01 m², d = 0,001 m, vuoto. (ε₀ = 8,85 × 10⁻¹² C²/(N·m²)). Rispondi in pF (picofarad).",
+    type: "numeric",
+    answer: 88.5,
+    tolerance: 2,
+    explanation: "C = ε₀A/d = 8,85×10⁻¹² × 0,01 / 0,001 = 8,85×10⁻¹¹ F = 88,5 pF.",
+    commonError: "Errore tipico: dimenticare la conversione tra unita' (1 pF = 10⁻¹² F).",
+    deepdive: "Capacita' tipica per un condensatore di laboratorio. Per ottenere capacita' grandi (μF) servono armature avvolte molto lunghe e dielettrici con ε_r elevato.",
+    difficulty: 2,
+    topic: "Capacita' e Condensatori"
+  },
+
+  // =============================================
+  // SUPERFICI EQUIPOTENZIALI
+  // =============================================
+  {
+    text: "Cosa si intende per superficie equipotenziale?",
+    type: "multiple",
+    options: [
+      "Una superficie sulla quale il campo E ha modulo zero",
+      "Una superficie attraverso cui il flusso di E e' massimo",
+      "Una superficie con la stessa densita' di carica in ogni punto",
+      "Una superficie sulla quale il potenziale V e' lo stesso in ogni punto"
+    ],
+    answer: 3,
+    explanation: "Una superficie equipotenziale ha lo stesso valore di V in ogni suo punto. Spostarsi su di essa NON richiede lavoro (ΔV = 0).",
+    commonError: "Confondere 'V costante' con 'E nullo'. Il campo NON e' nullo, e' solo perpendicolare alla superficie.",
+    deepdive: "Per una carica puntiforme le superfici equipotenziali sono sfere concentriche. Per un dipolo sono superfici simmetriche piu' complesse.",
+    difficulty: 1,
+    topic: "Superfici Equipotenziali"
+  },
+  {
+    text: "Le superfici equipotenziali e le linee di campo elettrico sono:",
+    type: "multiple",
+    options: [
+      "Sempre parallele tra loro",
+      "Inclinate di 45° tra loro",
+      "Sempre perpendicolari tra loro",
+      "Coincidenti tra loro"
+    ],
+    answer: 2,
+    explanation: "Le linee di campo sono SEMPRE perpendicolari alle superfici equipotenziali. Se non lo fossero, ci sarebbe una componente del campo lungo la superficie, ma allora V cambierebbe e non sarebbe equipotenziale.",
+    commonError: "Pensare che siano parallele. La logica e' 'opposta': se V costa, lo spostamento lungo la superficie non fa lavoro, quindi E ⊥ alla superficie.",
+    deepdive: "Analogia geografica: le curve di livello sono superfici 'ad altezza costante' (analogo equipotenziali) e la pendenza massima e' sempre perpendicolare ad esse (analogo campo).",
+    difficulty: 2,
+    topic: "Superfici Equipotenziali"
+  },
+  {
+    text: "All'interno di un condensatore piano carico, le superfici equipotenziali sono:",
+    type: "multiple",
+    options: [
+      "Cilindri concentrici",
+      "Sfere concentriche",
+      "Piani inclinati di 30°",
+      "Piani paralleli alle armature"
+    ],
+    answer: 3,
+    explanation: "Dentro il condensatore E e' uniforme e perpendicolare alle armature. Le equipotenziali, perpendicolari ad E, sono piani paralleli alle armature.",
+    commonError: "Disegnare equipotenziali sferiche all'interno del condensatore (sono sferiche solo per cariche puntiformi).",
+    deepdive: "Il campo uniforme implica che V varia linearmente da un'armatura all'altra: V(x) = E·x + costante. A x fissato V e' costante: e' un piano.",
+    difficulty: 2,
+    topic: "Superfici Equipotenziali"
+  },
+  {
+    text: "Tra campo E e potenziale V vale la relazione (su un piccolo tratto Δs):",
+    type: "multiple",
+    options: [
+      "E = ΔV · Δs",
+      "E = -ΔV / Δs",
+      "E = Δs / ΔV",
+      "E = ΔV + Δs"
+    ],
+    answer: 1,
+    explanation: "Lungo la direzione di massima variazione di V vale E = -ΔV/Δs. Il segno meno indica che E punta verso V decrescenti.",
+    commonError: "Dimenticare il segno meno. Senza di esso il campo punterebbe verso potenziali crescenti, contraddicendo l'osservazione.",
+    deepdive: "Nel campo uniforme |E| = ΔV/d (in modulo). E' la versione 'integrata' della relazione differenziale E = -dV/ds.",
+    difficulty: 2,
+    topic: "Superfici Equipotenziali"
+  },
+
+  // =============================================
+  // ELETTRONVOLT E MILLIKAN
+  // =============================================
+  {
+    text: "Quanto vale 1 elettronvolt (eV) in Joule?",
+    type: "multiple",
+    options: [
+      "1 eV = 1,60 × 10⁻¹⁹ J",
+      "1 eV = 9,11 × 10⁻³¹ J",
+      "1 eV = 6,67 × 10⁻¹¹ J",
+      "1 eV = 8,85 × 10⁻¹² J"
+    ],
+    answer: 0,
+    explanation: "1 eV = 1,60×10⁻¹⁹ J, pari alla carica elementare moltiplicata per 1 V.",
+    commonError: "Confondere con la massa dell'elettrone (9,11×10⁻³¹ kg) o con altre costanti come ε₀ o G.",
+    deepdive: "L'elettronvolt e' un'unita' pratica nella fisica delle particelle. Le energie atomiche sono dell'ordine di eV, quelle nucleari di MeV (10⁶ eV).",
+    difficulty: 2,
+    topic: "Elettronvolt e Millikan"
+  },
+  {
+    text: "Cosa e' un elettronvolt?",
+    type: "multiple",
+    options: [
+      "L'energia cinetica di un protone in moto a velocita' di 1 m/s",
+      "L'energia di legame medio dell'elettrone nell'atomo di idrogeno",
+      "La variazione di energia di un elettrone che attraversa una d.d.p. di 1 Volt",
+      "La quantita' di carica trasportata da un elettrone in un secondo"
+    ],
+    answer: 2,
+    explanation: "1 eV e' l'energia che un elettrone acquista (o cede) attraversando una differenza di potenziale di 1 V: ΔU = q·ΔV = e·1 V = 1,60×10⁻¹⁹ J.",
+    commonError: "Pensarlo come una grandezza 'di velocita'' o 'di carica'. E' un'unita' di ENERGIA.",
+    deepdive: "Si usa perche' nel mondo atomico le energie sono piccolissime in Joule. 1 eV e' dell'ordine delle transizioni energetiche atomiche.",
+    difficulty: 2,
+    topic: "Elettronvolt e Millikan"
+  },
+  {
+    text: "L'esperimento di Millikan (goccia d'olio) ha dimostrato che:",
+    type: "multiple",
+    options: [
+      "Le cariche elettriche sono distribuite con continuita' nei conduttori",
+      "Le cariche elettriche si annullano sempre a coppie",
+      "Le cariche elettriche si conservano nelle reazioni chimiche",
+      "Le cariche elettriche sono quantizzate, multiple di una carica elementare e"
+    ],
+    answer: 3,
+    explanation: "Millikan misuro' direttamente la carica delle gocce d'olio cariche e mostro' che essa e' sempre multipla intera di e = 1,60×10⁻¹⁹ C.",
+    commonError: "Confondere il risultato di Millikan (quantizzazione carica) con quello di Thomson (rapporto e/m), Rutherford (modello atomico) o altri.",
+    deepdive: "Per l'esperimento Millikan ricevette il Nobel nel 1923. Tecnica: equilibrare la goccia tra peso e forza elettrica in un condensatore variando V.",
+    difficulty: 1,
+    topic: "Elettronvolt e Millikan"
+  },
+  {
+    text: "Cosa e' la 'carica elementare' e?",
+    type: "multiple",
+    options: [
+      "La carica del nucleo di un atomo qualunque",
+      "La carica di un elettrone (in modulo) o di un protone, valore minimo isolabile",
+      "Una grandezza variabile che dipende dal materiale conduttore",
+      "Un valore convenzionale fissato per comodita' di calcolo"
+    ],
+    answer: 1,
+    explanation: "e ≈ 1,60×10⁻¹⁹ C e' la carica elementare. Tutte le cariche libere osservate sono multipli interi di e (positivi o negativi).",
+    commonError: "Pensare che ogni carica sia divisibile in modo continuo. La quantizzazione e' un fatto sperimentale, fondamento della fisica moderna.",
+    deepdive: "I quark hanno carica frazionaria (±1/3 e, ±2/3 e), ma sono confinati dentro adroni: in natura libera la carica minima resta e.",
+    difficulty: 2,
+    topic: "Elettronvolt e Millikan"
+  },
+
+  // =============================================
+  // ENERGIA NEL CONDENSATORE
+  // =============================================
+  {
+    text: "L'energia immagazzinata in un condensatore di capacita' C caricato a tensione V vale:",
+    type: "multiple",
+    options: [
+      "U = C V",
+      "U = ½ C V²",
+      "U = C V²",
+      "U = 2 C V"
+    ],
+    answer: 1,
+    explanation: "U = ½CV². E' una delle tre forme equivalenti, insieme a U = ½QV e U = ½Q²/C.",
+    commonError: "Dimenticare il fattore ½: scrivere CV² o QV. Il fattore nasce dall'integrazione del lavoro durante la carica.",
+    deepdive: "Le tre formule sono interscambiabili tramite Q = CV. Il fattore ½ riflette il fatto che la tensione cresce gradualmente da 0 a V durante la carica.",
+    difficulty: 2,
+    topic: "Energia nel Condensatore"
+  },
+  {
+    text: "Quale di queste NON e' una forma corretta dell'energia di un condensatore?",
+    type: "multiple",
+    options: [
+      "U = ½ Q V",
+      "U = ½ C V²",
+      "U = ½ Q² / C",
+      "U = Q² · C / 2"
+    ],
+    answer: 3,
+    explanation: "Le tre forme corrette sono ½QV, ½CV², ½Q²/C. La quarta opzione (Q²·C/2) e' sbagliata: il C va a denominatore, non a numeratore.",
+    commonError: "Scambiare la posizione di C tra numeratore e denominatore. Verifica con le unita' o con Q = CV.",
+    deepdive: "Ricava le tre formule a partire da U = ½QV: usa Q = CV per sostituire Q (ottieni ½CV²) o per sostituire V (ottieni ½Q²/C).",
+    difficulty: 3,
+    topic: "Energia nel Condensatore"
+  },
+  {
+    text: "La densita' di energia (per unita' di volume) all'interno di un condensatore vale:",
+    type: "multiple",
+    options: [
+      "u = ε₀ E",
+      "u = ½ ε₀ E²",
+      "u = 2 ε₀ E",
+      "u = E² / ε₀"
+    ],
+    answer: 1,
+    explanation: "u = ½ε₀E² in J/m³. Si ricava dividendo U = ½ε₀(A·d)E² per il volume A·d.",
+    commonError: "Dimenticare il quadrato sul campo: la densita' va come E², non come E.",
+    deepdive: "In presenza di dielettrico la formula diventa u = ½ε_r·ε₀·E². L'energia e' 'distribuita' nel campo: si puo' pensare al campo elettrico stesso come deposito di energia.",
+    difficulty: 3,
+    topic: "Energia nel Condensatore"
+  },
+  {
+    text: "Calcola l'energia di un condensatore con C = 100 μF caricato a V = 12 V. Rispondi in millijoule (mJ).",
+    type: "numeric",
+    answer: 7.2,
+    tolerance: 0.3,
+    explanation: "U = ½CV² = ½ × 100×10⁻⁶ × 12² = ½ × 100×10⁻⁶ × 144 = 0,0072 J = 7,2 mJ.",
+    commonError: "Errori tipici: dimenticare il ½, oppure non quadrare V. Anche conversioni sbagliate da μF a F.",
+    deepdive: "Energie tipiche dei condensatori sono modeste, ma si scaricano in tempi brevissimi: la potenza istantanea puo' essere altissima (flash fotografici, defibrillatori).",
+    difficulty: 2,
+    topic: "Energia nel Condensatore"
+  },
+  {
+    text: "Il fattore ½ nell'energia U = ½QV deriva dal fatto che:",
+    type: "multiple",
+    options: [
+      "Si lavora sempre con metodi statistici di mediazione",
+      "Le armature condividono ciascuna meta' della carica totale",
+      "La formula corretta in fisica relativistica richiede questo fattore",
+      "La tensione cresce gradualmente da 0 a V durante la carica del condensatore"
+    ],
+    answer: 3,
+    explanation: "Caricando il condensatore con piccoli incrementi Δq, la tensione passa da 0 a V. Il lavoro totale e' l'area del triangolo: ½Q·V.",
+    commonError: "Pensare che il ½ derivi da una convenzione o da una media. In realta' viene dall'integrazione del lavoro V·dq durante la carica.",
+    deepdive: "Graficamente: la curva V(q) e' una retta che parte dall'origine (V = q/C). Il lavoro = area = ½·base·altezza = ½·Q·V.",
+    difficulty: 3,
+    topic: "Energia nel Condensatore"
+  }
+];
+    type: "multiple",
+    options: [
+      "F = k · |q₁| · |q₂| / r²",
+      "F = k · |q₁| · |q₂| · r²",
+      "F = k · |q₁| + |q₂| / r²",
+      "F = |q₁| · |q₂| / (k · r²)"
+    ],
+    answer: 0,
+    explanation: "La forza elettrica tra due cariche e' data da F = k · |q₁| · |q₂| / r², dove k = 8,99 × 10⁹ N·m²/C². La forza e' direttamente proporzionale al prodotto delle cariche e inversamente proporzionale al quadrato della distanza.",
+    commonError: "Molti confondono il prodotto con la somma delle cariche, oppure dimenticano che la distanza e' al quadrato.",
+    deepdive: "La legge di Coulomb e' simile alla legge di gravitazione di Newton: entrambe dipendono dal prodotto di due grandezze (cariche o masse) e sono inversamente proporzionali a r². La differenza principale e' che la forza elettrica puo' essere sia attrattiva che repulsiva, mentre la gravita' e' solo attrattiva.",
+    difficulty: 1,
+    topic: "Legge di Coulomb"
+  },
+  {
+    text: "Quanto vale la costante k nella legge di Coulomb?",
+    type: "multiple",
+    options: [
+      "8,99 × 10⁹ N·m²/C²",
+      "6,67 × 10⁻¹¹ N·m²/kg²",
+      "8,85 × 10⁻¹² C²/(N·m²)",
+      "3 × 10⁸ m/s"
+    ],
+    answer: 0,
+    explanation: "La costante di Coulomb vale k = 8,99 × 10⁹ N·m²/C². Si puo' anche scrivere come k = 1/(4πε₀).",
+    commonError: "La seconda opzione e' la costante gravitazionale G, la terza e' ε₀ (costante dielettrica del vuoto), la quarta e' la velocita' della luce.",
+    deepdive: "La costante k puo' essere espressa anche come 1/(4πε₀), dove ε₀ = 8,85 × 10⁻¹² C²/(N·m²) e' la costante dielettrica (o permittivita') del vuoto. Ricorda: k e' molto grande, il che significa che le forze elettriche sono enormemente piu' intense di quelle gravitazionali.",
+    difficulty: 1,
+    topic: "Legge di Coulomb"
+  },
+  {
+    text: "Due cariche dello stesso segno si attraggono o si respingono?",
+    type: "truefalse",
+    statement: "Due cariche elettriche dello stesso segno si respingono.",
+    answer: true,
+    explanation: "Corretto! Cariche dello stesso segno (++ o --) si respingono, cariche di segno opposto (+- o -+) si attraggono.",
+    commonError: "Alcuni confondono il comportamento con i magneti, ma la regola e' la stessa: simili si respingono, opposti si attraggono.",
+    deepdive: "Nella formula di Coulomb usiamo i valori assoluti |q₁| e |q₂| per calcolare l'intensita' della forza. Il segno delle cariche ci serve solo per determinare il verso: se le cariche hanno lo stesso segno la forza e' repulsiva (le allontana), se hanno segno opposto e' attrattiva (le avvicina).",
+    difficulty: 1,
+    topic: "Legge di Coulomb"
+  },
+  {
+    text: "Se raddoppi la distanza tra due cariche, come cambia la forza elettrica?",
+    type: "multiple",
+    options: [
+      "Diventa un quarto",
+      "Diventa la meta'",
+      "Raddoppia",
+      "Resta uguale"
+    ],
+    answer: 0,
+    explanation: "Poiche' F e' proporzionale a 1/r², se raddoppi r la forza diventa 1/(2r)² = 1/(4r²), cioe' un quarto di quella iniziale.",
+    commonError: "L'errore piu' comune e' pensare che dimezzare la forza corrisponda a raddoppiare la distanza. In realta', la dipendenza e' dal quadrato: r × 2 => F / 4.",
+    deepdive: "La dipendenza da 1/r² e' tipica delle forze che si propagano nello spazio tridimensionale. Immagina la forza come un 'flusso' che si distribuisce su sfere sempre piu' grandi: l'area della sfera cresce come r², quindi l'intensita' per unita' di superficie diminuisce come 1/r².",
+    difficulty: 2,
+    topic: "Legge di Coulomb"
+  },
+  {
+    text: "Qual e' la direzione della forza nella legge di Coulomb?",
+    type: "multiple",
+    options: [
+      "La retta che congiunge le due cariche",
+      "Perpendicolare alla retta che congiunge le cariche",
+      "Sempre verticale",
+      "Dipende dal valore delle cariche"
+    ],
+    answer: 0,
+    explanation: "La forza di Coulomb agisce lungo la retta che congiunge le due cariche. Il verso dipende dai segni: attrattiva se opposte, repulsiva se uguali.",
+    commonError: "La direzione e' sempre la congiungente, indipendentemente dal valore delle cariche. Solo il verso cambia in base ai segni.",
+    deepdive: "Come vettore, la forza di Coulomb ha tre caratteristiche: modulo (dato dalla formula F = k|q₁||q₂|/r²), direzione (la retta congiungente le cariche) e verso (repulsivo per cariche uguali, attrattivo per cariche opposte).",
+    difficulty: 1,
+    topic: "Legge di Coulomb"
+  },
+  {
+    text: "Due cariche q₁ = +3 μC e q₂ = -3 μC sono poste a distanza r = 0,3 m. Calcola il modulo della forza (k = 9 × 10⁹ N·m²/C²). Scrivi il risultato in Newton.",
+    type: "numeric",
+    answer: 0.9,
+    tolerance: 0.05,
+    explanation: "F = k · |q₁| · |q₂| / r² = 9×10⁹ · 3×10⁻⁶ · 3×10⁻⁶ / (0,3)² = 9×10⁹ · 9×10⁻¹² / 0,09 = 81×10⁻³ / 0,09 = 0,9 N.",
+    commonError: "Errori comuni: dimenticare di convertire i microcoulomb in coulomb (1 μC = 10⁻⁶ C), oppure sbagliare il quadrato della distanza.",
+    deepdive: "Passaggi dettagliati: 1) Converti le cariche: 3 μC = 3 × 10⁻⁶ C. 2) Calcola il prodotto: 3×10⁻⁶ × 3×10⁻⁶ = 9×10⁻¹² C². 3) Calcola r² = 0,09 m². 4) F = 9×10⁹ × 9×10⁻¹² / 0,09 = 0,081/0,09 = 0,9 N. La forza e' attrattiva perche' le cariche hanno segno opposto.",
+    difficulty: 2,
+    topic: "Legge di Coulomb"
+  },
+  {
+    text: "La costante k puo' essere scritta anche come:",
+    type: "multiple",
+    options: [
+      "1 / (4πε₀)",
+      "4πε₀",
+      "ε₀ / (4π)",
+      "4π / ε₀"
+    ],
+    answer: 0,
+    explanation: "k = 1/(4πε₀), dove ε₀ e' la costante dielettrica del vuoto (permittivita' del vuoto).",
+    commonError: "Attenzione a non invertire la formula: k = 1/(4πε₀), non k = 4πε₀.",
+    deepdive: "La costante dielettrica del vuoto ε₀ = 8,85 × 10⁻¹² C²/(N·m²) compare nella legge di Gauss e in molte formule dell'elettromagnetismo. La scrittura con k e' piu' comoda per i calcoli diretti, mentre quella con ε₀ e' piu' usata nelle leggi generali.",
+    difficulty: 2,
+    topic: "Legge di Coulomb"
+  },
+
+  // =============================================
+  // CAMPO ELETTRICO
+  // =============================================
+  {
+    text: "Qual e' la definizione di campo elettrico?",
+    type: "multiple",
+    options: [
+      "E = F / q₀ (forza su carica di prova)",
+      "E = F · q₀",
+      "E = q₀ / F",
+      "E = k · r² / q₀"
+    ],
+    answer: 0,
+    explanation: "Il campo elettrico in un punto e' il rapporto tra la forza che agisce su una carica di prova q₀ posta in quel punto e la carica stessa: E = F / q₀.",
+    commonError: "E' facile confondere numeratore e denominatore. Ricorda: E = F/q₀, cioe' 'quanta forza subisce ogni coulomb di carica'.",
+    deepdive: "Il campo elettrico E rappresenta la 'capacita'' di una regione dello spazio di esercitare una forza su una carica. Non dipende dalla carica di prova q₀ (che deve essere piccola per non disturbare il campo), ma solo dalla sorgente che lo genera. L'unita' di misura e' N/C.",
+    difficulty: 1,
+    topic: "Campo Elettrico"
+  },
+  {
+    text: "Qual e' l'unita' di misura del campo elettrico?",
+    type: "multiple",
+    options: [
+      "N/C (Newton su Coulomb)",
+      "C/N (Coulomb su Newton)",
+      "N·C (Newton per Coulomb)",
+      "J/C (Joule su Coulomb)"
+    ],
+    answer: 0,
+    explanation: "L'unita' di misura del campo elettrico e' il Newton su Coulomb (N/C). Si puo' anche esprimere come V/m (Volt su metro).",
+    commonError: "J/C e' l'unita' del potenziale elettrico (Volt), non del campo.",
+    deepdive: "Dalla definizione E = F/q₀, le unita' sono [N]/[C] = N/C. Esiste un'altra unita' equivalente: il V/m (Volt al metro), che si ricava dal legame tra campo e potenziale. Per il liceo, ricorda che N/C e V/m sono la stessa cosa.",
+    difficulty: 1,
+    topic: "Campo Elettrico"
+  },
+  {
+    text: "Il campo elettrico generato da una carica puntiforme dipende dalla carica di prova?",
+    type: "truefalse",
+    statement: "Il campo elettrico generato da una carica Q dipende dalla carica di prova q₀.",
+    answer: false,
+    explanation: "Falso! Il campo E = k·|Q|/r² dipende solo dalla carica sorgente Q e dalla distanza r. Il campo esiste anche senza carica di prova!",
+    commonError: "Molti pensano che serva una seconda carica perche' il campo esista. In realta' la carica di prova e' solo uno strumento concettuale per 'misurare' il campo.",
+    deepdive: "Questa e' un'idea fondamentale: il campo elettrico e' una proprieta' dello spazio creata dalla carica sorgente Q. Esiste indipendentemente dal fatto che ci sia o meno una carica di prova. La carica di prova q₀ serve solo per definire e misurare il campo: poni q₀ nel punto, misuri la forza F, e calcoli E = F/q₀.",
+    difficulty: 2,
+    topic: "Campo Elettrico"
+  },
+  {
+    text: "Una carica Q = +5 μC genera un campo elettrico. A distanza r = 0,5 m, quanto vale E? (k = 9 × 10⁹). Rispondi in N/C.",
+    type: "numeric",
+    answer: 180000,
+    tolerance: 5000,
+    explanation: "E = k · |Q| / r² = 9×10⁹ × 5×10⁻⁶ / (0,5)² = 9×10⁹ × 5×10⁻⁶ / 0,25 = 45000 / 0,25 = 180000 N/C.",
+    commonError: "Errori frequenti: dimenticare la conversione μC -> C, oppure non elevare r al quadrato.",
+    deepdive: "Passo per passo: 1) Q = 5 μC = 5 × 10⁻⁶ C. 2) r² = (0,5)² = 0,25 m². 3) Numeratore: 9×10⁹ × 5×10⁻⁶ = 45×10³ = 45000. 4) E = 45000 / 0,25 = 180000 N/C. Questo e' un campo abbastanza intenso, equivalente a 1,8 × 10⁵ N/C.",
+    difficulty: 2,
+    topic: "Campo Elettrico"
+  },
+  {
+    text: "In quale verso punta il campo elettrico generato da una carica positiva?",
+    type: "multiple",
+    options: [
+      "Verso uscente (si allontana dalla carica)",
+      "Verso entrante (si avvicina alla carica)",
+      "Verso l'alto",
+      "Dipende dalla distanza"
+    ],
+    answer: 0,
+    explanation: "Il campo generato da una carica positiva punta verso l'esterno, allontanandosi dalla carica (campo uscente).",
+    commonError: "Per le cariche negative e' il contrario: il campo punta verso la carica (entrante). Non confondere i due casi.",
+    deepdive: "Regola pratica: Q positiva -> il campo 'scappa' dalla carica (uscente). Q negativa -> il campo 'corre verso' la carica (entrante). Puoi pensarla cosi': una carica positiva di prova verrebbe respinta da Q+, quindi la forza (e il campo) puntano verso l'esterno.",
+    difficulty: 1,
+    topic: "Campo Elettrico"
+  },
+  {
+    text: "Se una carica sorgente e' negativa, il campo elettrico:",
+    type: "multiple",
+    options: [
+      "Punta verso la carica (entrante)",
+      "Punta lontano dalla carica (uscente)",
+      "E' nullo",
+      "Ruota intorno alla carica"
+    ],
+    answer: 0,
+    explanation: "Una carica negativa genera un campo entrante: i vettori del campo puntano verso la carica, come se venissero 'attratti'.",
+    commonError: "Non confondere con la carica positiva, dove il campo e' uscente.",
+    deepdive: "Il verso del campo si determina sempre pensando a cosa succederebbe a una carica di prova positiva (+) posta in quel punto. Se la sorgente e' negativa, la carica di prova verrebbe attratta verso di essa -> il campo punta verso la sorgente.",
+    difficulty: 1,
+    topic: "Campo Elettrico"
+  },
+
+  // =============================================
+  // LINEE DI CAMPO
+  // =============================================
+  {
+    text: "Le linee di campo elettrico partono da:",
+    type: "multiple",
+    options: [
+      "Cariche positive e terminano su cariche negative",
+      "Cariche negative e terminano su cariche positive",
+      "Qualsiasi carica e non terminano mai",
+      "Il centro del campo e vanno all'infinito"
+    ],
+    answer: 0,
+    explanation: "Le linee di campo partono dalle cariche positive e terminano su quelle negative. Questa e' una convenzione fondamentale.",
+    commonError: "Ricorda: partono dal + e arrivano al -. Come la corrente convenzionale!",
+    deepdive: "Le linee di campo sono una rappresentazione grafica inventata da Faraday. Le regole fondamentali sono: 1) Partono dal + e terminano sul -. 2) Il numero di linee e' proporzionale alla carica. 3) Non si incrociano mai. 4) Dove sono piu' fitte, il campo e' piu' intenso.",
+    difficulty: 1,
+    topic: "Linee di Campo"
+  },
+  {
+    text: "Le linee di campo elettrico possono incrociarsi tra loro?",
+    type: "truefalse",
+    statement: "Le linee di campo elettrico possono incrociarsi.",
+    answer: false,
+    explanation: "Falso! Le linee di campo non si incrociano MAI. Se si incrociassero, in quel punto il campo avrebbe due direzioni diverse, il che e' fisicamente impossibile.",
+    commonError: "Anche quando ci sono piu' cariche, le linee si curvano ma non si incrociano.",
+    deepdive: "Se due linee si incrociassero in un punto P, significherebbe che il campo in P ha contemporaneamente due direzioni diverse. Ma il campo elettrico e' un vettore, e in ogni punto dello spazio puo' avere una sola direzione e un solo verso. Quindi l'incrocio e' impossibile.",
+    difficulty: 1,
+    topic: "Linee di Campo"
+  },
+  {
+    text: "Se in una zona le linee di campo sono molto fitte, cosa significa?",
+    type: "multiple",
+    options: [
+      "Il campo e' piu' intenso",
+      "Il campo e' piu' debole",
+      "Le cariche sono neutre",
+      "Non c'e' campo in quella zona"
+    ],
+    answer: 0,
+    explanation: "La densita' delle linee di campo e' proporzionale all'intensita' del campo: piu' linee = campo piu' forte.",
+    commonError: "Non confondere: linee fitte = campo intenso, linee rade = campo debole.",
+    deepdive: "Pensa alle linee di campo come a frecce che indicano quanto e' 'forte' l'influenza elettrica. Vicino a una carica le linee sono molto concentrate (campo intenso), mentre lontano si diradano (campo debole). Questo e' coerente con la formula E = k|Q|/r²: il campo diminuisce con il quadrato della distanza.",
+    difficulty: 1,
+    topic: "Linee di Campo"
+  },
+  {
+    text: "Il numero di linee di campo che partono da una carica e' proporzionale a:",
+    type: "multiple",
+    options: [
+      "All'intensita' della carica",
+      "Alla distanza dalle altre cariche",
+      "Alla massa della carica",
+      "Alla temperatura"
+    ],
+    answer: 0,
+    explanation: "Il numero di linee di campo e' proporzionale al valore (modulo) della carica: una carica doppia genera il doppio delle linee.",
+    commonError: "Le linee non dipendono dalla distanza o dalla massa, ma solo dalla grandezza della carica.",
+    deepdive: "Se una carica Q₁ = +2 μC genera 10 linee (per convenzione), allora Q₂ = +4 μC ne genera 20. Questo permette di 'leggere' il campo da un disegno: conta le linee per capire quale carica e' piu' grande.",
+    difficulty: 1,
+    topic: "Linee di Campo"
+  },
+
+  // =============================================
+  // PRINCIPIO DI SOVRAPPOSIZIONE
+  // =============================================
+  {
+    text: "Cosa afferma il principio di sovrapposizione per i campi elettrici?",
+    type: "multiple",
+    options: [
+      "Il campo totale e' la somma vettoriale dei campi generati dalle singole cariche",
+      "Il campo totale e' il prodotto dei campi singoli",
+      "Il campo totale e' sempre nullo se ci sono piu' cariche",
+      "Il campo totale e' uguale al campo della carica piu' grande"
+    ],
+    answer: 0,
+    explanation: "Il principio di sovrapposizione afferma che il campo elettrico totale in un punto e' la somma vettoriale di tutti i campi generati dalle singole cariche.",
+    commonError: "Attenzione: e' una somma VETTORIALE, non scalare! Devi scomporre i vettori nelle componenti x e y.",
+    deepdive: "In pratica, per trovare il campo totale: 1) Calcola il campo di ogni carica singolarmente. 2) Scomponi ogni campo in componenti x e y. 3) Somma tutte le componenti x tra loro e tutte le y tra loro. 4) Usa il teorema di Pitagora per trovare il modulo del campo risultante.",
+    difficulty: 2,
+    topic: "Principio di Sovrapposizione"
+  },
+  {
+    text: "Per sommare campi elettrici di piu' cariche, si deve usare:",
+    type: "multiple",
+    options: [
+      "La somma vettoriale (scomposizione in componenti)",
+      "La somma algebrica semplice",
+      "La media dei campi",
+      "Il prodotto dei campi"
+    ],
+    answer: 0,
+    explanation: "I campi elettrici sono vettori, quindi vanno sommati con la somma vettoriale: si scompongono in componenti e si sommano le componenti corrispondenti.",
+    commonError: "La somma semplice funziona solo se i campi sono paralleli. In generale servono le componenti.",
+    deepdive: "Quando i vettori non sono allineati, devi usare la trigonometria. Per ogni vettore E: Ex = E·cos(θ) e Ey = E·sin(θ). Poi: Etot,x = somma di tutte le Ex, Etot,y = somma di tutte le Ey. Infine: |Etot| = √(Etot,x² + Etot,y²).",
+    difficulty: 2,
+    topic: "Principio di Sovrapposizione"
+  },
+  {
+    text: "Due cariche Q₁ = +4 μC e Q₂ = -2 μC sono poste sull'asse x, separate da 0,5 m. Nel punto medio, i campi generati dalle due cariche puntano:",
+    type: "multiple",
+    options: [
+      "Entrambi nella stessa direzione (si sommano)",
+      "In direzioni opposte (si sottraggono)",
+      "Perpendicolarmente tra loro",
+      "Non e' possibile determinarlo"
+    ],
+    answer: 0,
+    explanation: "Q₁ e' positiva e si trova a sinistra: il suo campo nel punto medio punta a destra (uscente). Q₂ e' negativa e si trova a destra: il suo campo 'attira' verso di se', quindi punta ancora a destra. Entrambi i campi puntano nella stessa direzione!",
+    commonError: "L'errore e' pensare che campi di cariche opposte si annullino. Bisogna ragionare sul verso in ogni punto specifico.",
+    deepdive: "Questo e' un caso importante: quando hai una carica + a sinistra e una - a destra, nel punto medio i campi si sommano (puntano entrambi verso destra). Il campo totale e' E₁ + E₂. Invece, se entrambe le cariche fossero positive, i campi nel punto medio punterebbero in versi opposti e si sottrarrebbero.",
+    difficulty: 3,
+    topic: "Principio di Sovrapposizione"
+  },
+
+  // =============================================
+  // FLUSSO DEL CAMPO ELETTRICO
+  // =============================================
+  {
+    text: "Qual e' la formula del flusso del campo elettrico attraverso una superficie piana?",
+    type: "multiple",
+    options: [
+      "Φ = E · A · cos(θ)",
+      "Φ = E · A · sin(θ)",
+      "Φ = E / A · cos(θ)",
+      "Φ = E + A · cos(θ)"
+    ],
+    answer: 0,
+    explanation: "Il flusso e' Φ = E · A · cos(θ), dove θ e' l'angolo tra il campo E e la normale alla superficie.",
+    commonError: "L'angolo θ e' tra il campo e la NORMALE alla superficie, non tra il campo e la superficie stessa.",
+    deepdive: "L'analogia della finestra aiuta: il flusso e' come il 'vento' che attraversa una finestra. E' massimo quando la finestra e' perpendicolare al vento (θ = 0°, cos0° = 1), e nullo quando e' parallela (θ = 90°, cos90° = 0). Pensa a θ come all'angolo di 'inclinazione' della superficie rispetto al campo.",
+    difficulty: 2,
+    topic: "Flusso del Campo Elettrico"
+  },
+  {
+    text: "Quando il flusso del campo elettrico attraverso una superficie e' massimo?",
+    type: "multiple",
+    options: [
+      "Quando il campo e' perpendicolare alla superficie (θ = 0°)",
+      "Quando il campo e' parallelo alla superficie (θ = 90°)",
+      "Quando il campo e' nullo",
+      "Quando la superficie e' molto piccola"
+    ],
+    answer: 0,
+    explanation: "Il flusso e' massimo quando θ = 0°, cioe' quando il campo attraversa la superficie perpendicolarmente (cos 0° = 1).",
+    commonError: "Attenzione: θ e' l'angolo tra E e la NORMALE. Quando E e' perpendicolare alla superficie, e' parallelo alla normale, quindi θ = 0°.",
+    deepdive: "Torniamo all'analogia della finestra: se il vento soffia dritto contro la finestra aperta, passa il massimo di aria. Se inclini la finestra fino a renderla parallela al vento, non passa piu' nulla. Nella formula: Φ = E·A·cos(0°) = E·A (massimo) oppure Φ = E·A·cos(90°) = 0 (nullo).",
+    difficulty: 2,
+    topic: "Flusso del Campo Elettrico"
+  },
+  {
+    text: "Il flusso del campo elettrico puo' essere negativo?",
+    type: "truefalse",
+    statement: "Il flusso del campo elettrico puo' assumere valori negativi.",
+    answer: true,
+    explanation: "Vero! Il flusso e' negativo quando il campo entra nella superficie dalla parte opposta al vettore area (normale), cioe' quando 90° < θ < 270° e cos(θ) < 0.",
+    commonError: "Il flusso non e' come un modulo: puo' essere positivo, negativo o nullo, a seconda dell'orientamento relativo tra campo e superficie.",
+    deepdive: "Il segno del flusso ha un significato fisico: flusso positivo = il campo 'esce' dalla superficie, flusso negativo = il campo 'entra'. Per una superficie chiusa (come nella legge di Gauss), il flusso netto ti dice se dentro c'e' una carica netta positiva (flusso > 0) o negativa (flusso < 0).",
+    difficulty: 2,
+    topic: "Flusso del Campo Elettrico"
+  },
+  {
+    text: "Nell'analogia usata negli appunti, il flusso del campo elettrico e' paragonato a:",
+    type: "multiple",
+    options: [
+      "Il vento che entra da una finestra",
+      "L'acqua che scorre in un tubo",
+      "La luce che attraversa una lente",
+      "Il calore di una stufa"
+    ],
+    answer: 0,
+    explanation: "Negli appunti il flusso e' paragonato al vento che entra da una finestra: piu' vento (E) e finestra piu' grande (A) significano piu' flusso.",
+    commonError: "Questa analogia e' presente nei tuoi appunti. Ricordala per la verifica: e' un modo semplice per spiegare il concetto.",
+    deepdive: "Tre fattori determinano il flusso, proprio come per il vento da una finestra: 1) Intensita' del vento (E). 2) Dimensione della finestra (Area A). 3) Orientamento della finestra rispetto al vento (angolo θ). Se la finestra e' perpendicolare al vento, entra il massimo. Se e' parallela, non entra nulla.",
+    difficulty: 1,
+    topic: "Flusso del Campo Elettrico"
+  },
+
+  // =============================================
+  // LEGGE DI GAUSS
+  // =============================================
+  {
+    text: "Cosa afferma la legge di Gauss?",
+    type: "multiple",
+    options: [
+      "Il flusso totale attraverso una superficie chiusa dipende solo dalla carica interna",
+      "Il flusso totale dipende dalla carica esterna alla superficie",
+      "Il flusso e' sempre nullo per qualsiasi superficie chiusa",
+      "Il flusso dipende dalla forma della superficie"
+    ],
+    answer: 0,
+    explanation: "La legge di Gauss afferma che il flusso totale Φ attraverso una superficie chiusa (gaussiana) e' uguale alla carica netta interna divisa per ε₀: Φ = Q_interna / ε₀.",
+    commonError: "Le cariche ESTERNE alla superficie non contribuiscono al flusso totale. Solo quelle INTERNE contano.",
+    deepdive: "Questo e' il concetto chiave: anche se ci sono cariche fuori dalla superficie, il loro contributo al flusso si annulla (il campo che 'entra' da un lato 'esce' dall'altro). Solo la carica netta all'interno determina il flusso. Se dentro ci sono +5 μC e -3 μC, la carica netta e' +2 μC e Φ = 2×10⁻⁶/ε₀.",
+    difficulty: 2,
+    topic: "Legge di Gauss"
+  },
+  {
+    text: "Qual e' la formula della legge di Gauss?",
+    type: "multiple",
+    options: [
+      "Φ = Q_interna / ε₀",
+      "Φ = Q_interna · ε₀",
+      "Φ = ε₀ / Q_interna",
+      "Φ = Q_interna / k"
+    ],
+    answer: 0,
+    explanation: "La legge di Gauss si scrive Φ_tot = Q_interna / ε₀, dove ε₀ = 8,85 × 10⁻¹² C²/(N·m²).",
+    commonError: "Non confondere ε₀ con k! Nella legge di Gauss si usa ε₀, non k.",
+    deepdive: "Il legame tra le due costanti e': k = 1/(4πε₀). Nella legge di Gauss il 4π 'scompare' naturalmente grazie alla simmetria sferica. Ecco perche' Gauss usa ε₀ e non k: la formula risulta piu' semplice e elegante.",
+    difficulty: 2,
+    topic: "Legge di Gauss"
+  },
+  {
+    text: "Quanto vale la costante dielettrica del vuoto ε₀?",
+    type: "multiple",
+    options: [
+      "8,85 × 10⁻¹² C²/(N·m²)",
+      "8,99 × 10⁹ N·m²/C²",
+      "6,67 × 10⁻¹¹ N·m²/kg²",
+      "1,6 × 10⁻¹⁹ C"
+    ],
+    answer: 0,
+    explanation: "ε₀ = 8,85 × 10⁻¹² C²/(N·m²). E' la costante dielettrica (o permittivita') del vuoto.",
+    commonError: "La seconda opzione e' k (costante di Coulomb), la terza e' G (costante gravitazionale), la quarta e' la carica dell'elettrone.",
+    deepdive: "ε₀ compare nella legge di Gauss (Φ = Q/ε₀) e nel legame con k (k = 1/4πε₀). Il suo valore numerico e' molto piccolo, il che riflette il fatto che le forze elettriche sono molto intense. Per la verifica, ricorda i valori: k ≈ 9 × 10⁹ e ε₀ ≈ 8,85 × 10⁻¹².",
+    difficulty: 1,
+    topic: "Legge di Gauss"
+  },
+  {
+    text: "Una superficie gaussiana sferica contiene una carica Q = +6 μC. Le cariche esterne contribuiscono al flusso totale?",
+    type: "truefalse",
+    statement: "Le cariche esterne alla superficie gaussiana contribuiscono al flusso totale attraverso la superficie.",
+    answer: false,
+    explanation: "Falso! Solo le cariche INTERNE alla superficie gaussiana contribuiscono al flusso totale. Le cariche esterne generano un flusso netto nullo (quello che entra esce dall'altra parte).",
+    commonError: "Molti pensano che tutte le cariche contribuiscano. In realta', per la legge di Gauss, solo Q_interna conta.",
+    deepdive: "Immagina una carica esterna: il suo campo attraversa la superficie entrando da un lato e uscendo dall'altro. Il flusso in entrata (negativo) e quello in uscita (positivo) si bilanciano perfettamente, dando un contributo netto nullo. Solo le cariche dentro la superficie possono creare un flusso 'sbilanciato'.",
+    difficulty: 2,
+    topic: "Legge di Gauss"
+  },
+  {
+    text: "Per una carica Q al centro di una sfera di raggio r, il flusso Φ = (k·Q/r²) · (4πr²). Dopo la semplificazione, cosa si ottiene?",
+    type: "multiple",
+    options: [
+      "Φ = Q / ε₀",
+      "Φ = k · Q",
+      "Φ = 4πkQ / r",
+      "Φ = Q · r²"
+    ],
+    answer: 0,
+    explanation: "Semplificando: Φ = k·Q·4π. Poiche' k = 1/(4πε₀), si ottiene Φ = Q/ε₀, che e' proprio la legge di Gauss!",
+    commonError: "Il passaggio chiave e' la sostituzione di k con 1/(4πε₀): i fattori 4π si cancellano e r² si semplifica.",
+    deepdive: "Ecco i passaggi completi: 1) Φ = (k·Q/r²)·(4πr²) = k·Q·4π (gli r² si cancellano). 2) Sostituisci k = 1/(4πε₀): Φ = [1/(4πε₀)]·Q·4π. 3) Il 4π si cancella sopra e sotto: Φ = Q/ε₀. Questo dimostra che il flusso non dipende dal raggio della sfera!",
+    difficulty: 3,
+    topic: "Legge di Gauss"
+  },
+
+  // =============================================
+  // CONFRONTI E CONCETTI TRASVERSALI
+  // =============================================
+  {
+    text: "Qual e' la differenza principale tra forza elettrica e campo elettrico?",
+    type: "multiple",
+    options: [
+      "La forza dipende da entrambe le cariche, il campo solo dalla sorgente",
+      "Sono la stessa cosa con nomi diversi",
+      "La forza si misura in N/C, il campo in Newton",
+      "Il campo dipende da entrambe le cariche, la forza solo dalla sorgente"
+    ],
+    answer: 0,
+    explanation: "La forza F = k·|q₁|·|q₂|/r² dipende da entrambe le cariche. Il campo E = k·|Q|/r² dipende solo dalla carica sorgente Q e dalla distanza.",
+    commonError: "Le unita' di misura sono invertite nell'opzione C: la forza si misura in Newton, il campo in N/C.",
+    deepdive: "Pensa cosi': il campo e' la 'preparazione' che la sorgente fa nello spazio. La forza e' cio' che accade quando una seconda carica 'sente' quel campo. Il campo c'e' sempre (creato da Q), la forza serve una seconda carica per manifestarsi. Formalmente: F = q₀ · E.",
+    difficulty: 2,
+    topic: "Campo Elettrico"
+  },
+  {
+    text: "La legge di Coulomb e' simile alla legge di gravitazione di Newton. Quale differenza fondamentale c'e'?",
+    type: "multiple",
+    options: [
+      "La forza elettrica puo' essere attrattiva o repulsiva, la gravita' solo attrattiva",
+      "La gravita' puo' essere repulsiva, la forza elettrica no",
+      "Hanno formule completamente diverse",
+      "Non c'e' alcuna somiglianza"
+    ],
+    answer: 0,
+    explanation: "Entrambe dipendono dal prodotto di due grandezze e da 1/r², ma la forza elettrica puo' essere attrattiva o repulsiva (a seconda dei segni delle cariche), mentre la gravita' e' sempre e solo attrattiva.",
+    commonError: "Le formule sono strutturalmente identiche (prodotto/r²), ma con costanti e grandezze diverse.",
+    deepdive: "Confronto: F_el = k·|q₁|·|q₂|/r² e F_grav = G·m₁·m₂/r². La struttura e' la stessa! Le differenze: 1) la forza elettrica puo' attrarre o respingere, la gravita' solo attrarre. 2) k e' enorme (≈10⁹), G e' piccolissima (≈10⁻¹¹): le forze elettriche sono molto piu' forti. 3) Le cariche possono essere positive o negative, le masse sono sempre positive.",
+    difficulty: 2,
+    topic: "Legge di Coulomb"
+  },
+  {
+    text: "Completa: il campo elettrico si misura in ___ e rappresenta la forza per unita' di ___.",
+    type: "completion",
+    answer: ["N/C", "carica"],
+    explanation: "Il campo elettrico si misura in N/C (Newton su Coulomb) e rappresenta la forza per unita' di carica: E = F/q₀.",
+    commonError: "Non confondere con il potenziale (V = J/C) o con l'energia (Joule).",
+    deepdive: "L'unita' N/C ci dice letteralmente cosa fa il campo: applica una forza di tot Newton per ogni Coulomb di carica che viene posto in quel punto. Se E = 100 N/C e metti una carica di 2 C, subirai una forza di 200 N. Se metti 0,5 C, subirai 50 N. Il campo e' un 'moltiplicatore' di forza.",
+    difficulty: 1,
+    topic: "Campo Elettrico"
+  },
+  {
+    text: "Se triplicassi la carica q₁ e dimezzassi la distanza, come cambierebbe la forza di Coulomb?",
+    type: "multiple",
+    options: [
+      "Diventa 12 volte piu' grande",
+      "Diventa 6 volte piu' grande",
+      "Diventa 3 volte piu' grande",
+      "Diventa 1,5 volte piu' grande"
+    ],
+    answer: 0,
+    explanation: "Se q₁ → 3q₁ e r → r/2: F' = k·3q₁·q₂/(r/2)² = k·3q₁·q₂/(r²/4) = 12·k·q₁·q₂/r² = 12F. La forza diventa 12 volte piu' grande.",
+    commonError: "Molti dimenticano che dimezzare r significa quadruplicare la forza (perche' r e' al quadrato), non solo raddoppiarla.",
+    deepdive: "Analizziamo i due effetti separatamente: 1) Triplicare q₁: la forza triplica (F e' proporzionale a q₁). 2) Dimezzare r: r² diventa (r/2)² = r²/4, quindi la forza si moltiplica per 4. Effetto combinato: 3 × 4 = 12. E' un esercizio tipico da verifica!",
+    difficulty: 3,
+    topic: "Legge di Coulomb"
+  },
+  {
+    text: "Un campo elettrico E = 500 N/C agisce su una carica q = 2 × 10⁻⁶ C. Quanto vale la forza? Rispondi in Newton (usa il punto come separatore decimale).",
+    type: "numeric",
+    answer: 0.001,
+    tolerance: 0.0001,
+    explanation: "F = q · E = 2×10⁻⁶ × 500 = 1×10⁻³ = 0,001 N.",
+    commonError: "Ricorda che dalla definizione E = F/q₀ si ricava F = q₀ · E. Basta moltiplicare!",
+    deepdive: "Dalla definizione di campo E = F/q, ricaviamo F = q·E. Questo e' il legame fondamentale tra forza e campo. Qui: F = 2×10⁻⁶ C × 500 N/C = 1000 × 10⁻⁶ N = 10⁻³ N = 0,001 N = 1 millinewton.",
+    difficulty: 2,
+    topic: "Campo Elettrico"
+  },
+  {
+    text: "In una superficie gaussiana sono presenti le cariche +8 μC, -3 μC e +1 μC. Quanto vale il flusso totale? (ε₀ = 8,85 × 10⁻¹² C²/(N·m²)). Rispondi in N·m²/C, arrotondando alle migliaia.",
+    type: "numeric",
+    answer: 678000,
+    tolerance: 20000,
+    explanation: "Q_interna = +8 -3 +1 = +6 μC = 6×10⁻⁶ C. Φ = Q/ε₀ = 6×10⁻⁶ / 8,85×10⁻¹² ≈ 678000 N·m²/C.",
+    commonError: "Ricorda di sommare algebricamente tutte le cariche (con il segno!) per trovare Q_interna.",
+    deepdive: "Passaggi: 1) Somma le cariche: +8 -3 +1 = +6 μC. 2) Converti: 6 μC = 6 × 10⁻⁶ C. 3) Applica Gauss: Φ = 6×10⁻⁶ / 8,85×10⁻¹² = (6/8,85) × 10⁶ ≈ 0,678 × 10⁶ ≈ 678000 N·m²/C. La Q_interna e' la somma algebrica: i segni contano!",
+    difficulty: 3,
+    topic: "Legge di Gauss"
+  },
+  {
+    text: "Nella dimostrazione della legge di Gauss per una sfera, perche' r² si cancella?",
+    type: "multiple",
+    options: [
+      "Perche' il campo ha r² al denominatore e l'area della sfera ha r² al numeratore",
+      "Perche' il campo non dipende dalla distanza",
+      "E' un'approssimazione, non si cancella davvero",
+      "Perche' la costante k contiene r²"
+    ],
+    answer: 0,
+    explanation: "E = k·Q/r² (r² al denominatore) e A = 4πr² (r² al numeratore). Moltiplicando: E·A = k·Q·4π, e r² si semplifica.",
+    commonError: "Non e' un'approssimazione: la cancellazione e' esatta e mostra che il flusso non dipende dal raggio!",
+    deepdive: "Questa cancellazione e' profonda: significa che non importa quanto grande sia la sfera gaussiana, il flusso rimane sempre Q/ε₀. Puoi prendere una sfera di 1 cm o di 1 km di raggio attorno alla stessa carica: il flusso sara' identico. Questo e' il cuore della legge di Gauss.",
+    difficulty: 3,
+    topic: "Legge di Gauss"
+  },
+  {
+    text: "La forza di Coulomb e' una grandezza:",
+    type: "multiple",
+    options: [
+      "Vettoriale",
+      "Scalare",
+      "Adimensionale",
+      "Costante"
+    ],
+    answer: 0,
+    explanation: "La forza di Coulomb e' una grandezza vettoriale: ha modulo, direzione (la congiungente) e verso (attrattivo o repulsivo).",
+    commonError: "La formula F = k|q₁||q₂|/r² da' solo il modulo. Direzione e verso si determinano analizzando i segni delle cariche.",
+    deepdive: "Come ogni forza, anche quella di Coulomb e' un vettore con tre proprieta': 1) Modulo: dato dalla formula. 2) Direzione: la retta che congiunge le cariche. 3) Verso: attrattivo (cariche opposte) o repulsivo (cariche uguali). Negli esercizi, spesso devi disegnare il vettore forza prima di fare i calcoli.",
+    difficulty: 1,
+    topic: "Legge di Coulomb"
+  },
+  {
+    text: "Se il flusso totale attraverso una superficie gaussiana chiusa e' zero, cosa puoi concludere?",
+    type: "multiple",
+    options: [
+      "La carica netta all'interno e' zero",
+      "Non ci sono cariche all'interno",
+      "Il campo elettrico e' nullo ovunque sulla superficie",
+      "La superficie non e' chiusa"
+    ],
+    answer: 0,
+    explanation: "Se Φ = 0 allora Q_interna/ε₀ = 0, cioe' Q_interna = 0. Ma attenzione: potrebbe esserci una carica +2 e una -2 all'interno (carica netta zero)!",
+    commonError: "Flusso nullo NON significa 'nessuna carica dentro'. Significa che la SOMMA algebrica delle cariche interne e' zero.",
+    deepdive: "Esempio: dentro la superficie ci sono +5 μC e -5 μC. La carica netta e' 0, quindi il flusso e' 0. Ma le cariche ci sono eccome! Inoltre, flusso nullo non implica campo nullo: il campo puo' essere intenso in vari punti della superficie, ma il bilancio tra flusso entrante e uscente e' zero.",
+    difficulty: 3,
+    topic: "Legge di Gauss"
+  }
+];
+
+/* ============================================
+   ULTRA PREPARAZIONE - 5 domande da 10
+   Esercizi avanzati con ragionamento multi-step
+   ============================================ */
+const ULTRA_QUESTIONS = [
+  {
+    text: "Un condensatore piano (vuoto) ha armature di area A = 0,04 m² distanti d = 1 mm. Viene caricato a V = 300 V e poi staccato dal generatore. Calcola l'energia immagazzinata. (ε₀ = 8,85 × 10⁻¹²). Rispondi in microjoule (μJ), arrotondando all'intero.",
+    type: "numeric",
+    answer: 16,
+    tolerance: 2,
+    explanation: "C = ε₀A/d = 8,85×10⁻¹² × 0,04 / 0,001 = 3,54×10⁻¹⁰ F. U = ½CV² = 0,5 × 3,54×10⁻¹⁰ × 300² = 0,5 × 3,54×10⁻¹⁰ × 90000 ≈ 1,59×10⁻⁵ J ≈ 16 μJ.",
+    commonError: "Dimenticare il fattore ½, oppure non quadrare V. Conversione errata di d da mm a m.",
+    deepdive: "Una volta staccato dal generatore la carica Q resta costante. Se cambi d (es. allontani le armature), C diminuisce e V aumenta in modo che Q = CV resti fissa. L'energia ½Q²/C aumenta a spese del lavoro fatto da chi sposta le armature.",
+    difficulty: 3,
+    topic: "Ultra Preparazione"
+  },
+  {
+    text: "Due cariche puntiformi q₁ = +4 μC e q₂ = -4 μC sono poste a distanza r = 0,2 m. Calcola l'energia potenziale del sistema. (K = 9 × 10⁹). Rispondi in Joule, arrotondando a due decimali.",
+    type: "numeric",
+    answer: -0.72,
+    tolerance: 0.05,
+    explanation: "U = K·q₁·q₂/r = 9×10⁹ × (+4×10⁻⁶) × (-4×10⁻⁶) / 0,2 = -144×10⁻³ / 0,2 = -0,72 J.",
+    commonError: "Dimenticare il segno: con cariche discordi U e' NEGATIVA (sistema legato). Inoltre confondere la formula con quella della forza (1/r² invece di 1/r).",
+    deepdive: "Energia negativa = sistema legato: per separare le due cariche serve fornire energia (+0,72 J). Analogo all'energia gravitazionale negativa di un satellite legato ad un pianeta.",
+    difficulty: 3,
+    topic: "Ultra Preparazione"
+  },
+  {
+    text: "Un elettrone (e = 1,6×10⁻¹⁹ C) viene accelerato da fermo attraverso una d.d.p. di 500 V. Calcola l'energia cinetica acquisita. Rispondi in elettronvolt (eV).",
+    type: "numeric",
+    answer: 500,
+    tolerance: 5,
+    explanation: "Per definizione, un elettrone che attraversa 1 V acquista 1 eV di energia. Quindi attraversando 500 V acquista 500 eV. In Joule: ΔE = e·ΔV = 1,6×10⁻¹⁹ × 500 = 8×10⁻¹⁷ J.",
+    commonError: "Cercare di fare conti complicati senza accorgersi che la conversione e' immediata: 1 eV ↔ 1 V per la carica elementare.",
+    deepdive: "L'eV e' nato proprio per questi calcoli: invece di scrivere 8×10⁻¹⁷ J si scrive 500 eV. Per neutralita' del segno il risultato e' lo stesso: l'elettrone (carica negativa) acquista energia attraversando una d.d.p. che lo accelera.",
+    difficulty: 2,
+    topic: "Ultra Preparazione"
+  },
+  {
+    text: "Tre cariche identiche q = +2 μC sono ai vertici di un triangolo equilatero di lato L = 0,3 m. Calcola l'energia potenziale totale del sistema. (K = 9 × 10⁹). Rispondi in millijoule (mJ), arrotondando all'intero.",
+    type: "numeric",
+    answer: 360,
+    tolerance: 15,
+    explanation: "Tre coppie identiche, ciascuna con U_ij = K·q²/L = 9×10⁹ × (2×10⁻⁶)² / 0,3 = 9×10⁹ × 4×10⁻¹² / 0,3 = 0,12 J. Totale: U = 3 × 0,12 = 0,36 J = 360 mJ.",
+    commonError: "Sommare solo 2 coppie invece di 3, oppure contare 6 coppie (in un triangolo le coppie distinte sono 3, non 6).",
+    deepdive: "Per n cariche le coppie sono n(n-1)/2: 3 cariche → 3 coppie, 4 cariche → 6 coppie, 5 cariche → 10 coppie. Ogni coppia va contata UNA volta sola (U_ij = U_ji).",
+    difficulty: 3,
+    topic: "Ultra Preparazione"
+  },
+  {
+    text: "All'interno di un condensatore piano, il campo elettrico vale E = 5×10⁵ V/m e tra le armature c'e' il vuoto. Calcola la densita' di energia immagazzinata nel campo. (ε₀ = 8,85 × 10⁻¹²). Rispondi in J/m³, arrotondando a due decimali.",
+    type: "numeric",
+    answer: 1.11,
+    tolerance: 0.1,
+    explanation: "u = ½ε₀E² = 0,5 × 8,85×10⁻¹² × (5×10⁵)² = 0,5 × 8,85×10⁻¹² × 2,5×10¹¹ ≈ 1,106 J/m³ ≈ 1,11 J/m³.",
+    commonError: "Dimenticare il quadrato sul campo (mettere E al posto di E²). Oppure dimenticare il fattore ½.",
+    deepdive: "L'energia e' 'distribuita' nello spazio dove c'e' campo elettrico. Nel condensatore l'energia totale U = u·V_olume = ½ε₀E² × (A·d). Combinando con E = V/d e C = ε₀A/d si ottiene U = ½CV².",
+    difficulty: 3,
+    topic: "Ultra Preparazione"
+  }
+];
+
+/* ============================================
+   VARIABILI DI STATO
+   ============================================ */
+let currentQuestions = [];  // domande della sessione corrente
+let currentIndex = 0;       // indice domanda corrente
+let correctCount = 0;       // risposte corrette
+let wrongCount = 0;         // risposte errate
+let history = [];           // cronologia risposte
+let topicStats = {};        // statistiche per argomento
+let errorQuestionIds = [];  // indici domande sbagliate (per ripasso)
+let answered = false;       // se la domanda corrente ha ricevuto risposta
+
+/* ============================================
+   INIZIALIZZAZIONE
+   ============================================ */
+(function init() {
+  // Popola i filtri per argomento
+  const topics = [...new Set(QUESTIONS.map(q => q.topic))];
+  const grid = document.getElementById('topic-filters');
+  topics.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'topic-item';
+    div.innerHTML = `<input type="checkbox" checked value="${t}" class="topic-cb"> ${t}`;
+    grid.appendChild(div);
+  });
+
+  // Mostra statistiche precedenti da localStorage
+  loadPreviousStats();
+})();
+
+/* Carica statistiche salvate */
+function loadPreviousStats() {
+  const saved = localStorage.getItem('energia_potenziale_stats');
+  if (saved) {
+    const data = JSON.parse(saved);
+    document.getElementById('prev-stats').style.display = 'block';
+    document.getElementById('prev-stats-text').textContent =
+      `${data.correct}/${data.total} corrette (${data.percentage}%) - ${data.date}`;
+    // Mostra pulsante "ripassa errori" se ci sono errori salvati
+    const savedErrors = localStorage.getItem('energia_potenziale_errors');
+    if (savedErrors && JSON.parse(savedErrors).length > 0) {
+      document.getElementById('btn-errors').style.display = 'inline-block';
+    }
+  }
+}
+
+/* Cancella progressi */
+function clearProgress() {
+  localStorage.removeItem('energia_potenziale_stats');
+  localStorage.removeItem('energia_potenziale_errors');
+  document.getElementById('prev-stats').style.display = 'none';
+  document.getElementById('btn-errors').style.display = 'none';
+}
+
+/* ============================================
+   AVVIO QUIZ
+   ============================================ */
+function startQuiz(mode) {
+  // Reset stato
+  currentIndex = 0;
+  correctCount = 0;
+  wrongCount = 0;
+  history = [];
+  topicStats = {};
+  errorQuestionIds = [];
+  answered = false;
+
+  // Seleziona domande in base alla modalita'
+  const selectedTopics = [...document.querySelectorAll('.topic-cb:checked')].map(cb => cb.value);
+
+  if (mode === 'ultra') {
+    currentQuestions = [...ULTRA_QUESTIONS];
+  } else if (mode === 'errors') {
+    const savedErrors = localStorage.getItem('energia_potenziale_errors');
+    if (savedErrors) {
+      const errorIds = JSON.parse(savedErrors);
+      currentQuestions = errorIds.map(id => QUESTIONS[id]).filter(q => q);
+    }
+    if (currentQuestions.length === 0) {
+      alert('Non ci sono errori salvati da ripassare!');
+      return;
+    }
+  } else {
+    currentQuestions = QUESTIONS.filter(q => selectedTopics.includes(q.topic));
+    if (currentQuestions.length === 0) {
+      alert('Seleziona almeno un argomento!');
+      return;
+    }
+  }
+
+  if (mode === 'random') {
+    shuffleArray(currentQuestions);
+  } else if (mode === 'all') {
+    // Ordina per difficolta' crescente
+    currentQuestions.sort((a, b) => a.difficulty - b.difficulty);
+  }
+
+  // Inizializza statistiche per argomento
+  const topics = [...new Set(currentQuestions.map(q => q.topic))];
+  topics.forEach(t => { topicStats[t] = { correct: 0, wrong: 0, total: 0 }; });
+
+  // Mostra schermata quiz
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('total-q').textContent = currentQuestions.length;
+
+  showQuestion();
+}
+
+/* Mescola array (Fisher-Yates) */
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+/* ============================================
+   MOSTRA DOMANDA
+   ============================================ */
+function showQuestion() {
+  answered = false;
+  const q = currentQuestions[currentIndex];
+
+  // Aggiorna header
+  document.getElementById('current-q').textContent = currentIndex + 1;
+  document.getElementById('score-correct').textContent = correctCount;
+  document.getElementById('score-wrong').textContent = wrongCount;
+  const pct = ((currentIndex) / currentQuestions.length) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+
+  // Meta (argomento, difficolta', tipo)
+  const meta = document.getElementById('question-meta');
+  const diffLabels = ['Facile', 'Media', 'Difficile'];
+  const typeLabels = { multiple: 'Scelta multipla', truefalse: 'Vero/Falso', numeric: 'Esercizio numerico', completion: 'Completamento' };
+  meta.innerHTML = `
+    <span class="badge badge-topic">${q.topic}</span>
+    <span class="badge badge-diff-${q.difficulty}">${diffLabels[q.difficulty - 1]}</span>
+    <span class="badge badge-type">${typeLabels[q.type]}</span>
+  `;
+
+  // Testo domanda
+  document.getElementById('question-text').textContent = q.text;
+
+  // Area risposta
+  const area = document.getElementById('answer-area');
+  area.innerHTML = '';
+  document.getElementById('submit-area').style.display = 'none';
+
+  if (q.type === 'multiple') {
+    // Crea array di indici e mescolali per randomizzare l'ordine delle opzioni
+    const indices = q.options.map((_, i) => i);
+    shuffleArray(indices);
+    q._shuffledIndices = indices; // salva la mappatura per la correzione
+
+    const container = document.createElement('div');
+    container.className = 'options-container';
+    indices.forEach((origIdx, displayIdx) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = q.options[origIdx];
+      btn.onclick = () => handleMultipleChoice(displayIdx);
+      btn.id = 'opt-' + displayIdx;
+      btn.dataset.origIdx = origIdx;
+      container.appendChild(btn);
+    });
+    area.appendChild(container);
+  } else if (q.type === 'truefalse') {
+    // Mostra l'affermazione
+    const stmt = document.createElement('p');
+    stmt.style.cssText = 'font-style:italic; margin-bottom:15px; padding:12px; background:#f0f0f0; border-radius:8px;';
+    stmt.textContent = '\"' + q.statement + '\"';
+    area.appendChild(stmt);
+
+    const container = document.createElement('div');
+    container.className = 'options-container';
+    ['Vero', 'Falso'].forEach((label, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = label;
+      btn.onclick = () => handleTrueFalse(i === 0);
+      btn.id = 'tf-' + i;
+      container.appendChild(btn);
+    });
+    area.appendChild(container);
+  } else if (q.type === 'numeric') {
+    const container = document.createElement('div');
+    container.className = 'answer-input-container';
+    container.innerHTML = `<input type="text" class="answer-input" id="numeric-input" placeholder="Scrivi il valore numerico..." onkeydown="if(event.key==='Enter')checkOpenAnswer()">`;
+    area.appendChild(container);
+    document.getElementById('submit-area').style.display = 'block';
+  } else if (q.type === 'completion') {
+    const container = document.createElement('div');
+    container.className = 'answer-input-container';
+    container.innerHTML = `
+      <input type="text" class="answer-input" id="completion-input-0" placeholder="Prima parola mancante..." style="margin-bottom:8px;" onkeydown="if(event.key==='Enter')document.getElementById('completion-input-1').focus()">
+      <input type="text" class="answer-input" id="completion-input-1" placeholder="Seconda parola mancante..." onkeydown="if(event.key==='Enter')checkOpenAnswer()">
+    `;
+    area.appendChild(container);
+    document.getElementById('submit-area').style.display = 'block';
+  }
+
+  // Nascondi feedback, professore e pulsante next
+  document.getElementById('feedback-box').style.display = 'none';
+  document.getElementById('deepdive-box').style.display = 'none';
+  document.getElementById('next-btn-container').style.display = 'none';
+  document.getElementById('prof-container').className = 'prof-container';
+}
+
+/* ============================================
+   GESTIONE RISPOSTE
+   ============================================ */
+
+/* Scelta multipla */
+function handleMultipleChoice(displayIdx) {
+  if (answered) return;
+  answered = true;
+
+  const q = currentQuestions[currentIndex];
+  // Ricava l'indice originale dalla mappatura mescolata
+  const origSelected = q._shuffledIndices[displayIdx];
+  const isCorrect = origSelected === q.answer;
+
+  // Evidenzia opzioni usando l'indice originale salvato in data-origIdx
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    const origIdx = parseInt(btn.dataset.origIdx);
+    if (origIdx === q.answer) btn.classList.add('correct');
+    if (i === displayIdx && !isCorrect) btn.classList.add('wrong');
+  });
+
+  processAnswer(isCorrect, q);
+}
+
+/* Vero/Falso */
+function handleTrueFalse(selected) {
+  if (answered) return;
+  answered = true;
+
+  const q = currentQuestions[currentIndex];
+  const isCorrect = selected === q.answer;
+
+  const correctIdx = q.answer ? 0 : 1;
+  const selectedIdx = selected ? 0 : 1;
+
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (i === correctIdx) btn.classList.add('correct');
+    if (i === selectedIdx && !isCorrect) btn.classList.add('wrong');
+  });
+
+  processAnswer(isCorrect, q);
+}
+
+/* Risposta aperta (numerica o completamento) */
+function checkOpenAnswer() {
+  if (answered) return;
+  answered = true;
+
+  const q = currentQuestions[currentIndex];
+  let isCorrect = false;
+
+  if (q.type === 'numeric') {
+    const input = document.getElementById('numeric-input');
+    const val = parseFloat(input.value.replace(',', '.'));
+    isCorrect = !isNaN(val) && Math.abs(val - q.answer) <= q.tolerance;
+    input.style.borderColor = isCorrect ? 'var(--success)' : 'var(--danger)';
+    input.style.background = isCorrect ? 'var(--success-light)' : 'var(--danger-light)';
+  } else if (q.type === 'completion') {
+    const inputs = [
+      document.getElementById('completion-input-0').value.trim().toLowerCase(),
+      document.getElementById('completion-input-1').value.trim().toLowerCase()
+    ];
+    const answers = q.answer.map(a => a.toLowerCase());
+    isCorrect = inputs[0].includes(answers[0]) && inputs[1].includes(answers[1]);
+
+    [0, 1].forEach(i => {
+      const el = document.getElementById('completion-input-' + i);
+      const ok = inputs[i].includes(answers[i]);
+      el.style.borderColor = ok ? 'var(--success)' : 'var(--danger)';
+      el.style.background = ok ? 'var(--success-light)' : 'var(--danger-light)';
+    });
+  }
+
+  processAnswer(isCorrect, q);
+}
+
+/* Logica comune di elaborazione risposta */
+function processAnswer(isCorrect, q) {
+  // Aggiorna contatori
+  if (isCorrect) {
+    correctCount++;
+    topicStats[q.topic].correct++;
+  } else {
+    wrongCount++;
+    topicStats[q.topic].wrong++;
+    // Salva indice per ripasso
+    const globalIdx = QUESTIONS.indexOf(q);
+    if (globalIdx !== -1) errorQuestionIds.push(globalIdx);
+  }
+  topicStats[q.topic].total++;
+
+  // Cronologia
+  history.push({
+    question: q.text,
+    topic: q.topic,
+    correct: isCorrect,
+    difficulty: q.difficulty
+  });
+
+  // Mostra feedback
+  showFeedback(isCorrect, q);
+
+  // Aggiorna punteggio
+  document.getElementById('score-correct').textContent = correctCount;
+  document.getElementById('score-wrong').textContent = wrongCount;
+}
+
+/* ============================================
+   FEEDBACK E APPROFONDIMENTI
+   ============================================ */
+/* ============================================
+   PROF. PALUDETTO — SVG CARTOON
+   Ispirato alla foto: capelli ricci scuri, barba,
+   occhiali, espressione autorevole
+   ============================================ */
+
+// SVG del prof felice/approvazione
+const PROF_SVG_HAPPY = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sfondo glow verde -->
+  <defs>
+    <radialGradient id="glowG" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#06d6a0;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#06d6a0;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowG)"/>
+  <!-- Corpo/giacca -->
+  <path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+  <path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#1e40af" stroke="none"/>
+  <!-- Collo -->
+  <rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/>
+  <!-- Testa -->
+  <ellipse cx="110" cy="105" rx="48" ry="52" fill="#deb887"/>
+  <!-- Capelli ricci scuri -->
+  <path d="M62 95 Q58 55 80 42 Q95 33 110 32 Q125 33 140 42 Q162 55 158 95" fill="#2c1810" stroke="#1a0f0a" stroke-width="1"/>
+  <circle cx="68" cy="82" r="8" fill="#2c1810"/><circle cx="72" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="152" cy="82" r="8" fill="#2c1810"/><circle cx="148" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="78" cy="90" r="6" fill="#2c1810"/><circle cx="142" cy="90" r="6" fill="#2c1810"/>
+  <circle cx="85" cy="65" r="6" fill="#2c1810"/><circle cx="135" cy="65" r="6" fill="#2c1810"/>
+  <circle cx="95" cy="50" r="7" fill="#2c1810"/><circle cx="125" cy="50" r="7" fill="#2c1810"/>
+  <circle cx="110" cy="45" r="8" fill="#2c1810"/>
+  <circle cx="100" cy="55" r="5" fill="#2c1810"/><circle cx="120" cy="55" r="5" fill="#2c1810"/>
+  <!-- Barba -->
+  <path d="M78 118 Q80 145 110 152 Q140 145 142 118 Q142 130 130 140 Q110 150 90 140 Q78 130 78 118Z" fill="#3d2914" stroke="#2c1810" stroke-width="1"/>
+  <path d="M75 108 Q72 125 78 118" fill="#3d2914"/><path d="M145 108 Q148 125 142 118" fill="#3d2914"/>
+  <!-- Occhiali -->
+  <rect x="76" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <rect x="116" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <line x1="104" y1="102" x2="116" y2="102" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="76" y1="100" x2="66" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="144" y1="100" x2="154" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <!-- Occhi felici (archi sorridenti) -->
+  <path d="M84 102 Q90 96 96 102" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M124 102 Q130 96 136 102" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Sopracciglia alzate (contento) -->
+  <path d="M78 86 Q90 80 100 84" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M120 84 Q130 80 142 86" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Bocca sorridente (nella barba) -->
+  <path d="M96 132 Q110 142 124 132" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Pollice su -->
+  <g transform="translate(165,140) rotate(-15)">
+    <rect x="0" y="12" width="18" height="26" rx="5" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/>
+    <rect x="4" y="-8" width="12" height="24" rx="6" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/>
+  </g>
+  <!-- Badge check -->
+  <circle cx="180" cy="45" r="18" fill="#06d6a0"/>
+  <path d="M171 45 L177 51 L189 39" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+// SVG del prof arrabbiato/disapprovazione
+const PROF_SVG_ANGRY = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sfondo glow rosso -->
+  <defs>
+    <radialGradient id="glowR" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ef476f;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#ef476f;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowR)"/>
+  <!-- Corpo/giacca -->
+  <path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+  <path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#1e40af" stroke="none"/>
+  <!-- Collo -->
+  <rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/>
+  <!-- Testa -->
+  <ellipse cx="110" cy="105" rx="48" ry="52" fill="#deb887"/>
+  <!-- Capelli ricci scuri -->
+  <path d="M62 95 Q58 55 80 42 Q95 33 110 32 Q125 33 140 42 Q162 55 158 95" fill="#2c1810" stroke="#1a0f0a" stroke-width="1"/>
+  <circle cx="68" cy="82" r="8" fill="#2c1810"/><circle cx="72" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="152" cy="82" r="8" fill="#2c1810"/><circle cx="148" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="78" cy="90" r="6" fill="#2c1810"/><circle cx="142" cy="90" r="6" fill="#2c1810"/>
+  <circle cx="85" cy="65" r="6" fill="#2c1810"/><circle cx="135" cy="65" r="6" fill="#2c1810"/>
+  <circle cx="95" cy="50" r="7" fill="#2c1810"/><circle cx="125" cy="50" r="7" fill="#2c1810"/>
+  <circle cx="110" cy="45" r="8" fill="#2c1810"/>
+  <circle cx="100" cy="55" r="5" fill="#2c1810"/><circle cx="120" cy="55" r="5" fill="#2c1810"/>
+  <!-- Barba -->
+  <path d="M78 118 Q80 145 110 152 Q140 145 142 118 Q142 130 130 140 Q110 150 90 140 Q78 130 78 118Z" fill="#3d2914" stroke="#2c1810" stroke-width="1"/>
+  <path d="M75 108 Q72 125 78 118" fill="#3d2914"/><path d="M145 108 Q148 125 142 118" fill="#3d2914"/>
+  <!-- Occhiali -->
+  <rect x="76" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <rect x="116" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <line x1="104" y1="102" x2="116" y2="102" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="76" y1="100" x2="66" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="144" y1="100" x2="154" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <!-- Occhi arrabbiati (puntini intensi) -->
+  <circle cx="90" cy="101" r="3.5" fill="#1a1a2e"/>
+  <circle cx="130" cy="101" r="3.5" fill="#1a1a2e"/>
+  <!-- Sopracciglia aggrottate -->
+  <path d="M78 88 Q88 82 100 88" fill="none" stroke="#2c1810" stroke-width="3" stroke-linecap="round" transform="rotate(8, 89, 85)"/>
+  <path d="M120 88 Q132 82 142 88" fill="none" stroke="#2c1810" stroke-width="3" stroke-linecap="round" transform="rotate(-8, 131, 85)"/>
+  <!-- Bocca contrariata -->
+  <path d="M96 135 Q110 128 124 135" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Mano facepalm -->
+  <g transform="translate(152,120) rotate(10)">
+    <rect x="0" y="0" width="22" height="14" rx="5" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/>
+    <rect x="3" y="-6" width="5" height="10" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/>
+    <rect x="9" y="-8" width="5" height="12" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/>
+    <rect x="15" y="-6" width="5" height="10" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/>
+  </g>
+  <!-- Badge X -->
+  <circle cx="180" cy="45" r="18" fill="#ef476f"/>
+  <path d="M173 38 L187 52 M187 38 L173 52" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Vena frustrazione -->
+  <g transform="translate(55,55)">
+    <path d="M0 5 L5 0 L10 5 L5 10 Z" fill="none" stroke="#ef476f" stroke-width="2"/>
+  </g>
+</svg>`;
+
+// SVG versione neutra per header
+const PROF_SVG_NEUTRAL = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glowN" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#4361ee;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#4361ee;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowN)"/>
+  <path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+  <path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#1e40af" stroke="none"/>
+  <rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/>
+  <ellipse cx="110" cy="105" rx="48" ry="52" fill="#deb887"/>
+  <path d="M62 95 Q58 55 80 42 Q95 33 110 32 Q125 33 140 42 Q162 55 158 95" fill="#2c1810" stroke="#1a0f0a" stroke-width="1"/>
+  <circle cx="68" cy="82" r="8" fill="#2c1810"/><circle cx="72" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="152" cy="82" r="8" fill="#2c1810"/><circle cx="148" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="78" cy="90" r="6" fill="#2c1810"/><circle cx="142" cy="90" r="6" fill="#2c1810"/>
+  <circle cx="85" cy="65" r="6" fill="#2c1810"/><circle cx="135" cy="65" r="6" fill="#2c1810"/>
+  <circle cx="95" cy="50" r="7" fill="#2c1810"/><circle cx="125" cy="50" r="7" fill="#2c1810"/>
+  <circle cx="110" cy="45" r="8" fill="#2c1810"/>
+  <circle cx="100" cy="55" r="5" fill="#2c1810"/><circle cx="120" cy="55" r="5" fill="#2c1810"/>
+  <path d="M78 118 Q80 145 110 152 Q140 145 142 118 Q142 130 130 140 Q110 150 90 140 Q78 130 78 118Z" fill="#3d2914" stroke="#2c1810" stroke-width="1"/>
+  <path d="M75 108 Q72 125 78 118" fill="#3d2914"/><path d="M145 108 Q148 125 142 118" fill="#3d2914"/>
+  <rect x="76" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <rect x="116" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <line x1="104" y1="102" x2="116" y2="102" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="76" y1="100" x2="66" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="144" y1="100" x2="154" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <circle cx="90" cy="101" r="3" fill="#1a1a2e"/>
+  <circle cx="130" cy="101" r="3" fill="#1a1a2e"/>
+  <path d="M80 86 Q90 82 100 85" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M120 85 Q130 82 140 86" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M100 134 L120 134" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+</svg>`;
+
+// Inietta SVG nei container
+(function initProfSVG() {
+  document.getElementById('prof-svg-happy').innerHTML = PROF_SVG_HAPPY;
+  document.getElementById('prof-svg-angry').innerHTML = PROF_SVG_ANGRY;
+  document.getElementById('prof-header-svg').innerHTML = PROF_SVG_NEUTRAL;
+})();
+
+/* Frasi del Prof. Paludetto */
+const PROF_CORRECT_PHRASES = [
+  "Bene. Questa e' fisica fatta con criterio.",
+  "Corretto. Finalmente una risposta degna.",
+  "Ottimo. Qui il campo elettrico non ti spaventa.",
+  "Bravo. Coulomb sarebbe soddisfatto.",
+  "Si', ci siamo. Ragionamento pulito.",
+  "Esatto. Vedo che qualcuno ha studiato.",
+  "Risposta corretta. Continua cosi' e il 10 e' tuo.",
+  "Perfetto. Gauss approva dal paradiso dei fisici.",
+  "Bene bene. Questo lo metto sul registro con il segno piu'.",
+  "Corretto. Non ti servira' neanche il ripasso.",
+  "Giusto. Hai la stoffa del fisico.",
+  "Ok, non male. Forse c'e' speranza per questa classe."
+];
+
+const PROF_WRONG_PHRASES = [
+  "No. Cosi' non va.",
+  "Attenzione: qui hai confuso i concetti.",
+  "Errore. Rivedi bene il ragionamento.",
+  "Questa risposta non regge. Riprova.",
+  "Fermati un attimo: qui c'e' da ripassare.",
+  "No, no, no. Torna sugli appunti.",
+  "Sbagliato. Ma almeno ci hai provato.",
+  "Questo errore lo vedo ogni anno. Leggi la spiegazione.",
+  "Coulomb si sta rivoltando. Concentrati.",
+  "Errore grave. Apri il quaderno e rileggi.",
+  "Non ci siamo. Ma il bello della fisica e' che si puo' rimediare.",
+  "Risposta sbagliata. Ti do un'altra possibilita' dopo."
+];
+
+function showFeedback(isCorrect, q) {
+  const fb = document.getElementById('feedback-box');
+  const dd = document.getElementById('deepdive-box');
+  const prof = document.getElementById('prof-container');
+
+  // --- Prof. Paludetto ---
+  prof.className = 'prof-container show ' + (isCorrect ? 'correct' : 'wrong');
+  const phrases = isCorrect ? PROF_CORRECT_PHRASES : PROF_WRONG_PHRASES;
+  document.getElementById('prof-phrase').textContent = phrases[Math.floor(Math.random() * phrases.length)];
+  document.getElementById('prof-name').textContent = 'Prof. Paludetto';
+
+  // --- Feedback ---
+  fb.style.display = 'block';
+  fb.className = 'feedback-box ' + (isCorrect ? 'feedback-correct' : 'feedback-wrong');
+
+  if (isCorrect) {
+    document.getElementById('feedback-title').textContent = 'Risposta corretta!';
+    document.getElementById('feedback-text').textContent = q.explanation;
+    dd.style.display = 'none';
+  } else {
+    document.getElementById('feedback-title').textContent = 'Risposta sbagliata';
+    document.getElementById('feedback-text').innerHTML =
+      `<strong>Errore comune:</strong> ${q.commonError}<br><br><strong>Spiegazione:</strong> ${q.explanation}`;
+
+    // Mostra approfondimento
+    dd.style.display = 'block';
+    document.getElementById('deepdive-text').textContent = q.deepdive;
+  }
+
+  document.getElementById('next-btn-container').style.display = 'block';
+
+  // Scroll al professore (che e' sopra il feedback)
+  prof.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/* ============================================
+   NAVIGAZIONE
+   ============================================ */
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= currentQuestions.length) {
+    endQuiz();
+  } else {
+    showQuestion();
+    document.getElementById('question-card').scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+/* ============================================
+   FINE QUIZ E RIEPILOGO
+   ============================================ */
+function endQuiz() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'block';
+
+  const total = correctCount + wrongCount;
+  const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+
+  // Punteggio grande
+  const scoreEl = document.getElementById('final-score');
+  scoreEl.textContent = pct + '%';
+  scoreEl.className = 'big-score ' + (pct >= 70 ? 'good' : pct >= 50 ? 'medium' : 'bad');
+  document.getElementById('final-score-label').textContent =
+    `${correctCount} corrette su ${total} domande`;
+
+  // Commento del Prof nel riepilogo
+  const profSummary = document.getElementById('prof-summary');
+  let summaryPhrase, summaryClass;
+  if (pct >= 90) {
+    summaryPhrase = "Eccellente. Risultato da primo della classe. Quasi quasi ti metto 10.";
+    summaryClass = 'correct';
+  } else if (pct >= 70) {
+    summaryPhrase = "Bene, risultato solido. Ma non adagiarti: c'e' ancora margine di miglioramento.";
+    summaryClass = 'correct';
+  } else if (pct >= 50) {
+    summaryPhrase = "Sufficiente, ma di poco. Hai le basi, pero' devi ripassare. Sul serio.";
+    summaryClass = 'wrong';
+  } else {
+    summaryPhrase = "Insufficiente. Ci vediamo all'interrogazione di recupero. Studia.";
+    summaryClass = 'wrong';
+  }
+  profSummary.className = 'prof-container show ' + summaryClass;
+  document.getElementById('prof-summary-svg').innerHTML = pct >= 70 ? PROF_SVG_HAPPY : PROF_SVG_ANGRY;
+  document.getElementById('prof-summary-phrase').textContent = summaryPhrase;
+  document.getElementById('prof-summary-name').textContent = 'Prof. Paludetto';
+
+  // Griglia statistiche
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-box"><div class="stat-number">${total}</div><div class="stat-label">Domande totali</div></div>
+    <div class="stat-box"><div class="stat-number" style="color:var(--success)">${correctCount}</div><div class="stat-label">Corrette</div></div>
+    <div class="stat-box"><div class="stat-number" style="color:var(--danger)">${wrongCount}</div><div class="stat-label">Errate</div></div>
+    <div class="stat-box"><div class="stat-number">${pct}%</div><div class="stat-label">Percentuale</div></div>
+  `;
+
+  // Risultati per argomento
+  const topicDiv = document.getElementById('topic-results');
+  topicDiv.innerHTML = '';
+  const weakTopics = [];
+
+  for (const [topic, stats] of Object.entries(topicStats)) {
+    if (stats.total === 0) continue;
+    const topicPct = Math.round((stats.correct / stats.total) * 100);
+    const cls = topicPct >= 70 ? 'strong' : topicPct >= 50 ? 'medium-res' : 'weak';
+    const barColor = topicPct >= 70 ? 'var(--success)' : topicPct >= 50 ? 'var(--warning)' : 'var(--danger)';
+
+    if (topicPct < 70) weakTopics.push(topic);
+
+    topicDiv.innerHTML += `
+      <div class="topic-result-item ${cls}">
+        <span><strong>${topic}</strong> — ${stats.correct}/${stats.total} (${topicPct}%)</span>
+        <div class="topic-bar"><div class="topic-bar-fill" style="width:${topicPct}%;background:${barColor}"></div></div>
+      </div>
+    `;
+  }
+
+  // Suggerimenti
+  const sugDiv = document.getElementById('suggestions');
+  if (weakTopics.length > 0) {
+    sugDiv.innerHTML = `
+      <h3>Suggerimenti per il ripasso</h3>
+      <p>Dovresti concentrarti su questi argomenti:</p>
+      <ul>${weakTopics.map(t => `<li><strong>${t}</strong> — rileggi gli appunti e rifai gli esercizi su questo tema</li>`).join('')}</ul>
+      <p style="margin-top:8px;">Usa il pulsante "Ripassa gli errori" per rifare solo le domande sbagliate.</p>
+    `;
+  } else {
+    sugDiv.innerHTML = `
+      <h3>Ottimo lavoro!</h3>
+      <p>Hai risposto bene su tutti gli argomenti. Continua cosi'! Prova la modalita' casuale per consolidare.</p>
+    `;
+  }
+
+  // Cronologia
+  const histDiv = document.getElementById('history-list');
+  histDiv.innerHTML = '';
+  history.forEach((h, i) => {
+    histDiv.innerHTML += `
+      <div class="history-item">
+        <span>${i + 1}. ${h.question.substring(0, 60)}${h.question.length > 60 ? '...' : ''}</span>
+        <span class="${h.correct ? 'correct-mark' : 'wrong-mark'}">${h.correct ? 'Corretta' : 'Errata'}</span>
+      </div>
+    `;
+  });
+
+  // Salva in localStorage
+  localStorage.setItem('energia_potenziale_stats', JSON.stringify({
+    total, correct: correctCount, wrong: wrongCount, percentage: pct,
+    date: new Date().toLocaleDateString('it-IT')
+  }));
+  localStorage.setItem('energia_potenziale_errors', JSON.stringify(errorQuestionIds));
+}
+
+/* ============================================
+   SEZIONE APPUNTI
+   ============================================ */
+const noteIds = ['coulomb','campo','linee','sovra','flusso','gauss','dim-coulomb','dim-campo','dim-gauss','dim-piastra','dim-condensatore','dim-velocita'];
+const noteLabels = ['Legge di Coulomb','Campo Elettrico','Linee di Campo','Sovrapposizione','Flusso','Legge di Gauss','DIM: Coulomb','DIM: Campo E','DIM: Gauss','DIM: Piastra','DIM: Condensatore','DIM: Velocita\''];
+
+// Popola navigazione rapida appunti
+(function initNotes() {
+  const nav = document.getElementById('notes-nav');
+  if (!nav) return;
+  noteIds.forEach((id, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = noteLabels[i];
+    btn.onclick = () => {
+      // Apri la sezione e scrolla
+      const body = document.getElementById('body-' + id);
+      if (!body.classList.contains('open')) toggleNote(id);
+      document.getElementById('note-' + id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    nav.appendChild(btn);
+  });
+})();
+
+function showNotes(section) {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'block';
+
+  // Se richiesto, scrolla direttamente alle dimostrazioni
+  if (section === 'dimostrazioni') {
+    setTimeout(() => {
+      const el = document.getElementById('note-dim-coulomb');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+}
+
+function hideNotes() {
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+
+function toggleNote(id) {
+  const body = document.getElementById('body-' + id);
+  const toggle = body.previousElementSibling.querySelector('.note-toggle');
+  body.classList.toggle('open');
+  toggle.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+/* ============================================
+   SIMULAZIONE VERIFICA
+   Struttura identica alla verifica del prof:
+   - Parte 1: 10 domande scelta multipla (A-E)
+   - Parte 2: 3 domande aperte/dimostrative
+   ============================================ */
+
+const EXAM_MC = [
+  {
+    text: "Quale relazione lega lavoro della forza elettrica L_AB ed energia potenziale tra A e B?",
+    options: [
+      "L_AB = U_A · U_B",
+      "L_AB = U_B - U_A",
+      "L_AB = U_A - U_B",
+      "L_AB = (U_A + U_B) / 2",
+      "Nessuna delle precedenti"
+    ],
+    answer: 2,
+    explanation: "Per una forza conservativa il lavoro e' la diminuzione di energia potenziale: L_AB = U_A - U_B."
+  },
+  {
+    text: "L'energia potenziale di due cariche puntiformi q₁ e q₂ a distanza r e':",
+    options: [
+      "U = K q₁ q₂ r",
+      "U = K (q₁ + q₂) / r",
+      "U = K q₁ q₂ / r²",
+      "U = K q₁ q₂ / r",
+      "Nessuna delle precedenti"
+    ],
+    answer: 3,
+    explanation: "U = K·q₁q₂/r. Notare la differenza con la forza F = Kq₁q₂/r²: l'energia scala con 1/r, la forza con 1/r²."
+  },
+  {
+    text: "Il potenziale elettrico V in un punto si definisce come:",
+    options: [
+      "V = q₀ · U",
+      "V = U / q₀",
+      "V = q₀ / U",
+      "V = U · F / q₀",
+      "Nessuna delle precedenti"
+    ],
+    answer: 1,
+    explanation: "Il potenziale e' V = U/q₀, energia potenziale per unita' di carica. Si misura in Volt = J/C."
+  },
+  {
+    text: "All'interno di un campo uniforme E, tra due piastre distanti d, la d.d.p. ΔV vale:",
+    options: [
+      "ΔV = E + d",
+      "ΔV = E / d",
+      "ΔV = ½ E d",
+      "ΔV = E · d",
+      "Nessuna delle precedenti"
+    ],
+    answer: 3,
+    explanation: "Da V = E·h e considerando la differenza tra due punti distanti d in direzione del campo: ΔV = E·d. Da qui anche la lettura di E in V/m."
+  },
+  {
+    text: "Un condensatore piano (vuoto) ha A = 0,02 m² e d = 1 mm. Quanto vale C? (ε₀ = 8,85×10⁻¹²)",
+    options: [
+      "C ≈ 4,4 × 10⁻¹¹ F",
+      "C ≈ 8,85 × 10⁻¹² F",
+      "C ≈ 8,85 × 10⁻⁹ F",
+      "C ≈ 1,77 × 10⁻¹⁰ F",
+      "Nessuna delle precedenti"
+    ],
+    answer: 3,
+    explanation: "C = ε₀A/d = 8,85×10⁻¹² × 0,02 / 0,001 = 8,85×10⁻¹² × 20 = 1,77×10⁻¹⁰ F (≈ 177 pF)."
+  },
+  {
+    text: "Se inserisci un dielettrico (ε_r > 1) tra le armature di un condensatore caricato e isolato, la capacita':",
+    options: [
+      "Aumenta di un fattore ε_r",
+      "Diminuisce di un fattore ε_r",
+      "Resta uguale",
+      "Si annulla",
+      "Nessuna delle precedenti"
+    ],
+    answer: 0,
+    explanation: "Con dielettrico C' = ε_r·ε₀·A/d. La capacita' aumenta di un fattore ε_r."
+  },
+  {
+    text: "Quale relazione tra le seguenti NON descrive correttamente l'energia di un condensatore?",
+    options: [
+      "U = ½ C V²",
+      "U = ½ Q² / C",
+      "U = ½ Q V",
+      "U = Q² C / 2",
+      "Nessuna delle precedenti"
+    ],
+    answer: 3,
+    explanation: "Le tre forme corrette sono ½CV², ½QV, ½Q²/C (intercambiabili tramite Q = CV). Q²·C/2 e' sbagliata: C va al denominatore."
+  },
+  {
+    text: "Le superfici equipotenziali e le linee di campo elettrico sono sempre:",
+    options: [
+      "parallele tra loro",
+      "perpendicolari tra loro",
+      "tangenti tra loro",
+      "indipendenti tra loro",
+      "Nessuna delle precedenti"
+    ],
+    answer: 1,
+    explanation: "Le linee di campo sono perpendicolari alle superfici equipotenziali. Spostandosi lungo l'equipotenziale ΔV = 0, quindi E non puo' avere componenti tangenti alla superficie."
+  },
+  {
+    text: "1 elettronvolt corrisponde all'energia:",
+    options: [
+      "di un protone fermo",
+      "di un fotone di lunghezza d'onda 1 m",
+      "che un elettrone acquista attraversando una d.d.p. di 1 V",
+      "necessaria per ionizzare l'atomo di idrogeno",
+      "Nessuna delle precedenti"
+    ],
+    answer: 2,
+    explanation: "1 eV = e·1 V = 1,60×10⁻¹⁹ J, l'energia che un elettrone (o un protone) acquista attraversando 1 V."
+  },
+  {
+    text: "L'esperimento di Millikan (goccia d'olio) ha messo in evidenza:",
+    options: [
+      "la dualita' onda-corpuscolo dell'elettrone",
+      "la conservazione della carica nelle reazioni",
+      "la quantizzazione della carica elettrica",
+      "il principio di sovrapposizione dei campi",
+      "Nessuna delle precedenti"
+    ],
+    answer: 2,
+    explanation: "Millikan misuro' direttamente la carica delle gocce d'olio cariche e dimostro' che la carica e' sempre multipla intera della carica elementare e."
+  }
+];
+
+const EXAM_OPEN = [
+  {
+    text: "Un condensatore piano ha armature di area A = 0,01 m² distanti d = 0,5 mm. Tra le armature c'e' il vuoto (ε₀ = 8,85×10⁻¹²). Viene caricato con una d.d.p. V = 100 V. Calcola: (a) la capacita' C; (b) la carica Q; (c) l'energia immagazzinata U; (d) il modulo del campo E tra le armature.",
+    solution: "(a) C = ε₀A/d = 8,85×10⁻¹² × 0,01 / 0,0005 = 8,85×10⁻¹² × 20 = 1,77×10⁻¹⁰ F (177 pF).\n\n(b) Q = CV = 1,77×10⁻¹⁰ × 100 = 1,77×10⁻⁸ C = 17,7 nC.\n\n(c) U = ½CV² = 0,5 × 1,77×10⁻¹⁰ × 100² = 0,5 × 1,77×10⁻¹⁰ × 10000 = 8,85×10⁻⁷ J ≈ 0,885 μJ.\n   Verifica: U = ½QV = 0,5 × 1,77×10⁻⁸ × 100 = 8,85×10⁻⁷ J. Coincide.\n\n(d) E = V/d = 100 / 0,0005 = 200 000 V/m = 2×10⁵ V/m.\n   Equivalentemente, E = σ/ε₀ con σ = Q/A = 1,77×10⁻⁸ / 0,01 = 1,77×10⁻⁶ C/m². E = 1,77×10⁻⁶ / 8,85×10⁻¹² = 2×10⁵ V/m. Coincide."
+  },
+  {
+    text: "Dimostra che l'energia immagazzinata in un condensatore vale U = ½CV². Parti dal lavoro infinitesimo necessario per spostare una piccola carica dq dall'armatura negativa a quella positiva, integrando durante la carica. Mostra anche le forme equivalenti U = ½QV e U = ½Q²/C.",
+    solution: "DIMOSTRAZIONE (energia di un condensatore):\n\n1) Durante la carica, in un istante generico la d.d.p. tra le armature e' V' = q'/C, con q' carica accumulata fino a quel momento.\n\n2) Il lavoro infinitesimo per portare dq dall'armatura − a quella + e':\n   dL = V'·dq = (q'/C)·dq.\n\n3) Il lavoro totale per caricare il condensatore da 0 a Q (corrispondente a V finale) e' l'integrale:\n   L = ∫₀^Q (q'/C) dq' = (1/C)·[q'²/2]₀^Q = ½·Q²/C.\n\n4) Graficamente: la relazione V'(q') e' una retta passante per l'origine, e il lavoro e' l'area del triangolo: L = ½·Q·V.\n\n5) La forza elettrica e' conservativa, quindi tutto il lavoro si immagazzina come energia potenziale:\n   U = ½·Q²/C.\n\n6) Forme equivalenti (sostituendo Q = CV):\n   • U = ½·Q·V (sostituendo Q²/C = QV)\n   • U = ½·CV² (sostituendo Q = CV in ½QV)\n\nLe tre formule sono interscambiabili."
+  },
+  {
+    text: "Discuti il significato fisico delle superfici equipotenziali e dimostra (con un ragionamento qualitativo) che esse sono sempre perpendicolari alle linee di campo. Rappresenta graficamente le superfici equipotenziali nei tre casi: (a) carica puntiforme, (b) condensatore piano, (c) due cariche uguali e opposte (dipolo).",
+    solution: "SIGNIFICATO: una superficie equipotenziale e' un luogo geometrico dei punti con lo stesso potenziale V. Spostarsi su di essa NON richiede lavoro (ΔV = 0 → L = -q·ΔV = 0).\n\nDIMOSTRAZIONE PERPENDICOLARITA':\nSe E avesse una componente E_∥ tangente alla superficie, lo spostamento Δs lungo la superficie produrrebbe un lavoro non nullo:\n   L = q·E_∥·Δs\nCioe' una variazione di V (V_finale ≠ V_iniziale), contraddicendo l'ipotesi che la superficie sia equipotenziale.\nQuindi E deve avere SOLO componente perpendicolare alla superficie: E ⊥ superficie equipotenziale.\n\nDISEGNI:\n(a) Carica puntiforme: V = Kq/r dipende solo da r → equipotenziali = sfere concentriche centrate sulla carica. Linee di campo = raggi uscenti (q>0) o entranti (q<0).\n\n(b) Condensatore piano: campo uniforme perpendicolare alle armature. V varia linearmente con la distanza dall'armatura: V(x) = E·x + cost. Equipotenziali = piani paralleli alle armature. Linee di campo = rette perpendicolari ai piani.\n\n(c) Dipolo (+q, -q): equipotenziali a forma di lobi (positiva attorno a +q, negativa attorno a -q). Una superficie particolare: il piano mediano (V = 0), perpendicolare al segmento +q ↔ -q. Linee di campo: dal +q al -q, sempre perpendicolari alle equipotenziali."
+  }
+];
+
+let examTimer = null;
+let examSeconds = 3000; // 50 minuti
+let examSubmitted = false;
+
+function showExam() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'block';
+
+  examSubmitted = false;
+  document.getElementById('exam-submit-btn').style.display = 'inline-block';
+  document.getElementById('exam-result').style.display = 'none';
+
+  renderExamMC();
+  renderExamOpen();
+  startExamTimer();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function hideExam() {
+  clearInterval(examTimer);
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+
+function resetExam() {
+  examSeconds = 3000;
+  showExam();
+}
+
+/* Renderizza domande a scelta multipla con opzioni mescolate */
+function renderExamMC() {
+  const container = document.getElementById('exam-mc-questions');
+  container.innerHTML = '';
+
+  EXAM_MC.forEach((q, qi) => {
+    // Mescola opzioni
+    const indices = q.options.map((_, i) => i);
+    shuffleArray(indices);
+    q._shuffled = indices;
+
+    const letters = ['A', 'B', 'C', 'D', 'E'];
+    let html = `<div class="exam-question" id="exam-q-${qi}">
+      <div class="eq-text"><span class="eq-number">${qi + 1}.</span> ${q.text}</div>
+      <div class="exam-options">`;
+
+    indices.forEach((origIdx, dispIdx) => {
+      html += `
+        <div class="exam-option" id="exam-opt-${qi}-${dispIdx}">
+          <input type="radio" name="exam-q-${qi}" id="exam-radio-${qi}-${dispIdx}" value="${origIdx}">
+          <label for="exam-radio-${qi}-${dispIdx}">${letters[dispIdx]}. ${q.options[origIdx]}</label>
+        </div>`;
+    });
+
+    html += `</div>
+      <div class="exam-correction" id="exam-corr-${qi}"></div>
+    </div>`;
+    container.innerHTML += html;
+  });
+}
+
+/* Renderizza domande aperte */
+function renderExamOpen() {
+  const container = document.getElementById('exam-open-questions');
+  container.innerHTML = '';
+
+  EXAM_OPEN.forEach((q, qi) => {
+    const num = EXAM_MC.length + qi + 1;
+    container.innerHTML += `
+      <div class="exam-question" id="exam-open-${qi}">
+        <div class="eq-text"><span class="eq-number">${num}.</span> ${q.text}</div>
+        <div class="exam-open-area">
+          <textarea id="exam-textarea-${qi}" placeholder="Scrivi qui la tua risposta..."></textarea>
+        </div>
+        <div class="exam-correction" id="exam-open-corr-${qi}"></div>
+      </div>`;
+  });
+}
+
+/* Timer */
+function startExamTimer() {
+  examSeconds = 3000;
+  clearInterval(examTimer);
+  updateTimerDisplay();
+  examTimer = setInterval(() => {
+    examSeconds--;
+    updateTimerDisplay();
+    if (examSeconds <= 0) {
+      clearInterval(examTimer);
+      if (!examSubmitted) submitExam();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(examSeconds / 60);
+  const s = examSeconds % 60;
+  const el = document.getElementById('exam-timer');
+  el.textContent = `Tempo: ${m}:${s.toString().padStart(2, '0')}`;
+  el.style.color = examSeconds < 300 ? 'var(--danger)' : 'var(--dark)';
+}
+
+/* Consegna verifica */
+function submitExam() {
+  if (examSubmitted) return;
+  if (!confirm('Sei sicuro di voler consegnare la verifica?')) return;
+
+  examSubmitted = true;
+  clearInterval(examTimer);
+
+  let correctMC = 0;
+
+  // Correggi scelta multipla
+  EXAM_MC.forEach((q, qi) => {
+    const selected = document.querySelector(`input[name="exam-q-${qi}"]:checked`);
+    const corrDiv = document.getElementById('exam-corr-' + qi);
+    const selectedVal = selected ? parseInt(selected.value) : -1;
+    const isCorrect = selectedVal === q.answer;
+
+    if (isCorrect) {
+      correctMC++;
+      corrDiv.className = 'exam-correction show correct-box';
+      corrDiv.innerHTML = `<strong>Corretta!</strong> ${q.explanation}`;
+    } else {
+      corrDiv.className = 'exam-correction show wrong-box';
+      corrDiv.innerHTML = `<strong>Sbagliata.</strong> ${q.explanation}`;
+    }
+
+    // Evidenzia opzioni
+    q._shuffled.forEach((origIdx, dispIdx) => {
+      const optEl = document.getElementById(`exam-opt-${qi}-${dispIdx}`);
+      if (origIdx === q.answer) optEl.classList.add('correct-highlight');
+      if (dispIdx === getDisplayIdx(qi, selectedVal) && !isCorrect) optEl.classList.add('wrong-highlight');
+    });
+
+    // Disabilita radio
+    document.querySelectorAll(`input[name="exam-q-${qi}"]`).forEach(r => r.disabled = true);
+  });
+
+  // Mostra soluzioni aperte
+  EXAM_OPEN.forEach((q, qi) => {
+    const corrDiv = document.getElementById('exam-open-corr-' + qi);
+    corrDiv.className = 'exam-correction show correct-box';
+    corrDiv.innerHTML = `<strong>Soluzione completa:</strong><pre style="white-space:pre-wrap;font-family:inherit;margin-top:8px;">${q.solution}</pre>`;
+  });
+
+  // Calcolo voto: 10 MC (0.6 punti ciascuna = 6 pt) + 3 aperte (valutazione manuale suggerita)
+  const mcPoints = correctMC * 0.6;
+  const grade = Math.min(10, mcPoints + 4); // mc da 0 a 6 + max 4 per aperte (autovalutazione)
+  const mcGrade = (mcPoints / 6 * 10).toFixed(1);
+
+  document.getElementById('exam-submit-btn').style.display = 'none';
+  const resultDiv = document.getElementById('exam-result');
+  resultDiv.style.display = 'block';
+
+  const gradeEl = document.getElementById('exam-grade');
+  gradeEl.textContent = `${correctMC}/10 risposte multiple corrette`;
+  gradeEl.style.color = correctMC >= 7 ? 'var(--success)' : correctMC >= 5 ? 'var(--warning)' : 'var(--danger)';
+
+  document.getElementById('exam-grade-detail').innerHTML =
+    `Parte 1 (scelta multipla): <strong>${correctMC}/10</strong> — Voto stimato parte 1: <strong>${mcGrade}/10</strong><br>
+     Parte 2 (domande aperte): confronta le tue risposte con le soluzioni mostrate sopra.`;
+
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function getDisplayIdx(qi, origVal) {
+  const shuffled = EXAM_MC[qi]._shuffled;
+  return shuffled.indexOf(origVal);
+}
+
+/* ============================================
+   VERIFICA DIMOSTRAZIONI
+   6 domande aperte: riproduci la dimostrazione
+   ============================================ */
+
+const DEMO_EXAM = [
+  {
+    title: "Energia immagazzinata in un condensatore",
+    text: "Calcola il lavoro necessario per caricare un condensatore piano partendo da carica zero fino alla carica finale Q. Mostra il passaggio dall'integrale (o area sotto la curva V-q) alle tre forme U = ½Q²/C, U = ½QV, U = ½CV².",
+    solution: "Passo 1 — Lavoro infinitesimo:\nDurante la carica, ad un certo istante, sul condensatore c'e' una carica q' e una d.d.p. V' = q'/C.\nPer portare una carica dq dall'armatura negativa alla positiva serve un lavoro:\nΔL = V'·dq = (q'/C)·dq\n\nPasso 2 — Sto caricando: q' aumenta nel tempo:\nL'idea intuitiva e' che l'energia spesa serve a portare carica contro la d.d.p. crescente.\n\nPasso 3 — Lavoro totale (integrale):\nL = ∫₀^Q (q'/C) dq' = (1/C)·[q'²/2]₀^Q = ½ · Q²/C\n\nPasso 3-bis — Equivalentemente: area sotto la retta V'(q') = q'/C\nLa relazione e' lineare → l'area e' un triangolo:\nL = (Q · V) / 2 = ½ Q V\n\nPasso 4 — La forza elettrica e' conservativa:\nQuindi il lavoro speso si conserva come energia potenziale elettrica:\nU = ½ Q²/C\n\nPasso 5 — Le tre forme equivalenti (sostituendo Q = CV):\n• U = ½ Q²/C\n• U = ½ Q · V (deriva da Q²/C = Q·(Q/C) = Q·V)\n• U = ½ C V²  (deriva da ½ Q V con Q = CV)\n\nLe tre formule sono interscambiabili tramite Q = CV."
+  },
+  {
+    title: "Densita' di energia in un condensatore",
+    text: "Partendo da U = ½CV² e dalle relazioni C = ε₀A/d e V = E·d, dimostra che la densita' di energia (per unita' di volume) all'interno di un condensatore vale u = ½ε₀E². Mostra come si modifica la formula in presenza di un dielettrico.",
+    solution: "Passo 1 — Punto di partenza:\nU = ½ C V²\nC = ε₀ · A / d\nV = E · d  →  V² = E² · d²\n\nPasso 2 — Sostituisco C e V² in U:\nU = ½ · (ε₀ A / d) · (E² d²)\nU = ½ · ε₀ · A · d · E²\n\nPasso 3 — Riconosco il volume:\nA · d = volume interno al condensatore (V_olume).\nU = ½ · ε₀ · V_olume · E²\n\nPasso 4 — Densita' = energia / volume:\nu = U / V_olume = ½ · ε₀ · E²\nUnita' di misura: J/m³.\n\nPasso 5 — In presenza di dielettrico:\nLa permittivita' diventa ε = ε_r · ε₀, quindi:\nu = ½ · ε_r · ε₀ · E²\n\nL'energia e' 'distribuita' nel campo elettrico stesso: dove c'e' campo, c'e' energia."
+  },
+  {
+    title: "Capacita' di un condensatore piano",
+    text: "Dimostra che la capacita' di un condensatore piano nel vuoto e' C = ε₀·A/d. Parti dalla definizione C = q/ΔV, usa V = E·d e l'espressione del campo tra le piastre E = σ/ε₀ con σ = Q/A. Estendi poi al caso con dielettrico (ε_r > 1).",
+    solution: "Passo 1 — Definizione di capacita':\nC = Q / ΔV\n\nPasso 2 — Esprimo ΔV in funzione del campo:\nNel condensatore il campo e' uniforme: ΔV = E · d.\nQuindi: C = Q / (E·d).\n\nPasso 3 — Esprimo E in funzione di Q:\nIl campo tra le piastre vale E = σ / ε₀, dove σ = Q/A.\nE = (Q/A) / ε₀ = Q / (ε₀ · A).\n\nPasso 4 — Sostituisco E:\nC = Q / (E · d) = Q / [Q / (ε₀ A) · d] = (ε₀ · A) / d.\n\nRisultato:\nC = ε₀ · A / d\n\nPasso 5 — In presenza di dielettrico (ε_r > 1):\nIl campo si riduce di un fattore ε_r perche' il dielettrico si polarizza:\nE = σ / (ε_r ε₀)\nDi conseguenza: C = ε_r · ε₀ · A / d (la capacita' aumenta).\n\nNota: per una sfera conduttrice di raggio R nel vuoto vale C = 4πε₀R."
+  }
+];
+
+let demoExamTimer = null;
+let demoExamSeconds = 2400;
+let demoExamSubmitted = false;
+
+function showDemoExam() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'block';
+
+  demoExamSubmitted = false;
+  document.getElementById('demo-exam-submit-btn').style.display = 'inline-block';
+  document.getElementById('demo-exam-result').style.display = 'none';
+
+  renderDemoExamQuestions();
+  startDemoExamTimer();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function hideDemoExam() {
+  clearInterval(demoExamTimer);
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+
+function resetDemoExam() {
+  demoExamSeconds = 2400;
+  showDemoExam();
+}
+
+function renderDemoExamQuestions() {
+  const container = document.getElementById('demo-exam-questions');
+  container.innerHTML = '';
+
+  DEMO_EXAM.forEach((q, qi) => {
+    container.innerHTML += `
+      <div class="exam-question" id="demo-q-${qi}">
+        <div class="eq-text">
+          <span class="eq-number">${qi + 1}.</span>
+          <strong style="color:#7c3aed;">[${q.title}]</strong><br>
+          ${q.text}
+        </div>
+        <div class="exam-open-area">
+          <textarea id="demo-textarea-${qi}" placeholder="Scrivi qui la dimostrazione passo per passo..."></textarea>
+        </div>
+        <div class="exam-correction" id="demo-corr-${qi}"></div>
+      </div>`;
+  });
+}
+
+function startDemoExamTimer() {
+  demoExamSeconds = 2400;
+  clearInterval(demoExamTimer);
+  updateDemoTimerDisplay();
+  demoExamTimer = setInterval(() => {
+    demoExamSeconds--;
+    updateDemoTimerDisplay();
+    if (demoExamSeconds <= 0) {
+      clearInterval(demoExamTimer);
+      if (!demoExamSubmitted) submitDemoExam();
+    }
+  }, 1000);
+}
+
+function updateDemoTimerDisplay() {
+  const m = Math.floor(demoExamSeconds / 60);
+  const s = demoExamSeconds % 60;
+  const el = document.getElementById('demo-exam-timer');
+  el.textContent = `Tempo: ${m}:${s.toString().padStart(2, '0')}`;
+  el.style.color = demoExamSeconds < 300 ? 'var(--danger)' : 'var(--dark)';
+}
+
+function submitDemoExam() {
+  if (demoExamSubmitted) return;
+  if (!confirm('Sei sicuro di voler consegnare la verifica sulle dimostrazioni?')) return;
+
+  demoExamSubmitted = true;
+  clearInterval(demoExamTimer);
+
+  // Mostra le soluzioni per ogni dimostrazione
+  DEMO_EXAM.forEach((q, qi) => {
+    const corrDiv = document.getElementById('demo-corr-' + qi);
+    const textarea = document.getElementById('demo-textarea-' + qi);
+    const userAnswer = textarea.value.trim();
+
+    corrDiv.className = 'exam-correction show correct-box';
+    corrDiv.innerHTML = `
+      <strong>Soluzione completa — ${q.title}:</strong>
+      <pre style="white-space:pre-wrap; font-family:inherit; margin-top:8px; line-height:1.7;">${q.solution}</pre>
+      ${userAnswer.length < 10 ? '<p style="color:var(--danger); margin-top:8px;"><strong>Non hai scritto una risposta per questa domanda.</strong></p>' : '<p style="color:var(--primary); margin-top:8px;"><strong>Confronta la tua risposta con la soluzione qui sopra.</strong></p>'}
+    `;
+    textarea.disabled = true;
+    textarea.style.opacity = '0.7';
+  });
+
+  document.getElementById('demo-exam-submit-btn').style.display = 'none';
+  const resultDiv = document.getElementById('demo-exam-result');
+  resultDiv.style.display = 'block';
+  document.getElementById('demo-exam-grade-detail').innerHTML =
+    'Le dimostrazioni richiedono valutazione manuale. Confronta attentamente ogni tua risposta con la soluzione mostrata sopra.<br>Controlla: hai incluso tutti i passaggi? Le semplificazioni sono corrette? Hai spiegato il significato fisico?';
+
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1707 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Filosofia - Allenamento e Verifica</title>
+<style>
+:root{--primary:#6d28d9;--primary-light:#ede9fe;--success:#06d6a0;--success-light:#e6faf4;--danger:#ef476f;--danger-light:#fde8ed;--warning:#ffd166;--dark:#1e1b4b;--gray:#6c757d;--light:#f8f9fa;--white:#fff;--shadow:0 6px 24px rgba(0,0,0,.10);--shadow-lg:0 12px 40px rgba(0,0,0,.15);--radius:14px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:linear-gradient(160deg,#1e1b4b 0%,#4c1d95 50%,#1e1b4b 100%);min-height:100vh;color:var(--dark);line-height:1.6}
+.prof-container{display:none;position:relative;margin:20px auto;flex-direction:column;align-items:center;text-align:center}
+.prof-container.show{display:flex;animation:profAppear .6s cubic-bezier(.34,1.56,.64,1)}
+@keyframes profAppear{0%{opacity:0;transform:translateY(60px) scale(.5)}60%{transform:translateY(-10px) scale(1.05)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes profBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes profShake{0%,100%{transform:rotate(0)}15%{transform:rotate(-5deg)}30%{transform:rotate(5deg)}45%{transform:rotate(-4deg)}60%{transform:rotate(4deg)}75%{transform:rotate(-2deg)}}
+.prof-svg-container{position:relative;width:220px;height:220px;margin:0 auto}
+.prof-container.correct .prof-svg-container{animation:profBounce .8s ease .3s;filter:drop-shadow(0 8px 30px rgba(6,214,160,.35))}
+.prof-container.wrong .prof-svg-container{animation:profShake .6s ease;filter:drop-shadow(0 8px 30px rgba(239,71,111,.35))}
+.prof-bubble{background:var(--white);border-radius:20px;padding:18px 24px;box-shadow:var(--shadow-lg);position:relative;font-size:1.1em;font-weight:600;line-height:1.5;max-width:480px;margin-top:-10px}
+.prof-bubble::before{content:'';position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:0;height:0;border:8px solid transparent;border-bottom-color:var(--white)}
+.prof-container.correct .prof-bubble{border:3px solid var(--success);background:linear-gradient(135deg,#f0fff8,var(--white))}
+.prof-container.wrong .prof-bubble{border:3px solid var(--danger);background:linear-gradient(135deg,#fff5f7,var(--white))}
+.prof-container.correct .prof-bubble::before{border-bottom-color:var(--success)}
+.prof-container.wrong .prof-bubble::before{border-bottom-color:var(--danger)}
+.prof-name{font-size:.7em;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px}
+.prof-container.correct .prof-name{color:var(--success)}
+.prof-container.wrong .prof-name{color:var(--danger)}
+.prof-svg-correct,.prof-svg-wrong{display:none}
+.prof-container.correct .prof-svg-correct{display:block}
+.prof-container.wrong .prof-svg-wrong{display:block}
+.prof-header-container{width:120px;height:120px;margin:0 auto 10px}
+.container{max-width:820px;margin:0 auto;padding:20px}
+body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle at 30% 20%,rgba(109,40,217,.08) 0%,transparent 50%),radial-gradient(circle at 70% 80%,rgba(124,58,237,.08) 0%,transparent 50%);pointer-events:none;z-index:-1}
+#start-screen{background:var(--white);border-radius:20px;padding:40px;box-shadow:var(--shadow-lg);text-align:center;margin-top:30px;border:1px solid rgba(255,255,255,.1)}
+#start-screen h1{font-size:2.1em;color:var(--dark);margin-bottom:6px}
+#start-screen h1 span{background:linear-gradient(135deg,var(--primary),#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+#start-screen .subtitle{color:var(--gray);font-size:1em;margin-bottom:10px}
+.prof-welcome{font-size:.9em;color:var(--dark);background:var(--light);display:inline-block;padding:6px 16px;border-radius:20px;margin-bottom:20px;font-weight:500}
+.topic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:20px 0;text-align:left}
+.topic-item{background:var(--primary-light);padding:10px 14px;border-radius:8px;font-size:.9em;display:flex;align-items:center;gap:8px}
+.topic-item input[type="checkbox"]{accent-color:var(--primary)}
+.mode-buttons{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-top:25px}
+.btn{padding:12px 28px;border:none;border-radius:10px;font-size:1em;font-weight:600;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden}
+.btn:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.15)}
+.btn:active{transform:translateY(0) scale(.97)}
+.btn-primary{background:var(--primary);color:var(--white)}.btn-success{background:var(--success);color:var(--white)}.btn-warning{background:var(--warning);color:var(--dark)}.btn-danger{background:var(--danger);color:var(--white)}
+.btn-outline{background:transparent;border:2px solid var(--primary);color:var(--primary)}
+.btn-ultra{background:linear-gradient(135deg,#ff6a00,#ee0979);color:var(--white)}
+.btn-exam{background:linear-gradient(135deg,#1e1b4b,#4c1d95);color:var(--white);font-weight:700;letter-spacing:.5px}
+.menu-section{background:var(--light);border:1px solid #e0e0e0;border-radius:var(--radius);padding:20px 24px;margin-top:20px;text-align:center}
+.menu-section-title{font-size:.85em;font-weight:800;text-transform:uppercase;letter-spacing:2px;color:var(--gray);margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #e0e0e0}
+.menu-section-title .section-icon{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px;vertical-align:middle}
+.section-icon.test{background:var(--primary)}.section-icon.study{background:var(--success)}
+#exam-screen .exam-card{background:var(--white);border-radius:var(--radius);padding:30px 34px;box-shadow:var(--shadow);margin-bottom:16px}
+.exam-header{text-align:center;border-bottom:2px solid var(--dark);padding-bottom:14px;margin-bottom:24px}
+.exam-header h2{font-size:1.4em;margin-bottom:4px;letter-spacing:1px}
+.exam-header .exam-info{display:flex;justify-content:space-between;font-size:.9em;color:var(--gray);margin-top:8px}
+.exam-question{margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid #eee}
+.exam-question:last-child{border-bottom:none}
+.exam-question .eq-number{font-weight:700;color:var(--primary);margin-right:6px}
+.exam-question .eq-text{font-size:1.02em;margin-bottom:10px;line-height:1.7}
+.exam-options{padding-left:10px}
+.exam-option{display:flex;align-items:flex-start;gap:8px;padding:6px 10px;margin-bottom:4px;border-radius:6px;cursor:pointer;transition:background .15s}
+.exam-option:hover,.exam-option:active{background:var(--light)}
+.exam-option input[type="radio"]{margin-top:4px;accent-color:var(--primary);min-width:20px;min-height:20px}
+.exam-option label{cursor:pointer;line-height:1.5;-webkit-user-select:none;user-select:none;display:block;width:100%}
+.exam-option{touch-action:manipulation;-webkit-tap-highlight-color:rgba(109,40,217,0.15);min-height:44px;align-items:center}
+.exam-option.correct-highlight{background:var(--success-light)}.exam-option.wrong-highlight{background:var(--danger-light)}
+.exam-open-area{margin-top:10px}
+.exam-open-area textarea{width:100%;min-height:120px;padding:14px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit;font-size:.95em;resize:vertical;outline:none;transition:border-color .2s}
+.exam-open-area textarea:focus{border-color:var(--primary)}
+.exam-section-title{font-size:1.1em;font-weight:700;color:var(--dark);margin:24px 0 14px;padding:8px 12px;background:var(--light);border-radius:6px}
+.exam-correction{display:none;margin-top:8px;padding:10px 14px;border-radius:8px;font-size:.93em;line-height:1.6}
+.exam-correction.show{display:block}
+.exam-correction.correct-box{background:var(--success-light);border-left:4px solid var(--success)}
+.exam-correction.wrong-box{background:var(--danger-light);border-left:4px solid var(--danger)}
+.exam-result-bar{text-align:center;padding:20px;background:var(--light);border-radius:var(--radius);margin-top:20px}
+.exam-result-bar .exam-grade{font-size:2.5em;font-weight:800}
+.exam-timer{font-weight:600;font-size:1.1em;color:var(--danger)}
+.prev-stats{margin-top:25px;padding:15px;background:var(--light);border-radius:8px;font-size:.9em}
+#quiz-screen{display:none;margin-top:20px}
+.quiz-header{background:rgba(255,255,255,.95);backdrop-filter:blur(10px);border-radius:16px;padding:16px 24px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:16px;border:1px solid rgba(255,255,255,.2)}
+.progress-info{font-weight:600;color:var(--dark)}
+.progress-bar-container{width:100%;height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden}
+.progress-bar-fill{height:100%;background:linear-gradient(90deg,var(--primary),#7c3aed,#ec4899);border-radius:4px;transition:width .6s cubic-bezier(.34,1.56,.64,1);box-shadow:0 0 8px rgba(124,58,237,.3)}
+.score-display{display:flex;gap:15px;font-size:.9em}
+.score-correct{color:var(--success);font-weight:600}.score-wrong{color:var(--danger);font-weight:600}
+.question-card{background:var(--white);border-radius:16px;padding:30px;box-shadow:var(--shadow-lg);margin-bottom:16px;border:1px solid rgba(0,0,0,.04);animation:cardAppear .4s ease}
+@keyframes cardAppear{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+.question-meta{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
+.badge{padding:4px 12px;border-radius:20px;font-size:.8em;font-weight:600}
+.badge-topic{background:var(--primary-light);color:var(--primary)}.badge-diff-1{background:#d4edda;color:#155724}.badge-diff-2{background:#fff3cd;color:#856404}.badge-diff-3{background:#f8d7da;color:#721c24}.badge-type{background:#e2e3e5;color:#383d41}
+.question-text{font-size:1.15em;font-weight:500;margin-bottom:20px;line-height:1.7}
+.options-container{display:flex;flex-direction:column;gap:10px}
+.option-btn{display:block;width:100%;text-align:left;padding:14px 18px;border:2px solid #e0e0e0;border-radius:10px;background:var(--white);font-size:1em;cursor:pointer;transition:all .25s cubic-bezier(.34,1.56,.64,1)}
+.option-btn:hover:not(.disabled){border-color:var(--primary);background:var(--primary-light);transform:translateX(6px);box-shadow:0 3px 12px rgba(109,40,217,.15)}
+.option-btn.selected{border-color:var(--primary);background:var(--primary-light)}
+.option-btn.correct{border-color:var(--success);background:var(--success-light);animation:correctPulse .4s ease}
+.option-btn.wrong{border-color:var(--danger);background:var(--danger-light);animation:wrongShake .4s ease}
+.option-btn.disabled{cursor:default;opacity:.85}
+@keyframes correctPulse{0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
+@keyframes wrongShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.answer-input-container{margin-top:10px}
+.answer-input{width:100%;padding:14px 18px;border:2px solid #e0e0e0;border-radius:8px;font-size:1em;outline:none;transition:border-color .2s}
+.answer-input:focus{border-color:var(--primary)}
+.submit-answer-btn{margin-top:12px}
+.feedback-box{display:none;border-radius:14px;padding:20px 24px;margin-bottom:16px;box-shadow:var(--shadow);animation:slideIn .4s cubic-bezier(.34,1.56,.64,1)}
+@keyframes slideIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.feedback-correct{background:var(--success-light);border-left:5px solid var(--success)}
+.feedback-wrong{background:var(--danger-light);border-left:5px solid var(--danger)}
+.feedback-title{font-weight:700;font-size:1.1em;margin-bottom:8px}
+.feedback-correct .feedback-title{color:var(--success)}.feedback-wrong .feedback-title{color:var(--danger)}
+.feedback-text{margin-bottom:10px;line-height:1.7}
+.deepdive-box{display:none;background:#fff8e1;border-left:5px solid var(--warning);border-radius:var(--radius);padding:20px 24px;margin-bottom:16px;box-shadow:var(--shadow);animation:slideIn .4s ease}
+.deepdive-title{font-weight:700;color:#e65100;margin-bottom:8px}
+.deepdive-text{line-height:1.7}
+.next-btn-container{text-align:center;margin:16px 0}
+#summary-screen{display:none;margin-top:20px}
+.summary-card{background:var(--white);border-radius:20px;padding:34px;box-shadow:var(--shadow-lg);margin-bottom:16px;border:1px solid rgba(0,0,0,.04)}
+.summary-card h2{text-align:center;margin-bottom:20px;color:var(--dark)}
+.big-score{text-align:center;font-size:3em;font-weight:800;margin:10px 0}
+.big-score.good{color:var(--success)}.big-score.medium{color:var(--warning)}.big-score.bad{color:var(--danger)}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin:20px 0}
+.stat-box{background:var(--light);padding:16px;border-radius:8px;text-align:center}
+.stat-number{font-size:1.8em;font-weight:700}.stat-label{font-size:.85em;color:var(--gray)}
+.topic-results{margin:20px 0}
+.topic-result-item{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-radius:8px;margin-bottom:8px}
+.topic-result-item.weak{background:var(--danger-light)}.topic-result-item.strong{background:var(--success-light)}.topic-result-item.medium-res{background:#fff3cd}
+.topic-bar{width:100px;height:8px;background:#e0e0e0;border-radius:4px;overflow:hidden}
+.topic-bar-fill{height:100%;border-radius:4px}
+.suggestions{background:var(--primary-light);border-radius:8px;padding:16px 20px;margin-top:15px}
+.suggestions h3{color:var(--primary);margin-bottom:8px}.suggestions ul{padding-left:20px}.suggestions li{margin-bottom:5px}
+.history-list{max-height:300px;overflow-y:auto;margin-top:10px}
+.history-item{display:flex;justify-content:space-between;padding:8px 12px;border-bottom:1px solid #eee;font-size:.9em}
+.history-item .correct-mark{color:var(--success);font-weight:700}.history-item .wrong-mark{color:var(--danger);font-weight:700}
+.notes-nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.notes-nav button{padding:6px 14px;border:1px solid #ddd;border-radius:20px;background:var(--light);font-size:.85em;cursor:pointer;transition:all .2s}
+.notes-nav button:hover{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
+.note-section{border:1px solid #e0e0e0;border-radius:10px;margin-bottom:12px;overflow:hidden}
+.note-title{padding:14px 18px;margin:0;cursor:pointer;background:var(--light);display:flex;justify-content:space-between;align-items:center;transition:background .2s;user-select:none}
+.note-title:hover{background:var(--primary-light)}
+.note-toggle{font-size:.8em;color:var(--gray)}
+.note-body{padding:18px 20px;line-height:1.8;display:none}
+.note-body.open{display:block}
+.note-body h4{margin:14px 0 8px;color:var(--primary)}
+.note-body ul,.note-body ol{padding-left:22px;margin:8px 0}
+.note-body li{margin-bottom:4px}
+.formula-box{background:linear-gradient(135deg,#ede9fe,#fce7f3);border-left:4px solid var(--primary);padding:14px 18px;margin:12px 0;font-size:1.05em;font-weight:600;font-family:'Cambria','Times New Roman',serif;border-radius:0 8px 8px 0;font-style:italic}
+.note-tip{background:#fff8e1;border-left:4px solid var(--warning);padding:10px 14px;margin:12px 0;border-radius:0 8px 8px 0;font-size:.95em}
+*{-webkit-tap-highlight-color:rgba(109,40,217,0.15)}
+button,.btn,.option-btn,.topic-item,.note-title,.exam-option{touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.btn{-webkit-appearance:none;appearance:none}
+.option-btn{-webkit-appearance:none;appearance:none}
+@media(max-width:600px){.container{padding:10px}#start-screen{padding:20px}.question-card{padding:20px}.quiz-header{padding:12px 16px}#start-screen h1{font-size:1.5em}.prof-svg-container{width:160px;height:160px}.prof-bubble{font-size:.95em;padding:14px 18px}.btn{padding:14px 24px;font-size:1.05em;min-height:48px}.option-btn{padding:16px 18px;min-height:48px;font-size:1em}.topic-item{padding:12px 14px;min-height:44px}.mode-buttons{gap:10px}.menu-section{padding:16px}.topic-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div id="start-screen">
+    <div class="prof-header-container" id="prof-header-svg"></div>
+    <h1>Quiz di <span>Filosofia</span></h1>
+    <p class="subtitle">Allenamento interattivo sull'empirismo inglese e Pascal &mdash; Liceo Scientifico</p>
+    <div class="prof-welcome">Prof. Marchi dice: &quot;Vediamo se hai letto Locke, Hume, Berkeley e Pascal.&quot;</div>
+
+    <div class="menu-section">
+      <div class="menu-section-title"><span class="section-icon test"></span> Test e Preparazione</div>
+      <h3 style="margin-bottom:10px;text-align:left;font-size:.95em;">Filtra per argomento:</h3>
+      <div class="topic-grid" id="topic-filters"></div>
+      <div class="mode-buttons">
+        <button class="btn btn-primary" onclick="startQuiz('all')">Test completo</button>
+        <button class="btn btn-warning" onclick="startQuiz('random')">Modalita casuale</button>
+        <button class="btn btn-danger" onclick="startQuiz('errors')" id="btn-errors" style="display:none;">Ripassa gli errori</button>
+        <button class="btn btn-ultra" onclick="startQuiz('ultra')">Ultra Preparazione</button>
+      </div>
+      <div class="mode-buttons" style="margin-top:10px;">
+        <button class="btn btn-exam" onclick="showExam()">Simulazione Verifica</button>
+      </div>
+    </div>
+
+    <div class="menu-section">
+      <div class="menu-section-title"><span class="section-icon study"></span> Studio e Ripasso</div>
+      <div class="mode-buttons">
+        <button class="btn btn-outline" style="border-color:var(--success);color:var(--success);" onclick="showNotes()">Appunti e Teoria</button>
+      </div>
+    </div>
+
+    <div class="prev-stats" id="prev-stats" style="display:none;">
+      <strong>Sessione precedente:</strong>
+      <span id="prev-stats-text"></span>
+      <br><button class="btn btn-outline" style="margin-top:8px;padding:6px 16px;font-size:.85em;" onclick="clearProgress()">Cancella progressi</button>
+    </div>
+  </div>
+
+  <div id="quiz-screen">
+    <div class="quiz-header">
+      <div class="progress-info">Domanda <span id="current-q">1</span> di <span id="total-q">0</span></div>
+      <div class="score-display">
+        <span class="score-correct">Corrette: <span id="score-correct">0</span></span>
+        <span class="score-wrong">Errate: <span id="score-wrong">0</span></span>
+      </div>
+      <div class="progress-bar-container"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+    </div>
+    <div class="question-card" id="question-card">
+      <div class="question-meta" id="question-meta"></div>
+      <div class="question-text" id="question-text"></div>
+      <div id="answer-area"></div>
+      <div class="submit-answer-btn" id="submit-area" style="display:none;">
+        <button class="btn btn-primary" onclick="checkOpenAnswer()">Verifica risposta</button>
+      </div>
+    </div>
+    <div class="prof-container" id="prof-container">
+      <div class="prof-svg-container">
+        <div class="prof-svg-correct" id="prof-svg-happy"></div>
+        <div class="prof-svg-wrong" id="prof-svg-angry"></div>
+      </div>
+      <div class="prof-bubble">
+        <div class="prof-name" id="prof-name">Prof. Marchi</div>
+        <div id="prof-phrase"></div>
+      </div>
+    </div>
+    <div class="feedback-box" id="feedback-box">
+      <div class="feedback-title" id="feedback-title"></div>
+      <div class="feedback-text" id="feedback-text"></div>
+    </div>
+    <div class="deepdive-box" id="deepdive-box">
+      <div class="deepdive-title">Approfondimento</div>
+      <div class="deepdive-text" id="deepdive-text"></div>
+    </div>
+    <div class="next-btn-container" id="next-btn-container" style="display:none;">
+      <button class="btn btn-primary" onclick="nextQuestion()">Prossima domanda</button>
+      <button class="btn btn-outline" style="margin-left:8px;" onclick="endQuiz()">Termina</button>
+    </div>
+  </div>
+
+  <div id="summary-screen">
+    <div class="summary-card">
+      <h2>Riepilogo della Sessione</h2>
+      <div class="prof-container show" id="prof-summary" style="margin-bottom:16px;">
+        <div class="prof-svg-container" id="prof-summary-svg"></div>
+        <div class="prof-bubble">
+          <div class="prof-name" id="prof-summary-name">Prof. Marchi</div>
+          <div id="prof-summary-phrase"></div>
+        </div>
+      </div>
+      <div class="big-score" id="final-score"></div>
+      <p style="text-align:center;color:var(--gray);" id="final-score-label"></p>
+      <div class="stats-grid" id="stats-grid"></div>
+      <h3 style="margin:20px 0 10px;">Risultati per argomento</h3>
+      <div class="topic-results" id="topic-results"></div>
+      <div class="suggestions" id="suggestions"></div>
+      <h3 style="margin:20px 0 10px;">Cronologia risposte</h3>
+      <div class="history-list" id="history-list"></div>
+    </div>
+    <div style="text-align:center;margin:20px 0 40px;">
+      <button class="btn btn-primary" onclick="location.reload()">Ricomincia</button>
+      <button class="btn btn-danger" style="margin-left:10px;" onclick="startQuiz('errors')">Ripassa gli errori</button>
+    </div>
+  </div>
+
+  <div id="exam-screen" style="display:none;margin-top:20px;">
+    <div class="quiz-header">
+      <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
+        <div class="progress-info">Verifica: Domanda <span id="exam-current">1</span> di <span id="exam-total">13</span></div>
+        <span class="exam-timer" id="exam-timer" style="font-weight:600;color:var(--danger);">50:00</span>
+      </div>
+      <div class="progress-bar-container"><div class="progress-bar-fill" id="exam-progress-bar" style="width:0%"></div></div>
+      <div style="width:100%;text-align:right;margin-top:4px;">
+        <button class="btn btn-outline" style="padding:6px 14px;font-size:.85em;" onclick="hideExam()">Abbandona</button>
+      </div>
+    </div>
+    <div class="question-card" id="exam-question-card">
+      <div class="question-meta" id="exam-question-meta"></div>
+      <div class="question-text" id="exam-question-text"></div>
+      <div id="exam-answer-area"></div>
+    </div>
+    <div class="next-btn-container" id="exam-next-container" style="display:none;">
+      <button class="btn btn-primary" onclick="nextExamQuestion()">Prossima domanda</button>
+    </div>
+    <div class="summary-card" id="exam-result" style="display:none;">
+      <h2>Risultato della Verifica</h2>
+      <div class="big-score" id="exam-grade"></div>
+      <p style="text-align:center;color:var(--gray);" id="exam-grade-detail"></p>
+      <div id="exam-review"></div>
+      <div style="text-align:center;margin-top:20px;">
+        <button class="btn btn-primary" onclick="resetExam()">Ripeti la verifica</button>
+        <button class="btn btn-outline" style="margin-left:8px;" onclick="hideExam()">Torna al menu</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="notes-screen" style="display:none;margin-top:20px;">
+    <div class="summary-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:20px;">
+        <h2 style="margin:0;">Appunti di Filosofia</h2>
+        <button class="btn btn-outline" onclick="hideNotes()" style="padding:8px 18px;font-size:.9em;">Torna al menu</button>
+      </div>
+      <div class="notes-nav" id="notes-nav"></div>
+      <div id="notes-content"></div>
+    </div>
+  </div>
+
+</div>
+<script>
+document.addEventListener('touchstart', function(){}, {passive:true});
+
+const QUESTIONS = [
+  // LOCKE - CRITICA A CARTESIO (4)
+  {
+    text: "Secondo Locke, quale idea cartesiana va rifiutata?",
+    type: "multiple",
+    options: ["L'innatismo","Il cogito","Il dubbio metodico","L'esistenza di Dio"],
+    answer: 0,
+    explanation: "Locke rifiuta l'innatismo: nella mente non esiste alcun contenuto anteriore all'esperienza.",
+    commonError: "Non confondere: Locke non attacca il cogito, ma l'idea che nella mente esistano idee innate.",
+    deepdive: "Per Locke la mente alla nascita e' una 'tabula rasa'. Tutti i materiali della conoscenza vengono dall'esperienza. Nega quindi la dottrina cartesiana delle idee innate.",
+    difficulty: 1, topic: "Locke - Critica a Cartesio"
+  },
+  {
+    text: "La filosofia di Locke si colloca:",
+    type: "multiple",
+    options: ["A meta' tra empirismo e razionalismo","Nel pieno razionalismo","Nell'idealismo","Nello scetticismo puro"],
+    answer: 0,
+    explanation: "Locke e' definito 'razionalista critico': empirista ma ancora fiducioso nella ragione come guida per conoscere e orientarsi.",
+    commonError: "Locke non e' un empirista radicale come Hume: conserva un ruolo forte per la ragione.",
+    deepdive: "Locke estende l'uso della ragione a morale, politica e religione. La ragione e' l'unica guida valida per conoscere e orientarsi nella vita.",
+    difficulty: 2, topic: "Locke - Critica a Cartesio"
+  },
+  {
+    text: "Il 'criticismo' in senso filosofico significa:",
+    type: "multiple",
+    options: ["Filosofia che parte da un'indagine critica della ragione","Critica distruttiva di ogni sapere","Scetticismo radicale","Rifiuto della metafisica"],
+    answer: 0,
+    explanation: "Il criticismo e' la filosofia che parte da un'indagine critica sulle capacita' conoscitive della ragione stessa.",
+    commonError: "Criticismo non significa 'criticare tutto': significa esaminare la ragione prima di usarla.",
+    deepdive: "Il criticismo nasce con Locke (con il suo Saggio sull'intelletto umano) e trova piena sistemazione in Kant. Bisogna indagare oggetti, limiti e procedimenti della conoscenza.",
+    difficulty: 2, topic: "Locke - Critica a Cartesio"
+  },
+  {
+    text: "Per Locke la fonte della conoscenza e':",
+    type: "multiple",
+    options: ["L'esperienza","La rivelazione","Le idee innate","L'intuizione mistica"],
+    answer: 0,
+    explanation: "L'esperienza e' per Locke sia la fonte della conoscenza sia cio' che ne verifica i dati ottenuti.",
+    commonError: "Non confondere esperienza con ragione: per Locke la ragione elabora cio' che l'esperienza fornisce.",
+    deepdive: "L'esperienza limita e insieme fonda la conoscenza: cio' che non puo' essere ricondotto all'esperienza non e' conoscibile.",
+    difficulty: 1, topic: "Locke - Critica a Cartesio"
+  },
+
+  // LOCKE - IDEE SEMPLICI E COMPLESSE (5)
+  {
+    text: "Le idee semplici secondo Locke sono:",
+    type: "multiple",
+    options: ["Materiali passivi che la mente riceve dall'esperienza","Create attivamente dall'intelletto","Innate in ogni uomo","Copie sbiadite delle sensazioni"],
+    answer: 0,
+    explanation: "Le idee semplici non sono fabbricate dall'intelletto: sono create dall'esperienza e ricevute passivamente dalla mente.",
+    commonError: "Le copie sbiadite delle sensazioni sono le idee di Hume, non di Locke.",
+    deepdive: "La mente, di fronte alle idee semplici, e' passiva: le riceve. Diventa poi attiva nel combinarle per formare idee complesse.",
+    difficulty: 2, topic: "Locke - Idee semplici e complesse"
+  },
+  {
+    text: "Le idee di sensazione derivano:",
+    type: "multiple",
+    options: ["Dai cinque sensi, dall'esterno","Dall'osservazione delle attivita' interiori","Dall'immaginazione","Dall'intelletto puro"],
+    answer: 0,
+    explanation: "Le idee di sensazione sono quelle che percepiamo con i cinque sensi dall'esterno.",
+    commonError: "Non confondere con le idee di riflessione, che derivano dal senso interno.",
+    deepdive: "Locke distingue due fonti dell'esperienza: esterna (sensazione) e interna (riflessione). Entrambe producono idee semplici.",
+    difficulty: 1, topic: "Locke - Idee semplici e complesse"
+  },
+  {
+    text: "Le idee di riflessione sono:",
+    type: "multiple",
+    options: ["Idee delle attivita' interiori dello spirito","Idee derivate dai cinque sensi","Idee innate","Idee complesse combinate"],
+    answer: 0,
+    explanation: "Le idee di riflessione derivano dal senso interno: sono le idee delle attivita' interiori, dello spirito.",
+    commonError: "Non confondere riflessione con combinazione: la riflessione e' una fonte, non un'operazione complessa.",
+    deepdive: "Esempi di idee di riflessione: pensare, dubitare, volere, credere. La mente osserva se stessa e le proprie operazioni.",
+    difficulty: 2, topic: "Locke - Idee semplici e complesse"
+  },
+  {
+    text: "Le idee complesse sono prodotte:",
+    type: "multiple",
+    options: ["Dalla combinazione di idee semplici operata dall'intelletto","Direttamente dai sensi","Da Dio nell'anima","Per intuizione immediata"],
+    answer: 0,
+    explanation: "Le idee complesse nascono dalla combinazione di idee semplici operata dall'intelletto, che qui e' funzione attiva.",
+    commonError: "Mentre con le idee semplici la mente e' passiva, con le complesse diventa attiva.",
+    deepdive: "L'intelletto combina, confronta e astrae le idee semplici per formare idee complesse come sostanza, modo, relazione.",
+    difficulty: 2, topic: "Locke - Idee semplici e complesse"
+  },
+  {
+    text: "La coscienza, secondo Locke, e' cio' che:",
+    type: "truefalse",
+    statement: "La coscienza racchiude e unifica tutte le idee della mente.",
+    answer: true,
+    explanation: "Corretto! La coscienza e' la sede che racchiude tutte le idee, semplici e complesse.",
+    commonError: "Non confondere coscienza con intelletto: l'intelletto combina, la coscienza racchiude.",
+    deepdive: "La coscienza garantisce l'unita' del soggetto conoscente e la continuita' dell'identita' personale nel tempo.",
+    difficulty: 2, topic: "Locke - Idee semplici e complesse"
+  },
+
+  // LOCKE - QUALITA E SOSTANZA (4)
+  {
+    text: "Le qualita' primarie dei corpi secondo Locke:",
+    type: "multiple",
+    options: ["Sono oggettive e corrispondono a caratteristiche realmente presenti nei corpi","Sono solo soggettive","Non esistono","Dipendono dai soli sensi"],
+    answer: 0,
+    explanation: "Le qualita' primarie (estensione, figura, solidita', numero, movimento) sono oggettive: le nostre idee corrispondono a proprieta' realmente presenti nei corpi.",
+    commonError: "Non confondere primarie e secondarie: le secondarie sono soggettive, le primarie no.",
+    deepdive: "Le qualita' primarie sono misurabili e matematizzabili: per questo Locke le considera oggettive, in linea con la tradizione scientifica moderna.",
+    difficulty: 2, topic: "Locke - Qualita' e sostanza"
+  },
+  {
+    text: "Le qualita' secondarie sono:",
+    type: "multiple",
+    options: ["Soggettive: si fondano sulle qualita' oggettive ma esistono solo nella percezione","Oggettive come le primarie","Idee innate","Sostanze spirituali"],
+    answer: 0,
+    explanation: "Le qualita' secondarie (colori, sapori, odori, suoni) sono soggettive: esistono solo nella percezione, anche se si fondano sulle qualita' oggettive dei corpi.",
+    commonError: "Le secondarie non sono 'false', ma non corrispondono a proprieta' reali dei corpi: sono modi in cui noi li percepiamo.",
+    deepdive: "Il colore rosso, per esempio, non e' una proprieta' reale della mela: e' l'effetto soggettivo prodotto in noi dalla riflessione della luce sulla superficie della mela.",
+    difficulty: 2, topic: "Locke - Qualita' e sostanza"
+  },
+  {
+    text: "La critica di Locke all'idea di sostanza:",
+    type: "multiple",
+    options: ["La sostanza e' un sostegno ignoto e oscuro delle qualita' che percepiamo","La sostanza e' evidente ai sensi","La sostanza e' innata","La sostanza non esiste per definizione"],
+    answer: 0,
+    explanation: "Locke critica l'idea di sostanza: e' un sostegno ignoto e oscuro delle qualita' percepite, sconosciuta all'intelletto.",
+    commonError: "Locke non nega la sostanza: dice che la conosciamo solo come 'raggruppamento di idee semplici'.",
+    deepdive: "La sostanza per Locke e' un 'qualcosa' che sorregge le qualita', ma in se' resta inconoscibile. Questa critica prepara la strada a Hume e Berkeley.",
+    difficulty: 3, topic: "Locke - Qualita' e sostanza"
+  },
+  {
+    text: "Per Locke esistono due tipi di sostanza:",
+    type: "multiple",
+    options: ["Corporea/materiale e spirituale","Sensibile e intelligibile","Finita e infinita","Semplice e complessa"],
+    answer: 0,
+    explanation: "Locke distingue sostanza corporea/materiale (sostrato delle qualita' sensibili) e sostanza spirituale (sostrato delle operazioni dello spirito).",
+    commonError: "Entrambe le sostanze restano per Locke sostegni ignoti: ne abbiamo idee ma non le conosciamo in se'.",
+    deepdive: "Locke non nega l'esistenza delle sostanze ma nega che il nostro intelletto possa penetrarle: ne riceve ideas, non essenze.",
+    difficulty: 2, topic: "Locke - Qualita' e sostanza"
+  },
+
+  // LOCKE - CONOSCENZA (5)
+  {
+    text: "Per Locke la conoscenza vera e':",
+    type: "multiple",
+    options: ["Percezione della connessione fra idee o gruppi di idee","Percezione delle cose in se'","Adeguazione dell'intelletto alla rivelazione","Ricordo delle idee innate"],
+    answer: 0,
+    explanation: "La conoscenza vera e' per Locke percezione della connessione, accordo o discordanza fra idee e gruppi di idee.",
+    commonError: "Locke non dice che conosciamo le cose in se': conosciamo solo i rapporti tra le nostre idee.",
+    deepdive: "Questa definizione restringe fortemente la conoscenza: non conosciamo la realta' direttamente ma i legami che stabiliamo fra idee.",
+    difficulty: 2, topic: "Locke - Conoscenza"
+  },
+  {
+    text: "Quanti tipi di rapporti fra idee distingue Locke?",
+    type: "numeric",
+    answer: 4,
+    tolerance: 0,
+    explanation: "Locke distingue 4 tipi di rapporti fra idee: identita'/diversita', relazione, coesistenza/connessione necessaria, esistenza reale.",
+    commonError: "Non confondere i 4 rapporti con i 3 gradi di conoscenza.",
+    deepdive: "I 4 rapporti fra idee sono: 1) identita'/diversita', 2) relazione, 3) coesistenza o connessione necessaria, 4) esistenza reale.",
+    difficulty: 2, topic: "Locke - Conoscenza"
+  },
+  {
+    text: "Quanti sono i gradi della conoscenza secondo Locke?",
+    type: "numeric",
+    answer: 3,
+    tolerance: 0,
+    explanation: "I gradi della conoscenza sono 3: intuitiva, dimostrativa e sensitiva (esistenza reale).",
+    commonError: "Sono 3 gradi, non 4: non confondere con i rapporti fra idee.",
+    deepdive: "Intuizione: evidenza immediata fra idee (immutabile). Dimostrazione: mediata da idee intermedie, con rigore matematico. Sensazione attuale: certezza degli oggetti presenti ai sensi esterni.",
+    difficulty: 2, topic: "Locke - Conoscenza"
+  },
+  {
+    text: "La conoscenza intuitiva e':",
+    type: "multiple",
+    options: ["Immediata, evidente, che coglie subito accordo o discordia fra idee","Mediata da dimostrazione","Basata sulla sensazione","Ricordo di idee innate"],
+    answer: 0,
+    explanation: "La conoscenza intuitiva e' immediata ed evidente: coglie subito la connessione fra idee, senza bisogno di dimostrazione.",
+    commonError: "L'intuizione per Locke non e' mistica: e' semplicemente l'evidenza logico-matematica immediata (es. A=A).",
+    deepdive: "Nell'intuizione la mente coglie direttamente i rapporti fra idee, come nel principio di identita' o nell'evidenza che 'il bianco non e' il nero'.",
+    difficulty: 2, topic: "Locke - Conoscenza"
+  },
+  {
+    text: "La conoscenza sensitiva riguarda:",
+    type: "multiple",
+    options: ["L'esistenza degli oggetti presenti ai nostri sensi esterni","L'essenza delle cose","Le idee innate","Dio"],
+    answer: 0,
+    explanation: "La conoscenza sensitiva garantisce la certezza dell'esistenza degli oggetti presenti ai sensi esterni (sensazione attuale).",
+    commonError: "Sensitiva = esistenza presente, non essenza. Finche' ho sensazioni so che gli oggetti ci sono.",
+    deepdive: "Quando non percepisco nulla non vuol dire che l'oggetto sia sparito: il suo grado di verita' e' pero' piu' basso rispetto a quando lo percepisco attualmente.",
+    difficulty: 2, topic: "Locke - Conoscenza"
+  },
+
+  // LOCKE - FEDE E PROBABILITA (3)
+  {
+    text: "Il giudizio di probabilita' per Locke nasce quando:",
+    type: "multiple",
+    options: ["Non possiamo percepire immediatamente ne' dimostrare la connessione fra idee","Quando i sensi sbagliano","Quando ci sono idee innate","Quando interviene la fede"],
+    answer: 0,
+    explanation: "Il giudizio di probabilita' interviene quando non si puo' ne' percepire immediatamente ne' dimostrare la connessione fra idee.",
+    commonError: "La probabilita' non e' scetticismo: e' uno strumento razionale per orientarsi nell'incertezza.",
+    deepdive: "Locke fonda la probabilita' su: 1) conformita' con l'esperienza passata, 2) testimonianza di altri, 3) considerazioni per analogia.",
+    difficulty: 2, topic: "Locke - Fede e probabilita'"
+  },
+  {
+    text: "Per Locke l'esistenza di Dio si conosce per:",
+    type: "multiple",
+    options: ["Dimostrazione, tramite i principi di ex nihilo nihil e causalita' metafisica","Intuizione diretta","Fede soltanto","Idee innate"],
+    answer: 0,
+    explanation: "L'esistenza di Dio e' dimostrata in modo mediato, usando due principi metafisici: ex nihilo nihil (dal nulla non nasce nulla) e causalita' metafisica (se c'e' qualcosa deve esistere una causa prima).",
+    commonError: "Per Locke Dio non e' oggetto di intuizione (immediata): lo e' solo l'io con il cogito cartesiano rivisto.",
+    deepdive: "Io esisto (intuizione), ma non dal nulla: deve esistere una causa prima eterna, cioe' Dio. E' una terza via di stampo tomista.",
+    difficulty: 3, topic: "Locke - Fede e probabilita'"
+  },
+  {
+    text: "Per Locke la fede risponde:",
+    type: "multiple",
+    options: ["Alla rivelazione, con lo stesso livello di certezza dell'intuizione","Alla dimostrazione razionale","Al senso comune","All'esperienza sensibile"],
+    answer: 0,
+    explanation: "La fede risponde alla rivelazione divina con la stessa forza di certezza dell'intuizione: ha come oggetto la testimonianza di Dio che non puo' ingannare.",
+    commonError: "Per Locke fede e ragione non si escludono: la fede viene dopo la ragione, non al suo posto.",
+    deepdive: "Dio e' testimonianza di uno che non puo' ne' ingannare ne' essere ingannato. Dove la ragione non arriva, la fede subentra come livello massimo di certezza.",
+    difficulty: 3, topic: "Locke - Fede e probabilita'"
+  },
+
+  // HUME - IMPRESSIONI E IDEE (5)
+  {
+    text: "Per Hume le impressioni sono:",
+    type: "multiple",
+    options: ["Sensazioni attuali, percezioni sensibili vivide","Idee generali astratte","Copie sbiadite delle idee","Concetti della ragione"],
+    answer: 0,
+    explanation: "Le impressioni sono per Hume le sensazioni attuali, le percezioni sensibili nella loro vivacita' originaria.",
+    commonError: "Le impressioni sono cio' da cui derivano le idee, non viceversa.",
+    deepdive: "Hume rovescia la prospettiva di Locke: il primo dato della conoscenza non e' l'idea, ma l'impressione. L'idea e' solo una 'copia sbiadita' dell'impressione.",
+    difficulty: 1, topic: "Hume - Impressioni e idee"
+  },
+  {
+    text: "Le idee in Hume sono:",
+    type: "multiple",
+    options: ["Impressioni illanguidite, copie sbiadite","Innate nell'intelletto","Create dalla ragione pura","Sostanze spirituali"],
+    answer: 0,
+    explanation: "Le idee sono 'impressioni illanguidite': copie sbiadite delle sensazioni originarie.",
+    commonError: "Non confondere l'idea humiana (copia dell'impressione) con l'idea cartesiana o platonica.",
+    deepdive: "Questo principio porta Hume all'empirismo radicale: tutta la conoscenza umana deriva da impressioni. Se un'idea non ha origine in un'impressione, non e' legittima.",
+    difficulty: 1, topic: "Hume - Impressioni e idee"
+  },
+  {
+    text: "La posizione filosofica di Hume si puo' definire:",
+    type: "multiple",
+    options: ["Empirismo radicale","Razionalismo critico","Idealismo trascendentale","Dogmatismo metafisico"],
+    answer: 0,
+    explanation: "Hume e' un empirista radicale: tutta la realta' conoscibile si risolve nell'insieme delle percezioni. Se non percepisco, non e'.",
+    commonError: "Hume va oltre Locke: se Locke ammette ancora la sostanza come sostegno ignoto, Hume la elimina del tutto.",
+    deepdive: "Per Hume solo le percezioni esistono come oggetti di conoscenza. Tutto cio' che pretendo di pensare oltre le percezioni non ha fondamento.",
+    difficulty: 2, topic: "Hume - Impressioni e idee"
+  },
+  {
+    text: "Le impressioni complesse si formano:",
+    type: "multiple",
+    options: ["Quando impressioni semplici sono associate fra loro","Quando l'intelletto le deduce","Per rivelazione","Per intuizione immediata"],
+    answer: 0,
+    explanation: "Le impressioni complesse nascono dall'associazione di impressioni semplici fra loro.",
+    commonError: "L'associazione non e' un atto libero: segue criteri precisi (somiglianza, continuita', causa-effetto).",
+    deepdive: "Sia le impressioni sia le idee possono essere semplici o complesse. Le idee complesse possono derivare da impressioni complesse o nascere dall'immaginazione che combina liberamente idee semplici.",
+    difficulty: 2, topic: "Hume - Impressioni e idee"
+  },
+  {
+    text: "Le idee complesse in Hume possono essere prodotte da:",
+    type: "multiple",
+    options: ["Memoria (ricordo di impressioni complesse) o immaginazione (combinazione libera)","Solo dall'intelletto puro","Da Dio soltanto","Da un'intuizione mistica"],
+    answer: 0,
+    explanation: "Le idee complesse nascono o dalla memoria, come ricordo di impressioni complesse, o dall'immaginazione, che combina liberamente idee semplici.",
+    commonError: "La memoria e' fedele all'originale, l'immaginazione no: e' molto piu' libera e capricciosa.",
+    deepdive: "L'immaginazione e' pero' guidata dal principio di associazione: non e' caotica, ma legata a regole che spingono a connettere certe idee piuttosto che altre.",
+    difficulty: 2, topic: "Hume - Impressioni e idee"
+  },
+
+  // HUME - PRINCIPIO DI ASSOCIAZIONE (4)
+  {
+    text: "Il principio di associazione in Hume e':",
+    type: "multiple",
+    options: ["Una 'dolce forza' che spinge l'immaginazione a connettere idee semplici","Una regola logica a priori","Una rivelazione divina","Un istinto animale solo"],
+    answer: 0,
+    explanation: "Hume chiama il principio di associazione 'dolce forza' (gentle force): spinge l'immaginazione a connettere fra loro idee semplici.",
+    commonError: "Non e' una legge rigida: e' una propensione naturale, psicologica, non logica.",
+    deepdive: "Questa 'dolce forza' e' per la mente cio' che la gravita' e' per la natura: una forza regolare che spiega l'ordinarsi delle idee nella mente umana.",
+    difficulty: 2, topic: "Hume - Principio di associazione"
+  },
+  {
+    text: "Quanti sono i criteri del principio di associazione secondo Hume?",
+    type: "numeric",
+    answer: 3,
+    tolerance: 0,
+    explanation: "Sono 3: somiglianza, continuita' spazio-tempo, causa-effetto.",
+    commonError: "Attenzione: sono 3, non 2 ne' 4. La causa-effetto e' quello piu' importante e controverso.",
+    deepdive: "Somiglianza: idee simili si richiamano. Continuita': idee contigue nello spazio o nel tempo si associano. Causa-effetto: idee connesse come causa ed effetto si richiamano (fuoco -> incendio).",
+    difficulty: 2, topic: "Hume - Principio di associazione"
+  },
+  {
+    text: "La connessione tra fuoco e incendio e' un esempio di associazione per:",
+    type: "multiple",
+    options: ["Causa-effetto","Somiglianza","Continuita' spaziale","Contraddizione"],
+    answer: 0,
+    explanation: "Fuoco e incendio si associano per causa-effetto: il fuoco e' causa dell'incendio.",
+    commonError: "Non confondere con somiglianza: non e' una questione di aspetto simile ma di nesso causale.",
+    deepdive: "L'associazione causa-effetto e' quella che Hume analizza piu' a fondo, arrivando a una critica radicale della necessita' oggettiva del nesso causale.",
+    difficulty: 1, topic: "Hume - Principio di associazione"
+  },
+  {
+    text: "Secondo Hume, fra immaginazione e memoria:",
+    type: "truefalse",
+    statement: "L'immaginazione combina liberamente idee semplici, mentre la memoria riproduce impressioni complesse ricordate.",
+    answer: true,
+    explanation: "Corretto! La memoria ricorda impressioni complesse come erano, l'immaginazione combina liberamente idee semplici.",
+    commonError: "Entrambe lavorano con idee, ma con gradi diversi di fedelta' all'originale.",
+    deepdive: "L'immaginazione e' guidata, non caotica: i 3 criteri di associazione la orientano, altrimenti sarebbe pura fantasia arbitraria.",
+    difficulty: 2, topic: "Hume - Principio di associazione"
+  },
+
+  // HUME - CAUSA EFFETTO (4)
+  {
+    text: "La critica di Hume al nesso causa-effetto consiste nel sostenere che:",
+    type: "multiple",
+    options: ["Non si puo' mai affermare una necessita' oggettiva fra due impressioni o idee","La causa non precede l'effetto","Dio solo e' causa di tutto","La causa e' un'idea innata"],
+    answer: 0,
+    explanation: "Hume nega che si possa affermare una necessita' oggettiva fra due impressioni/idee: noi vediamo solo congiunzioni costanti, non necessita'.",
+    commonError: "Hume non nega che esistano sequenze regolari: nega che da esse si possa dedurre una necessita' oggettiva e universale.",
+    deepdive: "Noi vediamo sempre A seguito da B, ma non percepiamo la 'forza' che lega A e B. Quindi non possiamo affermare che A debba sempre produrre B: e' un'abitudine mentale.",
+    difficulty: 3, topic: "Hume - Critica causa-effetto"
+  },
+  {
+    text: "Secondo Hume, l'aspettativa che A causera' B in futuro nasce da:",
+    type: "multiple",
+    options: ["L'abitudine (custom), non dalla ragione","Una dimostrazione logica","L'intuizione di un principio innato","La rivelazione divina"],
+    answer: 0,
+    explanation: "L'aspettativa nasce dall'abitudine: avendo visto A seguito da B molte volte, la mente si abitua ad aspettarsi B dopo A.",
+    commonError: "Non e' un'inferenza razionale ma una consuetudine psicologica: per questo non e' certa.",
+    deepdive: "L'abitudine (custom o habit) e' la vera sorgente della nostra fiducia nella causalita'. La ragione non puo' giustificare l'induzione: e' solo credenza (belief).",
+    difficulty: 3, topic: "Hume - Critica causa-effetto"
+  },
+  {
+    text: "Perche' Hume critica il nesso causa-effetto? Una delle ragioni e':",
+    type: "multiple",
+    options: ["L'esperienza riguarda solo eventi passati, la necessita' non e' sempre possibile","La causa e' una sostanza innata","I sensi sono sempre ingannevoli","Dio non puo' essere causa"],
+    answer: 0,
+    explanation: "Una delle ragioni: l'esperienza riguarda solo eventi passati; proiettare la necessita' sul futuro non e' garantito dall'esperienza stessa.",
+    commonError: "Hume non dice che non ci sara' piu' causalita': dice che non possiamo esserne logicamente certi.",
+    deepdive: "Il problema dell'induzione: il passato non garantisce il futuro. Potremmo avere esperienze singole, isolate che si oppongono, logicamente non contraddittorie, ma non possiamo affermare 'A causa B' come verita' necessaria.",
+    difficulty: 3, topic: "Hume - Critica causa-effetto"
+  },
+  {
+    text: "Le scienze empiriche, secondo Hume, si fondano su:",
+    type: "multiple",
+    options: ["Dati di fatto, non sul principio di non-contraddizione","Matematica pura","Principi innati","Rivelazione"],
+    answer: 0,
+    explanation: "Le scienze empiriche esprimono ragionamenti su dati di fatto, non su principi logici necessari come il principio di non-contraddizione.",
+    commonError: "Solo la matematica si fonda sul principio di non-contraddizione: le altre scienze non hanno la stessa necessita'.",
+    deepdive: "Hume distingue: 1) proposizioni che si fondano sul principio di non-contraddizione (matematica, validita' necessaria); 2) proposizioni che si fondano su dati di fatto (scienze empiriche, validita' solo probabile).",
+    difficulty: 3, topic: "Hume - Critica causa-effetto"
+  },
+
+  // HUME - SCETTICISMO E SOSTANZA (3)
+  {
+    text: "Le conseguenze dello scetticismo di Hume investono:",
+    type: "multiple",
+    options: ["Tutte le scienze empiriche (es. fisica)","Solo la teologia","Solo la matematica","Solo la logica"],
+    answer: 0,
+    explanation: "Lo scetticismo humiano riguarda tutta la nostra vita cognitiva empirica: le scienze fisiche e tutte quelle basate sull'esperienza.",
+    commonError: "Lo scetticismo non tocca la matematica, che si regge sul principio di non-contraddizione.",
+    deepdive: "Noi non stiamo agli scettici nella vita pratica: ci fidiamo della causalita' perche' e' un'abitudine necessaria a vivere. Ma da un punto di vista epistemologico stretto la certezza manca.",
+    difficulty: 3, topic: "Hume - Scetticismo e sostanza"
+  },
+  {
+    text: "Hume sulla sostanza materiale e spirituale:",
+    type: "multiple",
+    options: ["Nega entrambe: non percepiamo sostanze ma solo impressioni","Accetta la materiale ma nega la spirituale","Accetta la spirituale ma nega la materiale","Accetta entrambe come innate"],
+    answer: 0,
+    explanation: "Hume nega entrambe le sostanze: noi percepiamo solo impressioni, non sostanze. Le sostanze sono costruzioni dell'immaginazione.",
+    commonError: "Locke ancora conserva la sostanza come sostegno ignoto; Hume la elimina del tutto.",
+    deepdive: "L'immaginazione e la memoria, spinte dal principio di costante unione delle impressioni, colmano i vuoti facendoci credere che sotto ci sia 'qualcosa' (la sostanza). Ma e' solo credenza.",
+    difficulty: 3, topic: "Hume - Scetticismo e sostanza"
+  },
+  {
+    text: "Per Hume l'idea di 'io' (identita' personale):",
+    type: "multiple",
+    options: ["E' un fascio di percezioni, non una sostanza stabile","E' una sostanza spirituale evidente","E' un'idea innata","E' una dimostrazione matematica"],
+    answer: 0,
+    explanation: "Per Hume l'io e' solo un 'fascio di percezioni' (bundle of perceptions) che si succedono. Non c'e' una sostanza-io stabile.",
+    commonError: "L'io humiano non e' il cogito cartesiano: non c'e' una res cogitans sotto le percezioni.",
+    deepdive: "Quando introspetto, trovo sempre una percezione particolare, mai 'me stesso'. L'unita' dell'io e' una finzione prodotta dalla memoria che lega percezioni successive.",
+    difficulty: 3, topic: "Hume - Scetticismo e sostanza"
+  },
+
+  // BERKELEY - IMMATERIALISMO (5)
+  {
+    text: "Per Berkeley l'unica sostanza reale e':",
+    type: "multiple",
+    options: ["Lo spirito","La materia","Il tempo","Lo spazio"],
+    answer: 0,
+    explanation: "Per Berkeley l'unica sostanza reale e' lo spirito: gli oggetti della conoscenza umana sono solo idee, che esistono solo nel soggetto che le percepisce.",
+    commonError: "Berkeley nega la sostanza materiale, non lo spirito: e' un immaterialista.",
+    deepdive: "La tesi di Berkeley rovescia il senso comune: non esiste la materia come sostanza indipendente. Cio' che chiamiamo 'corpi' e' solo un insieme di idee nella mente.",
+    difficulty: 2, topic: "Berkeley - Immaterialismo"
+  },
+  {
+    text: "La formula 'esse est percipi' significa:",
+    type: "multiple",
+    options: ["Essere e' essere percepito","Essere e' pensare","Io penso, dunque sono","Essere e' divenire"],
+    answer: 0,
+    explanation: "'Esse est percipi' (essere e' essere percepito): non esiste alcuna sostanza corporea al di la' di cio' che viene percepito.",
+    commonError: "Non confondere con il cogito cartesiano: Berkeley parla di essere, non di pensare.",
+    deepdive: "L'essere degli oggetti consiste nel loro 'essere idee', cioe' essere presenti nella mente. Niente esiste al di fuori della percezione.",
+    difficulty: 2, topic: "Berkeley - Immaterialismo"
+  },
+  {
+    text: "Una conseguenza dell'immaterialismo di Berkeley e':",
+    type: "multiple",
+    options: ["Tutte le sensazioni/idee sono soggettive, non c'e' motivo di distinguere primarie e secondarie","Solo le primarie sono reali","Solo le secondarie sono reali","Le qualita' non esistono"],
+    answer: 0,
+    explanation: "Berkeley abolisce la distinzione Locke tra qualita' primarie (oggettive) e secondarie (soggettive): tutte sono soggettive, perche' tutte sono solo idee.",
+    commonError: "Berkeley non nega le qualita': nega che alcune siano oggettive e corrispondano a proprieta' reali dei corpi.",
+    deepdive: "Se anche le primarie sono idee, cade la giustificazione per postulare una materia oggettiva. Il materialismo perde il suo appoggio filosofico.",
+    difficulty: 3, topic: "Berkeley - Immaterialismo"
+  },
+  {
+    text: "Per Berkeley i 'corpi' materiali:",
+    type: "multiple",
+    options: ["Sono solo raggruppamenti di idee nella mente","Sono sostanze indipendenti","Sono pura illusione","Sono idee innate"],
+    answer: 0,
+    explanation: "I corpi sono raggruppamenti di idee presenti nella mente: non sostanze autonome, ma fasci di qualita' percepite.",
+    commonError: "Berkeley non dice che il mondo e' un'illusione: dice che e' reale ma esiste come idee nella mente.",
+    deepdive: "Il mondo percepito e' pienamente reale: la realta' coincide con l'ordine delle idee nella mente. Non ha senso cercare una 'cosa in se' materiale dietro di esse.",
+    difficulty: 2, topic: "Berkeley - Immaterialismo"
+  },
+  {
+    text: "Se 'essere e' essere percepito', le cose esistono quando nessuno le guarda?",
+    type: "truefalse",
+    statement: "Secondo Berkeley, un oggetto continua a esistere anche se nessun uomo lo percepisce, perche' e' comunque percepito dallo spirito infinito che e' Dio.",
+    answer: true,
+    explanation: "Corretto! Le cose non sono percepite solo a tratti da spiriti finiti ma anche continuamente dallo Spirito infinito che e' Dio.",
+    commonError: "Senza Dio, il sistema di Berkeley crollerebbe: le cose sparirebbero ogni volta che nessuno le guarda.",
+    deepdive: "Dio garantisce la continuita' del mondo: e' lo spettatore cosmico la cui percezione mantiene in esistenza gli oggetti anche quando noi non li percepiamo.",
+    difficulty: 3, topic: "Berkeley - Immaterialismo"
+  },
+
+  // BERKELEY - SPIRITO E DIO (3)
+  {
+    text: "Per Berkeley gli spiriti si distinguono in:",
+    type: "multiple",
+    options: ["Spiriti finiti (anime umane) e Spirito infinito (Dio)","Solo umani","Solo Dio","Spiriti naturali e angelici"],
+    answer: 0,
+    explanation: "La sostanza reale e' lo spirito: spiriti finiti (anime umane) e Spirito infinito (Dio).",
+    commonError: "Non c'e' sostanza materiale in Berkeley: solo spirituale, in due forme.",
+    deepdive: "Gli spiriti sono attivi: percepiscono, vogliono, agiscono. Le idee sono passive: sono i contenuti percepiti dagli spiriti.",
+    difficulty: 1, topic: "Berkeley - Spirito e Dio"
+  },
+  {
+    text: "L'esito apologetico dell'immaterialismo di Berkeley consiste nel:",
+    type: "multiple",
+    options: ["Contrastare l'ateismo dei materialisti, che concepivano la materia come finita, immutabile ed eterna","Dimostrare matematicamente Dio","Ridurre Dio a idea","Negare Dio"],
+    answer: 0,
+    explanation: "L'esito e' apologetico: contrasta l'ateismo di chi ammette la materia come sostanza finita, immutabile, eterna. Se non c'e' materia, non c'e' ateismo.",
+    commonError: "Non confondere: Berkeley non dimostra Dio ma toglie alla materia il ruolo di sostanza indipendente, aprendo a Dio come spirito eterno.",
+    deepdive: "I materialisti ponevano la materia come se fosse Dio (eterna, immutabile). Berkeley demolisce questa base: la materia semplicemente non esiste come sostanza autonoma.",
+    difficulty: 3, topic: "Berkeley - Spirito e Dio"
+  },
+  {
+    text: "Per Berkeley Dio e':",
+    type: "multiple",
+    options: ["Lo spirito infinito che percepisce continuamente ogni cosa","Una sostanza materiale eterna","Un'idea innata","Il cogito stesso"],
+    answer: 0,
+    explanation: "Dio e' lo Spirito infinito, il soggetto percipiente universale, che garantisce l'esistenza continua di tutte le cose.",
+    commonError: "Per Berkeley Dio non e' astratto: e' attivo, percipiente, creatore delle idee che noi riceviamo.",
+    deepdive: "Le nostre idee 'arrivano' ordinatamente: chi le produce? Dio, secondo Berkeley. Il mondo ordinato e' segno della costante attivita' percipiente di Dio.",
+    difficulty: 2, topic: "Berkeley - Spirito e Dio"
+  },
+
+  // PASCAL - CONDIZIONE UMANA (5)
+  {
+    text: "L'opera principale di Pascal e':",
+    type: "multiple",
+    options: ["Pensieri (Pensees)","Le passioni dell'anima","Discorso sul metodo","Saggio sull'intelletto umano"],
+    answer: 0,
+    explanation: "L'opera principale di Pascal sono i 'Pensieri' (Pensees): frammenti di un'apologia cristiana mai compiuta.",
+    commonError: "Attenzione: 'Discorso sul metodo' e' di Cartesio, il 'Saggio sull'intelletto umano' e' di Locke.",
+    deepdive: "Pascal (1623-1662) appartiene al gruppo dei 'solitari di Port-Royal'. Nei Pensieri pone domande fondamentali sulla condizione umana per condurre il lettore alla fede.",
+    difficulty: 1, topic: "Pascal - Condizione umana"
+  },
+  {
+    text: "Per Pascal il 'divertissement' e':",
+    type: "multiple",
+    options: ["Distrazione, stordimento, dispersione con intrattenimenti e preoccupazioni continue","Divertimento sano","Riposo meditativo","Preghiera"],
+    answer: 0,
+    explanation: "Il divertissement e' distrazione/stordimento/dispersione: ci si riempie di intrattenimenti e preoccupazioni continue per non affrontare la propria miseria.",
+    commonError: "Non e' il 'divertirsi' positivo: e' un fuggire dalla condizione umana, una strategia patologica.",
+    deepdive: "Pascal vede nel divertissement il meccanismo con cui l'uomo copre il vuoto e la morte. Chi si ferma, precipita nella noia e si confronta con i limiti umani.",
+    difficulty: 2, topic: "Pascal - Condizione umana"
+  },
+  {
+    text: "La noia per Pascal e':",
+    type: "multiple",
+    options: ["Occasione di confronto con i limiti della condizione umana","Un male da eliminare","Pigrizia","Tristezza clinica"],
+    answer: 0,
+    explanation: "La noia e' occasione preziosa: confronto con i limiti della condizione umana, che il divertissement maschera.",
+    commonError: "Pascal rivaluta la noia: non e' negativa ma e' un 'attrito' filosofico con la propria miseria.",
+    deepdive: "Solo nella noia l'uomo si ferma, guarda se stesso e sente la propria finitudine. E' una porta d'ingresso alla vera domanda su Dio e sul senso della vita.",
+    difficulty: 2, topic: "Pascal - Condizione umana"
+  },
+  {
+    text: "Per Pascal la condizione umana e' caratterizzata da:",
+    type: "multiple",
+    options: ["Combinazione di miseria e grandezza","Solo grandezza","Solo miseria","Totale perfezione"],
+    answer: 0,
+    explanation: "L'uomo e' sempre miseria + grandezza: misera perche' limitato, mortale, frustrato; grande perche' sa di esserlo.",
+    commonError: "Non e' solo pessimismo: la grandezza umana sta proprio nella consapevolezza dei propri limiti.",
+    deepdive: "La famosa immagine della 'canna pensante': l'uomo e' fragile come una canna, ma e' una canna che pensa. La sua dignita' sta nel pensiero che conosce la propria miseria.",
+    difficulty: 2, topic: "Pascal - Condizione umana"
+  },
+  {
+    text: "Per Pascal, i tre punti di vista per descrivere l'uomo sono:",
+    type: "multiple",
+    options: ["Essere, conoscenza, morale","Etica, politica, estetica","Logica, fisica, teologia","Tempo, spazio, causalita'"],
+    answer: 0,
+    explanation: "Tre aspetti: 1) Essere (uomo a meta' tra Dio e cosmo), 2) Conoscenza (desiderio di verita' vs incertezza), 3) Morale (desiderio di bene vs suoi limiti).",
+    commonError: "Non sono categorie kantiane: sono dimensioni esistenziali della condizione umana.",
+    deepdive: "In ogni aspetto l'uomo e' doppio: ha infinite aspirazioni e limiti reali. E' questa sproporzione a costituirne il dramma.",
+    difficulty: 3, topic: "Pascal - Condizione umana"
+  },
+
+  // PASCAL - LIMITI DELLA SCIENZA (4)
+  {
+    text: "I limiti interni della scienza secondo Pascal sono:",
+    type: "multiple",
+    options: ["Riferimento all'esperienza e indimostrabilita' di principi primi e nozioni prime","Pigrizia degli scienziati","Mancanza di strumenti","Errori di calcolo"],
+    answer: 0,
+    explanation: "I limiti interni sono due e indipendenti: 1) riferimento obbligato all'esperienza, 2) indimostrabilita' dei principi e delle nozioni prime.",
+    commonError: "Non sono limiti contingenti ma strutturali: la scienza per costituzione non puo' superarli.",
+    deepdive: "La scienza parte sempre da principi che deve assumere senza dimostrarli (es. assiomi geometrici). Quindi non fonda se stessa in modo totalmente razionale.",
+    difficulty: 3, topic: "Pascal - Limiti della scienza"
+  },
+  {
+    text: "I limiti esterni della scienza riguardano:",
+    type: "multiple",
+    options: ["I problemi relativi al senso e alle questioni piu' rilevanti per l'esistenza umana","Le scarse risorse economiche","Il metodo sperimentale","La matematica"],
+    answer: 0,
+    explanation: "I limiti esterni: la scienza non affronta i problemi di senso ne' le questioni piu' rilevanti per l'esistenza umana (perche' vivo? che senso ha?).",
+    commonError: "Non e' un difetto della scienza: e' che la scienza ha un altro oggetto, non quello della 'ragione esistenziale'.",
+    deepdive: "Le domande piu' profonde (Dio, destino, senso) non sono indagabili con il metodo scientifico ma con un altro: l'esprit de finesse.",
+    difficulty: 3, topic: "Pascal - Limiti della scienza"
+  },
+  {
+    text: "Pascal distingue due 'spiriti' diversi:",
+    type: "multiple",
+    options: ["Esprit de geometrie (matematico) ed esprit de finesse (intuitivo)","Esprit pur ed esprit pratico","Esprit logico ed esprit sensibile","Ragione e volonta'"],
+    answer: 0,
+    explanation: "Esprit de geometrie: metodo di matematica e fisica, basato su principi espliciti e ragionamenti. Esprit de finesse: intuizione dei primi principi/postulati, non dimostrabili.",
+    commonError: "Non sono in conflitto: lavorano su ambiti diversi e sono entrambi necessari.",
+    deepdive: "La geometria lavora su principi chiari e li deduce. La finezza coglie intuitivamente principi impliciti, come si fa in morale, psicologia, religione. Le domande profonde richiedono la finezza.",
+    difficulty: 3, topic: "Pascal - Limiti della scienza"
+  },
+  {
+    text: "L'esprit de finesse e':",
+    type: "multiple",
+    options: ["Intuizione dei primi principi e postulati indimostrabili","Logica formale","Metodo sperimentale","Sillogismo aristotelico"],
+    answer: 0,
+    explanation: "L'esprit de finesse e' l'intuizione dei primi principi e dei postulati non dimostrabili, fondamentale per domande morali ed esistenziali.",
+    commonError: "Non e' irrazionalismo: e' una razionalita' diversa, intuitiva piuttosto che deduttiva.",
+    deepdive: "L'esprit de finesse coglie principi in modo globale, simultaneo, non step-by-step. E' il tipo di intelligenza che serve per l'uomo, il bene, Dio.",
+    difficulty: 3, topic: "Pascal - Limiti della scienza"
+  },
+
+  // PASCAL - FEDE E SCOMMESSA (4)
+  {
+    text: "Per Pascal la fede e':",
+    type: "multiple",
+    options: ["Dono di Dio, non dono del ragionamento","Prodotto della dimostrazione razionale","Sentimento irrazionale","Conoscenza scientifica"],
+    answer: 0,
+    explanation: "Pascal: 'La fede e' un dono di Dio. Non credete che diciamo che e' un dono del ragionamento'.",
+    commonError: "Pascal non e' irrazionalista: dice che la fede e' dono divino, non che la ragione sia inutile. Ma non si arriva a Dio per dimostrazione.",
+    deepdive: "La fede ha le sue ragioni ('il cuore ha le sue ragioni che la ragione non conosce'): e' un atto che coinvolge volonta', cuore e testimonianza divina, non solo intelletto.",
+    difficulty: 2, topic: "Pascal - Fede e scommessa"
+  },
+  {
+    text: "La 'scommessa' di Pascal riguarda:",
+    type: "multiple",
+    options: ["L'esistenza di Dio: conviene scommettere che Dio esiste","Il gioco d'azzardo","La politica","La probabilita' matematica pura"],
+    answer: 0,
+    explanation: "La scommessa: se Dio esiste e credo, guadagno tutto; se non esiste e credo, perdo poco. Se Dio esiste e non credo, perdo tutto. Conviene scommettere che Dio esiste.",
+    commonError: "Non e' cinismo: e' un argomento per indurre l'indifferente a cominciare a considerare seriamente la possibilita' di Dio.",
+    deepdive: "La scommessa non dimostra Dio: e' un dispositivo retorico-pragmatico per smuovere chi si dichiara indifferente. Dato che bisogna scommettere, meglio scommettere sul lato con guadagno infinito.",
+    difficulty: 3, topic: "Pascal - Fede e scommessa"
+  },
+  {
+    text: "Per Pascal la condotta pratica che segue alla scommessa e':",
+    type: "multiple",
+    options: ["Vita di fede, fare 'come se': aprire la volonta' e il cuore","Dimostrazioni razionali","Indifferenza totale","Scetticismo"],
+    answer: 0,
+    explanation: "Dalla scommessa segue una vita di fede: fare 'come se' Dio esistesse, aprendo la volonta' e il cuore alla fede.",
+    commonError: "Non e' ipocrisia: Pascal pensa che la pratica cambi il soggetto e apra la strada al dono della fede.",
+    deepdive: "Sequenza: scommessa -> vita di fede -> apertura della volonta' e del cuore -> altre prove storiche e apologetiche -> dono divino della fede. Si parte dalla ragione e si arriva al dono.",
+    difficulty: 3, topic: "Pascal - Fede e scommessa"
+  },
+  {
+    text: "Per Pascal l'umano e' caratterizzato dal rapporto:",
+    type: "multiple",
+    options: ["Volere vs non potere, che genera miseria come desiderio frustrato","Volere vs sentire","Pensare vs agire","Teoria vs pratica"],
+    answer: 0,
+    explanation: "L'uomo vuole ma non puo': la miseria umana e' proprio questo desiderio frustrato di grandezza, infinito, felicita'.",
+    commonError: "La miseria non e' difetto morale: e' la sproporzione tra l'aspirazione infinita e il limite finito.",
+    deepdive: "L'uomo desidera felicita', conoscenza totale, vita piena: ma sperimenta continuamente il limite. Solo Dio puo' colmare questa sproporzione con la grazia.",
+    difficulty: 3, topic: "Pascal - Fede e scommessa"
+  }
+];
+
+const ULTRA_QUESTIONS = [
+  {
+    text: "Un compagno ti dice: 'Locke e' empirista come Hume'. Rispondi correttamente:",
+    type: "multiple",
+    options: ["Locke e' empirista ma non radicale: ammette ancora la sostanza come sostegno ignoto, mentre Hume la nega del tutto","Hanno la stessa posizione","Locke e' piu' scettico di Hume","Hume e' razionalista"],
+    answer: 0,
+    explanation: "Locke ammette le sostanze come sostegno ignoto delle qualita'. Hume le elimina: solo percezioni. Locke e' empirista critico, Hume e' empirista radicale.",
+    commonError: "Non sono equivalenti: ci sono tre passi progressivi Locke -> Berkeley -> Hume nella radicalizzazione dell'empirismo.",
+    deepdive: "Locke tiene la sostanza come limite ignoto; Berkeley nega la materia ma tiene lo spirito; Hume nega entrambe. Alla fine restano solo le impressioni.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Perche' la critica humiana al nesso causa-effetto mette in crisi la scienza?",
+    type: "multiple",
+    options: ["Se la causalita' e' solo abitudine, le leggi scientifiche perdono la loro necessita' oggettiva","Nessuna crisi: la scienza non usa la causalita'","Solo la matematica viene toccata","Solo la teologia",],
+    answer: 0,
+    explanation: "La scienza si fonda sulla causalita' necessaria (le leggi fisiche). Se questa si riduce ad abitudine, le 'leggi' diventano solo regolarita' probabili, non certezze.",
+    commonError: "Hume non dice che la scienza non funzioni: dice che non ha le basi di necessita' che Cartesio o Newton le attribuivano.",
+    deepdive: "Kant sviluppera' la sua 'rivoluzione copernicana' proprio per rispondere a Hume: recuperare la necessita' della causalita' spostandola dalle cose ai quadri a priori del soggetto.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Metti a confronto: 'esse est percipi' di Berkeley e 'tutto si risolve in percezioni' di Hume.",
+    type: "multiple",
+    options: ["Berkeley tiene lo spirito come sostanza, Hume anche lo spirito si dissolve in fascio di percezioni","Posizioni identiche","Berkeley e' ateo, Hume e' credente","Berkeley nega Dio"],
+    answer: 0,
+    explanation: "Berkeley mantiene lo spirito come sostanza reale (con Dio come spirito infinito). Hume dissolve anche l'io in 'bundle of perceptions': non rimane nessuna sostanza.",
+    commonError: "Non sono equivalenti: la differenza e' radicale. Berkeley e' un metafisico spiritualista, Hume un fenomenalista.",
+    deepdive: "Berkeley ha un esito apologetico (salva Dio), Hume ha un esito scettico (dissolve ogni sostanza, perfino l'io). Sono due direzioni opposte dell'empirismo.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Scommessa di Pascal: perche' non e' un semplice calcolo opportunistico?",
+    type: "multiple",
+    options: ["Punta a smuovere l'indifferente; la scommessa sfocia in pratica di vita e apertura al dono della fede, non in fredda strategia","Lo e' davvero","E' un gioco senza conseguenze","Pascal e' cinico"],
+    answer: 0,
+    explanation: "La scommessa e' strumento retorico-pedagogico: chi scommette poi deve vivere 'come se', aprire volonta' e cuore, arrivando alla fede come dono.",
+    commonError: "Chi si ferma al solo calcolo fraintende Pascal: il calcolo e' la porta, la fede e' la casa.",
+    deepdive: "Pascal conosce bene la probabilita': usa la sua logica per mostrare che anche sul piano della convenienza la fede vince. Ma poi la trasforma in cammino esistenziale verso il dono divino.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Un ateo ti dice: 'La materia eterna e' Dio'. Come risponderebbe Berkeley?",
+    type: "multiple",
+    options: ["Negherebbe la materia come sostanza: 'esse est percipi', esistono solo spiriti e idee","Gli darebbe ragione","Direbbe che la materia e Dio sono la stessa cosa","Rifiuterebbe la questione"],
+    answer: 0,
+    explanation: "Berkeley attacca proprio la materia come presunta sostanza eterna e immutabile: se tutto e' idea nella mente, non c'e' materia, quindi niente Dio-materia.",
+    commonError: "Berkeley non e' un agnostico: la sua filosofia ha un esito chiaramente apologetico contro ogni forma di materialismo.",
+    deepdive: "Berkeley vede nel materialismo la radice dell'ateismo moderno. Togliendo la materia, toglie la base a ogni pretesa di un 'Dio-materia' autosufficiente. Resta solo lo Spirito infinito.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  }
+];
+
+const EXAM_MC = [
+  {text:"Cosa rifiuta Locke della filosofia cartesiana?",options:["L'innatismo","Il cogito","Il dubbio metodico","L'esistenza di Dio","La res extensa"],answer:0,explanation:"Locke rifiuta l'innatismo: la mente alla nascita e' tabula rasa."},
+  {text:"Per Locke le idee semplici di sensazione derivano da:",options:["I cinque sensi","L'intelletto attivo","La rivelazione","L'immaginazione","La memoria"],answer:0,explanation:"Le idee di sensazione derivano dai cinque sensi dall'esterno."},
+  {text:"Le qualita' primarie secondo Locke sono:",options:["Oggettive, corrispondono a proprieta' reali dei corpi","Soggettive","Innate","Immaginarie","Solo spirituali"],answer:0,explanation:"Le qualita' primarie (estensione, figura, movimento, numero, solidita') sono oggettive."},
+  {text:"Per Locke la conoscenza vera e':",options:["Percezione di connessione fra idee","Adeguazione dell'intelletto alla cosa","Intuizione di idee innate","Rivelazione di Dio","Memoria perfetta"],answer:0,explanation:"La conoscenza e' percezione della connessione, accordo o discordanza fra idee."},
+  {text:"Per Hume le idee sono:",options:["Impressioni illanguidite, copie sbiadite","Innate","Generate da Dio","Oggetti mentali innati","Sostanze spirituali"],answer:0,explanation:"Le idee sono copie sbiadite delle impressioni originarie."},
+  {text:"Il principio di associazione di Hume include:",options:["Somiglianza, continuita' spazio-tempo, causa-effetto","Solo somiglianza","Solo causa-effetto","Identita' e differenza","Induzione e deduzione"],answer:0,explanation:"I 3 criteri sono: somiglianza, continuita' spazio-temporale, causa-effetto."},
+  {text:"La critica di Hume alla causalita' sostiene che:",options:["Non c'e' necessita' oggettiva, solo congiunzione costante e abitudine","La causalita' e' divina","La causalita' e' innata","La causalita' e' falsa in assoluto","La causalita' e' dimostrabile"],answer:0,explanation:"Noi vediamo congiunzioni costanti, non necessita' oggettiva: la causalita' nasce dall'abitudine."},
+  {text:"Per Berkeley la formula fondamentale e':",options:["Esse est percipi","Cogito ergo sum","Tabula rasa","Veritas filia temporis","Credo ut intelligam"],answer:0,explanation:"'Essere e' essere percepito': l'essere degli oggetti consiste nel loro essere percepiti."},
+  {text:"Per Berkeley le cose continuano a esistere quando nessuno le guarda perche':",options:["Sono percepite dallo Spirito infinito (Dio)","Sono sostanze materiali","Hanno esistenza autonoma","Sono idee innate","Sono illusioni stabili"],answer:0,explanation:"Lo Spirito infinito (Dio) le percepisce continuamente garantendone la persistenza."},
+  {text:"Il 'divertissement' di Pascal e':",options:["Distrazione/stordimento dalla condizione umana","Divertimento sano","Preghiera","Meditazione filosofica","Studio scientifico"],answer:0,explanation:"Il divertissement e' dispersione con intrattenimenti continui per non affrontare la miseria umana."},
+  {text:"I due 'spiriti' di Pascal sono:",options:["Esprit de geometrie ed esprit de finesse","Esprit pur ed esprit pratico","Esprit logico ed esprit morale","Spirito umano e divino","Ragione e fede"],answer:0,explanation:"Geometrie: metodo matematico. Finesse: intuizione dei primi principi."},
+  {text:"Per Pascal la fede e':",options:["Dono di Dio, non del ragionamento","Prodotto della dimostrazione","Sentimento irrazionale","Conoscenza scientifica","Intuizione evidente"],answer:0,explanation:"La fede e' dono divino. La scommessa apre la strada ma non la produce."}
+];
+
+const EXAM_OPEN = [
+  {
+    text: "Spiega la distinzione di Locke tra idee semplici (di sensazione e di riflessione) e idee complesse. Chiarisci il ruolo attivo e passivo dell'intelletto e collega la teoria alla critica dell'innatismo cartesiano.",
+    solution: "Locke nega l'innatismo: nella mente nessun contenuto e' anteriore all'esperienza. L'esperienza fornisce i materiali (le idee semplici), che la mente riceve passivamente.\n\nIdee semplici: \n- Di sensazione: dai cinque sensi, dall'esterno.\n- Di riflessione: dal senso interno, osservando le attivita' dello spirito (pensare, volere, dubitare).\n\nRispetto alle idee semplici la mente e' passiva: non puo' crearle ne' modificarle.\n\nIdee complesse: combinazioni di idee semplici operate dall'intelletto. Qui la mente e' attiva: combina, confronta, astrae.\n\nLa coscienza racchiude tutte le idee e ne garantisce l'unita'.\n\nColleghiamo: Cartesio ammetteva idee innate (Dio, sostanza); Locke le nega, perche' tutto il materiale proviene dall'esperienza. Le idee come 'sostanza' sono costruzioni dell'intelletto che partono da idee semplici, non intuizioni native."
+  },
+  {
+    text: "Esponi la critica di Hume al nesso di causalita'. Spiega perche' questa critica investe le scienze empiriche e come si colloca rispetto al principio di non-contraddizione.",
+    solution: "Hume distingue due tipi di proposizioni:\n1) Proposizioni fondate sul principio di non-contraddizione (matematica): necessariamente vere, analitiche.\n2) Proposizioni su dati di fatto (scienze empiriche): non necessarie, solo probabili.\n\nLa causalita' appartiene al secondo tipo. Analizzandola, Hume osserva:\n- Noi percepiamo sempre A seguito da B, ma non percepiamo la 'forza' che lega A a B.\n- Da una congiunzione costante non si deduce una necessita' oggettiva.\n- L'aspettativa che A causera' B in futuro deriva dall'abitudine (custom), non dalla ragione.\n- L'esperienza riguarda solo il passato: il futuro non e' logicamente garantito.\n\nConseguenza: le leggi scientifiche (fisica, ecc.) perdono la loro pretesa di necessita' oggettiva e diventano generalizzazioni probabili basate sull'abitudine.\n\nLa matematica invece resta salva: si fonda sul principio di non-contraddizione, non su dati di fatto.\n\nEsito: scetticismo sulle scienze empiriche, fiducia solo nella matematica e nell'uso pratico dell'abitudine per orientarsi nella vita."
+  },
+  {
+    text: "Confronta le posizioni di Berkeley e Pascal sull'esistenza di Dio, mostrando per ciascuno la strategia filosofica e l'esito apologetico.",
+    solution: "BERKELEY:\nStrategia: immaterialismo (esse est percipi). L'unica sostanza reale e' lo spirito (finito nelle anime, infinito in Dio).\n- I corpi sono raggruppamenti di idee nella mente.\n- Cade la distinzione primarie/secondarie: tutte le qualita' sono soggettive.\n- Le cose continuano a esistere perche' Dio le percepisce continuamente.\nEsito apologetico: contrasta l'ateismo dei materialisti, che pensavano la materia come infinita/immutabile/eterna (quindi 'Dio-materia'). Eliminando la materia come sostanza, Berkeley toglie la base al materialismo e apre a Dio come Spirito infinito.\n\nPASCAL:\nStrategia: antropologica ed esistenziale. Non dimostra Dio ma mostra la miseria e grandezza dell'uomo: il desiderio frustrato di infinito.\n- Limiti della scienza (interni ed esterni): non raggiunge il senso.\n- Divertissement e noia: la condizione umana chiede risposte oltre la scienza.\n- Scommessa: conviene scommettere su Dio (guadagno infinito vs perdita finita).\n- Dalla scommessa segue la vita di fede: apertura della volonta' e del cuore.\n- La fede e' dono divino, non prodotto del ragionamento.\nEsito apologetico: condurre l'indifferente a porsi seriamente la domanda su Dio e ad aprirsi al dono della fede.\n\nDIFFERENZA: Berkeley lavora sul piano metafisico (cosa esiste); Pascal sul piano antropologico-esistenziale (chi e' l'uomo, cosa cerca). Entrambi hanno esito apologetico ma con strategie opposte: Berkeley decostruisce la materia, Pascal ricostruisce la condizione umana."
+  }
+];
+
+const PROF_SVG_HAPPY = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <defs><radialGradient id="glowG" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:#06d6a0;stop-opacity:0.2"/><stop offset="100%" style="stop-color:#06d6a0;stop-opacity:0"/></radialGradient></defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowG)"/>
+  <path d="M50 200 Q50 165 80 155 L110 150 L140 155 Q170 165 170 200 Z" fill="#2c2a4a" stroke="#1a1a2e" stroke-width="2"/>
+  <path d="M80 155 L100 170 L110 150 L120 170 L140 155" fill="#1e1b3a" stroke="none"/>
+  <rect x="100" y="145" width="20" height="14" rx="3" fill="#f5f5f5"/>
+  <rect x="95" y="150" width="30" height="5" rx="2" fill="#8b0000"/>
+  <ellipse cx="110" cy="105" rx="44" ry="48" fill="#e8c49a"/>
+  <path d="M66 80 Q68 45 90 35 Q105 30 110 30 Q115 30 130 35 Q152 45 154 80 L154 95 Q150 85 110 85 Q70 85 66 95 Z" fill="#6b7280" stroke="#4b5563" stroke-width="1"/>
+  <ellipse cx="110" cy="80" rx="44" ry="10" fill="#9ca3af" opacity="0.5"/>
+  <rect x="80" y="95" width="24" height="18" rx="4" fill="none" stroke="#1a1a2e" stroke-width="2.5"/>
+  <rect x="116" y="95" width="24" height="18" rx="4" fill="none" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="104" y1="103" x2="116" y2="103" stroke="#1a1a2e" stroke-width="2"/>
+  <line x1="80" y1="102" x2="70" y2="98" stroke="#1a1a2e" stroke-width="2"/>
+  <line x1="140" y1="102" x2="150" y2="98" stroke="#1a1a2e" stroke-width="2"/>
+  <path d="M86 104 Q92 98 98 104" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M122 104 Q128 98 134 104" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M82 85 Q92 79 102 85" fill="none" stroke="#4b5563" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M118 85 Q128 79 138 85" fill="none" stroke="#4b5563" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M95 128 Q110 138 125 128" fill="none" stroke="#c4956a" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M100 125 Q110 130 120 125" fill="none" stroke="#8b6f47" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  <g transform="translate(162,145) rotate(-10)">
+    <rect x="0" y="0" width="30" height="22" rx="2" fill="#d97706" stroke="#92400e" stroke-width="1.5"/>
+    <rect x="3" y="3" width="24" height="16" rx="1" fill="#fbbf24"/>
+    <line x1="6" y1="7" x2="24" y2="7" stroke="#92400e" stroke-width="0.8"/>
+    <line x1="6" y1="11" x2="24" y2="11" stroke="#92400e" stroke-width="0.8"/>
+    <line x1="6" y1="15" x2="24" y2="15" stroke="#92400e" stroke-width="0.8"/>
+  </g>
+  <circle cx="180" cy="45" r="18" fill="#06d6a0"/>
+  <path d="M171 45 L177 51 L189 39" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+const PROF_SVG_ANGRY = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <defs><radialGradient id="glowR" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:#ef476f;stop-opacity:0.2"/><stop offset="100%" style="stop-color:#ef476f;stop-opacity:0"/></radialGradient></defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowR)"/>
+  <path d="M50 200 Q50 165 80 155 L110 150 L140 155 Q170 165 170 200 Z" fill="#2c2a4a" stroke="#1a1a2e" stroke-width="2"/>
+  <path d="M80 155 L100 170 L110 150 L120 170 L140 155" fill="#1e1b3a" stroke="none"/>
+  <rect x="100" y="145" width="20" height="14" rx="3" fill="#f5f5f5"/>
+  <rect x="95" y="150" width="30" height="5" rx="2" fill="#8b0000"/>
+  <ellipse cx="110" cy="105" rx="44" ry="48" fill="#e8c49a"/>
+  <path d="M66 80 Q68 45 90 35 Q105 30 110 30 Q115 30 130 35 Q152 45 154 80 L154 95 Q150 85 110 85 Q70 85 66 95 Z" fill="#6b7280" stroke="#4b5563" stroke-width="1"/>
+  <ellipse cx="110" cy="80" rx="44" ry="10" fill="#9ca3af" opacity="0.5"/>
+  <rect x="80" y="95" width="24" height="18" rx="4" fill="none" stroke="#1a1a2e" stroke-width="2.5"/>
+  <rect x="116" y="95" width="24" height="18" rx="4" fill="none" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="104" y1="103" x2="116" y2="103" stroke="#1a1a2e" stroke-width="2"/>
+  <line x1="80" y1="102" x2="70" y2="98" stroke="#1a1a2e" stroke-width="2"/>
+  <line x1="140" y1="102" x2="150" y2="98" stroke="#1a1a2e" stroke-width="2"/>
+  <circle cx="92" cy="103" r="3" fill="#1a1a2e"/>
+  <circle cx="128" cy="103" r="3" fill="#1a1a2e"/>
+  <path d="M82 88 Q92 82 102 88" fill="none" stroke="#4b5563" stroke-width="2.5" stroke-linecap="round" transform="rotate(8,92,85)"/>
+  <path d="M118 88 Q128 82 138 88" fill="none" stroke="#4b5563" stroke-width="2.5" stroke-linecap="round" transform="rotate(-8,128,85)"/>
+  <path d="M95 130 Q110 123 125 130" fill="none" stroke="#c4956a" stroke-width="2.5" stroke-linecap="round"/>
+  <g transform="translate(152,120) rotate(10)">
+    <rect x="0" y="0" width="28" height="20" rx="2" fill="#d97706" stroke="#92400e" stroke-width="1.5"/>
+    <rect x="2" y="3" width="24" height="14" rx="1" fill="#fbbf24"/>
+    <line x1="5" y1="7" x2="23" y2="7" stroke="#92400e" stroke-width="0.8"/>
+    <line x1="5" y1="11" x2="23" y2="11" stroke="#92400e" stroke-width="0.8"/>
+  </g>
+  <circle cx="180" cy="45" r="18" fill="#ef476f"/>
+  <path d="M173 38 L187 52 M187 38 L173 52" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+  <g transform="translate(55,55)"><path d="M0 5 L5 0 L10 5 L5 10 Z" fill="none" stroke="#ef476f" stroke-width="2"/></g>
+</svg>`;
+
+const PROF_SVG_NEUTRAL = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <defs><radialGradient id="glowN" cx="50%" cy="50%" r="50%"><stop offset="0%" style="stop-color:#6d28d9;stop-opacity:0.15"/><stop offset="100%" style="stop-color:#6d28d9;stop-opacity:0"/></radialGradient></defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowN)"/>
+  <path d="M50 200 Q50 165 80 155 L110 150 L140 155 Q170 165 170 200 Z" fill="#2c2a4a" stroke="#1a1a2e" stroke-width="2"/>
+  <path d="M80 155 L100 170 L110 150 L120 170 L140 155" fill="#1e1b3a" stroke="none"/>
+  <rect x="100" y="145" width="20" height="14" rx="3" fill="#f5f5f5"/>
+  <rect x="95" y="150" width="30" height="5" rx="2" fill="#8b0000"/>
+  <ellipse cx="110" cy="105" rx="44" ry="48" fill="#e8c49a"/>
+  <path d="M66 80 Q68 45 90 35 Q105 30 110 30 Q115 30 130 35 Q152 45 154 80 L154 95 Q150 85 110 85 Q70 85 66 95 Z" fill="#6b7280"/>
+  <ellipse cx="110" cy="80" rx="44" ry="10" fill="#9ca3af" opacity="0.5"/>
+  <rect x="80" y="95" width="24" height="18" rx="4" fill="none" stroke="#1a1a2e" stroke-width="2.5"/>
+  <rect x="116" y="95" width="24" height="18" rx="4" fill="none" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="104" y1="103" x2="116" y2="103" stroke="#1a1a2e" stroke-width="2"/>
+  <line x1="80" y1="102" x2="70" y2="98" stroke="#1a1a2e" stroke-width="2"/>
+  <line x1="140" y1="102" x2="150" y2="98" stroke="#1a1a2e" stroke-width="2"/>
+  <circle cx="92" cy="103" r="2.5" fill="#1a1a2e"/><circle cx="128" cy="103" r="2.5" fill="#1a1a2e"/>
+  <path d="M84 87 Q92 83 100 87" fill="none" stroke="#4b5563" stroke-width="2" stroke-linecap="round"/>
+  <path d="M120 87 Q128 83 136 87" fill="none" stroke="#4b5563" stroke-width="2" stroke-linecap="round"/>
+  <path d="M100 130 L120 130" fill="none" stroke="#c4956a" stroke-width="2" stroke-linecap="round"/>
+</svg>`;
+
+(function initProfSVG(){
+  document.getElementById('prof-svg-happy').innerHTML = PROF_SVG_HAPPY;
+  document.getElementById('prof-svg-angry').innerHTML = PROF_SVG_ANGRY;
+  document.getElementById('prof-header-svg').innerHTML = PROF_SVG_NEUTRAL;
+})();
+
+const PROF_CORRECT_PHRASES = [
+  "Bene! Ragionamento chiaro e ordinato.",
+  "Corretto. Hai letto davvero i Pensieri.",
+  "Ottimo! Locke sarebbe d'accordo.",
+  "Bravo! Hume sorriderebbe (scetticamente).",
+  "Si', perfetto. Concetti padroneggiati.",
+  "Esatto. L'empirismo non ha segreti per te.",
+  "Risposta corretta! Continua cosi'.",
+  "Perfetto. Un piccolo filosofo tra noi.",
+  "Bene bene. Pascal ti approva.",
+  "Corretto. Berkeley sarebbe felice.",
+  "Giusto! Testa fina e metodica.",
+  "Ok, non male. Questa classe ha speranza."
+];
+
+const PROF_WRONG_PHRASES = [
+  "No. Qui hai confuso Locke e Hume.",
+  "Attenzione: rivedi bene questo passaggio.",
+  "Errore. Torna sugli appunti di filosofia.",
+  "Questa risposta non regge. Riprova.",
+  "Fermati: qui c'e' da ripassare.",
+  "No, no, no. Rileggi il capitolo.",
+  "Sbagliato. Ma l'errore e' occasione di chiarezza.",
+  "Questo errore lo vedo ogni anno. Leggi la spiegazione.",
+  "Non ci siamo. Apri il manuale e rileggi.",
+  "Errore. Ma l'esprit de finesse si allena.",
+  "Risposta sbagliata. Concentrati sulle distinzioni.",
+  "No. Rivedi la differenza fra impressioni e idee."
+];
+
+let currentQuestions = [];
+let currentIndex = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let history = [];
+let topicStats = {};
+let errorQuestionIds = [];
+let answered = false;
+
+(function init() {
+  const topics = [...new Set(QUESTIONS.map(q => q.topic))];
+  const grid = document.getElementById('topic-filters');
+  topics.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'topic-item';
+    div.innerHTML = '<input type="checkbox" checked value="' + t + '" class="topic-cb"> ' + t;
+    grid.appendChild(div);
+  });
+  loadPreviousStats();
+  initNotesContent();
+})();
+
+function loadPreviousStats() {
+  const saved = localStorage.getItem('filosofia_stats');
+  if (saved) {
+    const data = JSON.parse(saved);
+    document.getElementById('prev-stats').style.display = 'block';
+    document.getElementById('prev-stats-text').textContent =
+      data.correct + '/' + data.total + ' corrette (' + data.percentage + '%) - ' + data.date;
+    const savedErrors = localStorage.getItem('filosofia_errors');
+    if (savedErrors && JSON.parse(savedErrors).length > 0) {
+      document.getElementById('btn-errors').style.display = 'inline-block';
+    }
+  }
+}
+
+function clearProgress() {
+  localStorage.removeItem('filosofia_stats');
+  localStorage.removeItem('filosofia_errors');
+  document.getElementById('prev-stats').style.display = 'none';
+  document.getElementById('btn-errors').style.display = 'none';
+}
+
+function startQuiz(mode) {
+  currentIndex = 0; correctCount = 0; wrongCount = 0;
+  history = []; topicStats = {}; errorQuestionIds = []; answered = false;
+
+  const selectedTopics = [...document.querySelectorAll('.topic-cb:checked')].map(cb => cb.value);
+
+  if (mode === 'ultra') {
+    currentQuestions = [...ULTRA_QUESTIONS];
+  } else if (mode === 'errors') {
+    const savedErrors = localStorage.getItem('filosofia_errors');
+    if (savedErrors) {
+      const errorIds = JSON.parse(savedErrors);
+      currentQuestions = errorIds.map(id => QUESTIONS[id]).filter(q => q);
+    }
+    if (!currentQuestions || currentQuestions.length === 0) {
+      alert('Non ci sono errori salvati da ripassare!');
+      return;
+    }
+  } else {
+    currentQuestions = QUESTIONS.filter(q => selectedTopics.includes(q.topic));
+    if (currentQuestions.length === 0) {
+      alert('Seleziona almeno un argomento!');
+      return;
+    }
+  }
+
+  if (mode === 'random') shuffleArray(currentQuestions);
+  else if (mode === 'all') currentQuestions.sort((a, b) => a.difficulty - b.difficulty);
+
+  const topics = [...new Set(currentQuestions.map(q => q.topic))];
+  topics.forEach(t => { topicStats[t] = { correct: 0, wrong: 0, total: 0 }; });
+
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('total-q').textContent = currentQuestions.length;
+  showQuestion();
+}
+
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+function showQuestion() {
+  answered = false;
+  const q = currentQuestions[currentIndex];
+  document.getElementById('current-q').textContent = currentIndex + 1;
+  document.getElementById('score-correct').textContent = correctCount;
+  document.getElementById('score-wrong').textContent = wrongCount;
+  document.getElementById('progress-bar').style.width = ((currentIndex) / currentQuestions.length * 100) + '%';
+
+  const meta = document.getElementById('question-meta');
+  const diffLabels = ['Facile', 'Media', 'Difficile'];
+  const typeLabels = { multiple: 'Scelta multipla', truefalse: 'Vero/Falso', numeric: 'Esercizio numerico' };
+  meta.innerHTML = '<span class="badge badge-topic">' + q.topic + '</span>' +
+    '<span class="badge badge-diff-' + q.difficulty + '">' + diffLabels[q.difficulty - 1] + '</span>' +
+    '<span class="badge badge-type">' + typeLabels[q.type] + '</span>';
+
+  document.getElementById('question-text').textContent = q.text;
+  const area = document.getElementById('answer-area');
+  area.innerHTML = '';
+  document.getElementById('submit-area').style.display = 'none';
+
+  if (q.type === 'multiple') {
+    const indices = q.options.map((_, i) => i);
+    shuffleArray(indices);
+    q._shuffledIndices = indices;
+    const container = document.createElement('div');
+    container.className = 'options-container';
+    indices.forEach((origIdx, displayIdx) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = q.options[origIdx];
+      btn.onclick = () => handleMultipleChoice(displayIdx);
+      btn.id = 'opt-' + displayIdx;
+      btn.dataset.origIdx = origIdx;
+      container.appendChild(btn);
+    });
+    area.appendChild(container);
+  } else if (q.type === 'truefalse') {
+    const stmt = document.createElement('p');
+    stmt.style.cssText = 'font-style:italic;margin-bottom:15px;padding:12px;background:#f0f0f0;border-radius:8px;';
+    stmt.textContent = '"' + q.statement + '"';
+    area.appendChild(stmt);
+    const container = document.createElement('div');
+    container.className = 'options-container';
+    ['Vero', 'Falso'].forEach((label, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = label;
+      btn.onclick = () => handleTrueFalse(i === 0);
+      container.appendChild(btn);
+    });
+    area.appendChild(container);
+  } else if (q.type === 'numeric') {
+    const container = document.createElement('div');
+    container.className = 'answer-input-container';
+    container.innerHTML = '<input type="text" class="answer-input" id="numeric-input" placeholder="Scrivi il valore numerico..." onkeydown="if(event.key===\'Enter\')checkOpenAnswer()">';
+    area.appendChild(container);
+    document.getElementById('submit-area').style.display = 'block';
+  }
+
+  document.getElementById('feedback-box').style.display = 'none';
+  document.getElementById('deepdive-box').style.display = 'none';
+  document.getElementById('next-btn-container').style.display = 'none';
+  document.getElementById('prof-container').className = 'prof-container';
+}
+
+function handleMultipleChoice(displayIdx) {
+  if (answered) return;
+  answered = true;
+  const q = currentQuestions[currentIndex];
+  const origSelected = q._shuffledIndices[displayIdx];
+  const isCorrect = origSelected === q.answer;
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    const origIdx = parseInt(btn.dataset.origIdx);
+    if (origIdx === q.answer) btn.classList.add('correct');
+    if (i === displayIdx && !isCorrect) btn.classList.add('wrong');
+  });
+  processAnswer(isCorrect, q);
+}
+
+function handleTrueFalse(selected) {
+  if (answered) return;
+  answered = true;
+  const q = currentQuestions[currentIndex];
+  const isCorrect = selected === q.answer;
+  const correctIdx = q.answer ? 0 : 1;
+  const selectedIdx = selected ? 0 : 1;
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (i === correctIdx) btn.classList.add('correct');
+    if (i === selectedIdx && !isCorrect) btn.classList.add('wrong');
+  });
+  processAnswer(isCorrect, q);
+}
+
+function checkOpenAnswer() {
+  if (answered) return;
+  answered = true;
+  const q = currentQuestions[currentIndex];
+  let isCorrect = false;
+  if (q.type === 'numeric') {
+    const input = document.getElementById('numeric-input');
+    const val = parseFloat(input.value.replace(',', '.'));
+    isCorrect = !isNaN(val) && Math.abs(val - q.answer) <= q.tolerance;
+    input.style.borderColor = isCorrect ? 'var(--success)' : 'var(--danger)';
+    input.style.background = isCorrect ? 'var(--success-light)' : 'var(--danger-light)';
+  }
+  processAnswer(isCorrect, q);
+}
+
+function processAnswer(isCorrect, q) {
+  if (isCorrect) { correctCount++; topicStats[q.topic].correct++; }
+  else { wrongCount++; topicStats[q.topic].wrong++;
+    const globalIdx = QUESTIONS.indexOf(q);
+    if (globalIdx !== -1) errorQuestionIds.push(globalIdx);
+  }
+  topicStats[q.topic].total++;
+  history.push({ question: q.text, topic: q.topic, correct: isCorrect, difficulty: q.difficulty });
+  showFeedback(isCorrect, q);
+  document.getElementById('score-correct').textContent = correctCount;
+  document.getElementById('score-wrong').textContent = wrongCount;
+}
+
+function showFeedback(isCorrect, q) {
+  const fb = document.getElementById('feedback-box');
+  const dd = document.getElementById('deepdive-box');
+  const prof = document.getElementById('prof-container');
+
+  prof.className = 'prof-container show ' + (isCorrect ? 'correct' : 'wrong');
+  const phrases = isCorrect ? PROF_CORRECT_PHRASES : PROF_WRONG_PHRASES;
+  document.getElementById('prof-phrase').textContent = phrases[Math.floor(Math.random() * phrases.length)];
+  document.getElementById('prof-name').textContent = 'Prof. Marchi';
+
+  fb.style.display = 'block';
+  fb.className = 'feedback-box ' + (isCorrect ? 'feedback-correct' : 'feedback-wrong');
+
+  if (isCorrect) {
+    document.getElementById('feedback-title').textContent = 'Risposta corretta!';
+    document.getElementById('feedback-text').textContent = q.explanation;
+    dd.style.display = 'none';
+  } else {
+    document.getElementById('feedback-title').textContent = 'Risposta sbagliata';
+    document.getElementById('feedback-text').innerHTML =
+      '<strong>Errore comune:</strong> ' + q.commonError + '<br><br><strong>Spiegazione:</strong> ' + q.explanation;
+    dd.style.display = 'block';
+    document.getElementById('deepdive-text').textContent = q.deepdive;
+  }
+
+  document.getElementById('next-btn-container').style.display = 'block';
+  prof.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= currentQuestions.length) endQuiz();
+  else { showQuestion(); document.getElementById('question-card').scrollIntoView({ behavior: 'smooth' }); }
+}
+
+function endQuiz() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'block';
+
+  const total = correctCount + wrongCount;
+  const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+
+  const scoreEl = document.getElementById('final-score');
+  scoreEl.textContent = pct + '%';
+  scoreEl.className = 'big-score ' + (pct >= 70 ? 'good' : pct >= 50 ? 'medium' : 'bad');
+  document.getElementById('final-score-label').textContent = correctCount + ' corrette su ' + total + ' domande';
+
+  const profSummary = document.getElementById('prof-summary');
+  let summaryPhrase, summaryClass;
+  if (pct >= 90) { summaryPhrase = "Eccellente. Risultato da primo della classe. Locke, Hume e Pascal ti approvano."; summaryClass = 'correct'; }
+  else if (pct >= 70) { summaryPhrase = "Bene, risultato solido. Ma non adagiarti: c'e' ancora da limare."; summaryClass = 'correct'; }
+  else if (pct >= 50) { summaryPhrase = "Sufficiente, ma di poco. Le basi ci sono: ripassa."; summaryClass = 'wrong'; }
+  else { summaryPhrase = "Insufficiente. Ci vediamo al recupero. Leggi i Pensieri."; summaryClass = 'wrong'; }
+
+  profSummary.className = 'prof-container show ' + summaryClass;
+  document.getElementById('prof-summary-svg').innerHTML = pct >= 70 ? PROF_SVG_HAPPY : PROF_SVG_ANGRY;
+  document.getElementById('prof-summary-phrase').textContent = summaryPhrase;
+  document.getElementById('prof-summary-name').textContent = 'Prof. Marchi';
+
+  document.getElementById('stats-grid').innerHTML =
+    '<div class="stat-box"><div class="stat-number">' + total + '</div><div class="stat-label">Domande totali</div></div>' +
+    '<div class="stat-box"><div class="stat-number" style="color:var(--success)">' + correctCount + '</div><div class="stat-label">Corrette</div></div>' +
+    '<div class="stat-box"><div class="stat-number" style="color:var(--danger)">' + wrongCount + '</div><div class="stat-label">Errate</div></div>' +
+    '<div class="stat-box"><div class="stat-number">' + pct + '%</div><div class="stat-label">Percentuale</div></div>';
+
+  const topicDiv = document.getElementById('topic-results');
+  topicDiv.innerHTML = '';
+  const weakTopics = [];
+  for (const [topic, stats] of Object.entries(topicStats)) {
+    if (stats.total === 0) continue;
+    const topicPct = Math.round((stats.correct / stats.total) * 100);
+    const cls = topicPct >= 70 ? 'strong' : topicPct >= 50 ? 'medium-res' : 'weak';
+    const barColor = topicPct >= 70 ? 'var(--success)' : topicPct >= 50 ? 'var(--warning)' : 'var(--danger)';
+    if (topicPct < 70) weakTopics.push(topic);
+    topicDiv.innerHTML += '<div class="topic-result-item ' + cls + '"><span><strong>' + topic + '</strong> - ' + stats.correct + '/' + stats.total + ' (' + topicPct + '%)</span><div class="topic-bar"><div class="topic-bar-fill" style="width:' + topicPct + '%;background:' + barColor + '"></div></div></div>';
+  }
+
+  const sugDiv = document.getElementById('suggestions');
+  if (weakTopics.length > 0) {
+    sugDiv.innerHTML = '<h3>Suggerimenti per il ripasso</h3><p>Concentrati su:</p><ul>' +
+      weakTopics.map(t => '<li><strong>' + t + '</strong></li>').join('') +
+      '</ul><p style="margin-top:8px;">Usa "Ripassa gli errori" per rifare le domande sbagliate.</p>';
+  } else {
+    sugDiv.innerHTML = '<h3>Ottimo lavoro!</h3><p>Hai risposto bene su tutti gli argomenti!</p>';
+  }
+
+  const histDiv = document.getElementById('history-list');
+  histDiv.innerHTML = '';
+  history.forEach((h, i) => {
+    histDiv.innerHTML += '<div class="history-item"><span>' + (i+1) + '. ' + h.question.substring(0,60) + (h.question.length > 60 ? '...' : '') + '</span><span class="' + (h.correct ? 'correct-mark' : 'wrong-mark') + '">' + (h.correct ? 'Corretta' : 'Errata') + '</span></div>';
+  });
+
+  localStorage.setItem('filosofia_stats', JSON.stringify({
+    total: total, correct: correctCount, wrong: wrongCount, percentage: pct,
+    date: new Date().toLocaleDateString('it-IT')
+  }));
+  localStorage.setItem('filosofia_errors', JSON.stringify(errorQuestionIds));
+}
+
+const noteIds = ['locke-cartesio','locke-idee','locke-qualita','locke-conoscenza','locke-fede','hume-impressioni','hume-associazione','hume-causalita','hume-scetticismo','berkeley-immaterialismo','berkeley-dio','pascal-uomo','pascal-scienza','pascal-scommessa'];
+const noteLabels = ['Locke vs Cartesio','Locke idee','Locke qualita\'','Locke conoscenza','Locke fede','Hume impr./idee','Hume associazione','Hume causalita\'','Hume scetticismo','Berkeley','Berkeley Dio','Pascal uomo','Pascal scienza','Pascal scommessa'];
+
+function initNotesContent() {
+  const notesContainer = document.getElementById('notes-content');
+  const notesData = [
+    {id:'locke-cartesio',title:'1. Locke - Critica a Cartesio',body:'<p><strong>John Locke (1632-1704)</strong> - Empirismo inglese, razionalismo critico.</p><h4>Locke rifiuta:</h4><ul><li><strong>Innatismo</strong> cartesiano: nella mente nessun contenuto e\' anteriore all\'esperienza</li><li>L\'<strong>indipendenza</strong> della ragione dall\'esperienza</li></ul><h4>La ragione resta:</h4><ul><li>Unica guida valida per conoscere e orientarsi nella vita</li><li>Locke estende l\'uso della ragione a morale, politica, religione</li></ul><div class="note-tip">Locke = filosofia a meta\' tra empirismo e razionalismo -> CRITICISMO: filosofia che parte da un\'indagine critica della ragione</div><h4>Tre questioni critiche:</h4><ul><li><strong>Oggetti</strong> che essa puo\' conoscere</li><li><strong>Limiti</strong> oltre cui non si puo\' spingere</li><li><strong>Procedimenti</strong> che deve seguire</li></ul><div class="formula-box">LIMITE dato dall\'esperienza -> fonte della conoscenza e verifica dei dati. EMPIRISMO (empiria = esperienza).</div>'},
+    {id:'locke-idee',title:'2. Locke - Idee semplici e complesse',body:'<p>I materiali che riceve la mente sono IDEE SEMPLICI.</p><h4>IDEA:</h4><ul><li>Cio\' che si trova nella nostra mente/testa</li><li>Contenuti mentali (non piu\' ambito reale)</li></ul><div class="note-tip">Nella mente nessun contenuto anteriore all\'esperienza. Le idee semplici non sono fabbricate: sono create dall\'esperienza (mente passiva).</div><h4>IDEE SEMPLICI:</h4><ul><li><strong>Idee di sensazione:</strong> sensazioni che percepiamo con i 5 sensi dall\'esterno</li><li><strong>Idee di riflessione:</strong> derivano dal senso interno, idee delle attivita\' interiori, dello spirito</li></ul><h4>IDEE COMPLESSE:</h4><ul><li>Combinazione di idee semplici operata dall\'intelletto (funzione attiva)</li></ul><p><strong>COSCIENZA</strong> racchiude tutte le idee.</p>'},
+    {id:'locke-qualita',title:'3. Locke - Qualita\' primarie e secondarie',body:'<h4>Idee delle qualita\':</h4><p>Attraverso le idee dei 5 sensi attribuisco una qualita\' a un corpo esterno. Ma non tutte le idee corrispondono a qualita\' realmente presenti nei corpi.</p><ul><li><strong>Qualita\' PRIMARIE</strong> (corpi): idee che corrispondono a qualita\' oggettive. Estensione, figura, movimento, numero, solidita\'</li><li><strong>Qualita\' SECONDARIE</strong> (solo idee): idee che corrispondono a qualita\' soggettive, si fondano su quelle oggettive ma esistono solo nella percezione. Colori, sapori, suoni, odori</li></ul><h4>Critica dell\'idea di SOSTANZA:</h4><p>Sostanza = ente che sussiste di per se\', sconosciuta all\'intelletto.</p><ul><li>Ignoto e oscuro sostegno delle qualita\' che percepiamo</li><li>Raggruppamento di idee semplici</li></ul><h4>Due tipi di sostanza:</h4><ul><li><strong>Corporea/materiale:</strong> idea che sta sotto il percepiamo sul senso esterno, substrato delle qualita\' sensibili</li><li><strong>Spirituale:</strong> idea che sta sotto il percepiamo sul senso interno, substrato delle operazioni dello spirito</li></ul><div class="note-tip">Locke non nega l\'esistenza delle sostanze: nega solo che il nostro intelletto possa penetrarle.</div>'},
+    {id:'locke-conoscenza',title:'4. Locke - Conoscenza vera',body:'<p><strong>CONOSCENZA VERA</strong> = l\'intelletto percepisce una CONNESSIONE fra idee o gruppi di idee (legame, concordanza, tipi).</p><h4>4 tipi di rapporti fra idee:</h4><ol><li><strong>Identita\'/diversita\'</strong> - idee che si corrispondono o no</li><li><strong>Relazione</strong> - es. padre-figlio</li><li><strong>Coesistenza e connessione necessaria</strong> - es. causa-effetto</li><li><strong>Esistenza reale</strong> - verita\' ontologica, rapporto tra idee e realta\'</li></ol><h4>CONOSCENZA: 3 gradi</h4><ol><li><strong>INTUIZIONE:</strong> evidenza immediata, intuitiva; conoscere fra idee -> certa e indubitabile</li><li><strong>DIMOSTRAZIONE:</strong> quando l\'intelletto discorre passo per passo da idee (es. A<B, B<C -> A<C). Mediata da idee intermedie, grado di verita\' alta o dimostrativa</li><li><strong>ESISTENZA REALE:</strong> come la conosce? A) intuizione -> l\'evidenza del nostro io; B) dimostrazione -> arriviamo a dimostrare Dio; C) il mondo esterno -> esistenza certa grazie a sensazione attuale</li></ol>'},
+    {id:'locke-fede',title:'5. Locke - Fede e giudizio di probabilita\'',body:'<h4>ESISTENZA DI DIO e IO:</h4><p>Esistenza reale dell\'io e di Dio conosciamo con:</p><ul><li><strong>INTUIZIONE:</strong> cogliamo immediatamente l\'esistenza del nostro IO (cogito cartesiano)</li><li><strong>DIMOSTRAZIONE:</strong> proviamo in maniera mediata l\'esistenza di Dio, 2 principi metafisici: 1) EX NIHILO NIHIL (dal nulla non si crea nulla, io pero\' esisto), 2) CAUSALITA\' METAFISICA (se c\'e\' qualcosa deve averlo avuto un inizio, deve esistere qualcosa = esiste causa prima eterna = DIO, 3a via di Tommaso)</li></ul><h4>La SENSAZIONE ATTUALE:</h4><ul><li>Certezza esistenza oggetti presenti ai nostri sensi esterni (garantisce certezza sensibile)</li><li>Finche\' ho sensazioni so che gli oggetti ci sono</li><li>Grado di verita\' poco piu\' basso: quando non percepisco nulla non vuol dire che e\' sparito l\'oggetto</li></ul><div class="note-tip">Non basta conoscenza: intuizione e dimostrazione. Serve il GIUDIZIO di PROBABILITA\': non puo\' percepire immediatamente ne\' dimostrare connessione fra idee.</div><h4>Il giudizio di probabilita\' le suppone fondandosi su:</h4><ol><li>Conformita\' x esperienza passata</li><li>Conformita\' x testimonianza di altri</li><li>Considerazioni/certezze x analogia</li></ol><h4>LA FEDE:</h4><ul><li>Testimonianza di Dio: uno che non puo\' ingannare ne\' essere ingannato</li><li>Alla rivelazione si risponde con la fede (stesso livello intuizione)</li></ul>'},
+    {id:'hume-impressioni',title:'6. Hume - Impressioni e idee',body:'<p><strong>David Hume</strong> - Empirismo radicale.</p><h4>Distinzione fondamentale:</h4><ul><li><strong>IMPRESSIONI</strong> = sensazioni ATTUALI = percezioni sensibili vivide</li><li><strong>IDEE</strong> = impressioni illanguidite (copie sbiadite), combinazioni di idee che rispecchiano impressioni effettivamente percepite</li></ul><div class="formula-box">Tutta la CONOSCENZA UMANA deriva da IMPRESSIONI -> empirismo radicale. Tutta la realta\' conoscibile si risolve nell\'insieme delle percezioni. Se non percepisco, non c\'e\'.</div><h4>IMPRESSIONI:</h4><ul><li><strong>Semplici</strong></li><li><strong>Complesse</strong> (quando le semplici sono associate)</li></ul><h4>IDEE:</h4><ul><li><strong>Semplici</strong> -> da impressioni semplici</li><li><strong>Complesse</strong> -> prodotte da: MEMORIA (impressioni complesse, ricordo) o IMMAGINAZIONE (combina liberamente tra loro idee semplici)</li></ul>'},
+    {id:'hume-associazione',title:'7. Hume - Principio di associazione',body:'<p>&quot;Dolce forza&quot; (gentle force) spinge l\'immaginazione a connettere fra loro idee semplici.</p><div class="note-tip">In base a cosa? Secondo FANTASIA (libera) vs secondo PRINCIPIO di ASSOCIAZIONE (regolato).</div><h4>3 criteri del principio di associazione:</h4><ol><li><strong>SOMIGLIANZA</strong></li><li><strong>CONTINUITA\' SPAZIO-TEMPO</strong></li><li><strong>CAUSA-EFFETTO</strong> (es. fuoco -> incendio)</li></ol>'},
+    {id:'hume-causalita',title:'8. Hume - Critica causa-effetto',body:'<h4>Critica alla relazione CAUSA-EFFETTO concepita come nesso dotato di NECESSITA\':</h4><p>Non si puo\' mai affermare necessita\' oggettiva fra due o piu\' impressioni/idee semplici -> cosi\' da poter prevedere che necessariamente quella correlazione valga sempre anche in futuro.</p><h4>Perche\'?</h4><ol><li>L\'esperienza riguarda solo eventi passati (necessita\' non sempre possibile)</li><li>Potrebbe potuto succedere l\'opposto (non logicamente contraddittorio)</li><li>Si possono avere esperienze singole, impressioni isolate, ma non della relazione -> non posso affermarla CAUSA-EFFETTO (A -> B) necessariamente</li></ol><h4>Conseguenze:</h4><ul><li>Non sto agli scetticismo (l\'intera nostra vita)</li><li>Ma sta si fondano tutte le SCIENZE EMPIRICHE (es. fisica)</li></ul><div class="formula-box">Hume distingue 2 tipi di proposizioni: 1) quelle fondate sul principio di NON-CONTRADDIZIONE (matematica, validita\' necessaria); 2) tutte le altre = proposizioni delle scienze empiriche esprimono ragionamenti sui DATI di FATTO (solo probabile, controtestabili, non necessaria)</div>'},
+    {id:'hume-scetticismo',title:'9. Hume - Scetticismo e sostanza',body:'<h4>Hume vs idea di SOSTANZA (materiale e spirituale):</h4><p>Le sostanze = FASCI di IMPRESSIONI. Non percepiamo sostanze ma solo idee.</p><h4>Abitudine invece di ricevere ripetutamente fasci di impressioni:</h4><p>Che ci fanno &quot;credere&quot; che sotto ci sia &quot;qualcosa&quot;. Immaginazione e memoria -> colmano i vuoti tra le impressioni. Principio di costante unione delle impressioni -> inferimenti. Ci fanno credere che le impressioni siano continue.</p><div class="note-tip">Per Hume anche l\'IO e\' un &quot;fascio di percezioni&quot; (bundle of perceptions): non c\'e\' sostanza-io stabile. L\'unita\' e\' finzione della memoria.</div>'},
+    {id:'berkeley-immaterialismo',title:'10. Berkeley - Immaterialismo',body:'<p><strong>G. Berkeley</strong></p><p>L\'UNICA SOSTANZA REALE e\' lo SPIRITO.</p><p>Visto che i soli oggetti della conoscenza umana sono le idee intese come sostanza, che idee/sensazioni esistono solo nel soggetto che le percepisce.</p><h4>3 conseguenze:</h4><ol><li>Tutte le sensazioni/idee sono &quot;soggettive&quot; -> non motivo di distinguere tra idee relative a qualita\' secondarie e idee relative a qualita\' primarie (supporrebbero esistenza &quot;corpi&quot;)</li><li>SOSTANZA REALE (/= da idee): e\' solo lo SPIRITO che percepisce (= sost. spirituale, soggetto, l\'io) -> spiriti finiti (= anime umane) + spirito infinito (= Dio)</li><li><strong>IMMATERIALISMO (esse est percipi)</strong>: non esiste alcuna sostanza corporea/materiale al di la\' di cio\' che viene percepito -> ESSE EST PERCIPI. L\'&quot;essere&quot; degli oggetti consiste nel loro &quot;essere idee&quot; -> presenti nella mente</li></ol><div class="formula-box">Nell\'&quot;ESSERE PERCEPITI&quot;: non solo a tratti dagli spiriti finiti, ma anche interamente da quello Spirito infinito che e\' Dio.</div>'},
+    {id:'berkeley-dio',title:'11. Berkeley - Esito apologetico',body:'<h4>Esito apologetico vs ateismo dei materialisti:</h4><p>Che ammessa la sostanzialita\' della materia la concepiscono come:</p><ul><li>Finita</li><li>Immutabile</li><li>Eterna</li></ul><div class="note-tip">Eliminando la materia come sostanza, Berkeley toglie la base al materialismo (che faceva della materia un quasi-Dio) e apre alla pienezza dello Spirito infinito.</div>'},
+    {id:'pascal-uomo',title:'12. Pascal - Condizione umana',body:'<p><strong>PASCAL (1623-1662, Francia)</strong> - Solitari di Port-Royal.</p><p>Opera principale: <strong>&quot;PENSIERI&quot;</strong> - Si pone domande fondamentali -> esito apologetico.</p><h4>QUALI SONO I LIMITI DELLA MENTALITA\' COMUNE?</h4><p>Inadeguatezza della mentalita\' comune:</p><ul><li><strong>DIVERTISSEMENT:</strong> distrazione/stordimento/dispersione, intrattenimenti e preoccupazioni continue</li><li><strong>NOIA:</strong> occasione di confronto con limiti condizione umana</li></ul><h4>MISERIA e GRANDEZZA UMANE:</h4><p>L\'uomo e\' consapevole dei propri limiti grazie al pensiero. Il pensiero ci rende ragione della nostra grandezza (cuore). In quanto uomini siamo capaci di comprendere i limiti in quanto limiti.</p><ul><li>Volere vs non potere</li><li>Miseria = desiderio frustrato</li></ul><h4>3 aspetti della condizione umana:</h4><ol><li><strong>ESSERE</strong> (uomo a meta\' tra perfezione di Dio e cosmo)</li><li><strong>CONOSCENZA</strong> (desiderio di conoscenza/verita\' vs incertezza)</li><li><strong>MORALE</strong> (desiderio di realizzare bene vs suoi limiti)</li></ol>'},
+    {id:'pascal-scienza',title:'13. Pascal - Limiti della scienza',body:'<h4>LIMITI della SCIENZA:</h4><h4>Limiti INTERNI (indipendenti):</h4><ol><li>Riferimento all\'esperienza</li><li>Indimostrabilita\' principi PRIMI e nozioni PRIME</li></ol><h4>Limiti ESTERNI:</h4><p>Problemi relativi al SENSO e alle questioni piu\' rilevanti per l\'ESISTENZA umana.</p><div class="note-tip">Domande piu\' profonde non sono indagabili attraverso metodo scientifico, ma con un altro.</div><h4>Due spiriti:</h4><ul><li><strong>ESPRIT DE GEOMETRIE:</strong> matematica e fisica, metodo di sviluppo x ragionamenti</li><li><strong>ESPRIT DE FINESSE</strong> (spirito di finezza): intuizione primi principi/postulati</li></ul>'},
+    {id:'pascal-scommessa',title:'14. Pascal - Fede e scommessa',body:'<h4>FEDE:</h4><p>Riguardo all\'ESISTENZA di DIO:</p><ol><li>Incapacita\' di dimostrarla rigorosamente -> inutilita\' prove. Dio oggetto di fede non di ragione</li><li>Arrivano a dimostrare il Dio dei filosofi e scienziati -> inutile</li></ol><p>Riguardo alla CONDIZIONE UMANA: essere umano = miseria e grandezza combinate.</p><div class="note-tip">Filosofia inadeguata sia per: dimostrazione Dio, rendere ragione condizione umana, regolare condotta morale e politica. Filosofia non in grado di fornire morale universale -> morale dettata da fede.</div><h4>MISERIA e GRANDEZZE UMANE:</h4><p>Uomo consapevole dei propri limiti grazie al pensiero. Filosofia segna x indicare la strada alla fede. Fede: PROVA APOLOGETICA della RAGIONEVOLEZZA del CRISTIANESIMO.</p><h4>Fede cristiana:</h4><ul><li>Spiegazione di natura: peccato originale e destino</li><li>Rende ragione del fatto che l\'uomo sa dei limiti e all\'altro tempo dell\'uomo</li><li>Paradiso terrestre -> caduta + fatica + tolleranze -> piena compiutezza del bene</li><li>Desiderio frustrato -> umano pienezza: realizzato in Dio</li></ul><div class="formula-box">PROVA ESISTENZA di Dio per chi non e\' convinto -> la prova apologetica (la piu\' efficace). La SCOMMESSA: chi si trova a scommettere su: Dio perdente (lieto rifugio, consolazione esistenza), Dio vincente (poco tempo/infinito + infinito + eternita\'/solitudine). SCOMMESSA = indirizzare vs non volontari (no reale disposizione interiore della volonta\').</div><h4>APERTURA alla FEDE:</h4><ul><li>Scommessa su Dio -> vita di fede (fare &quot;come se&quot;)</li><li>Apertura della volonta\' e del cuore alla fede</li><li>Altre prove (storiche e apologetica)</li><li>Dono divino della fede: &quot;La fede e\' un dono di Dio. Non crediate che diciamo che e\' un dono del ragionamento.&quot;</li></ul>'}
+  ];
+
+  let html = '';
+  notesData.forEach(n => {
+    html += '<div class="note-section" id="note-' + n.id + '"><h3 class="note-title" onclick="toggleNote(\'' + n.id + '\')">' + n.title + ' <span class="note-toggle">&#9660;</span></h3><div class="note-body" id="body-' + n.id + '">' + n.body + '</div></div>';
+  });
+  notesContainer.innerHTML = html;
+
+  const nav = document.getElementById('notes-nav');
+  noteIds.forEach((id, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = noteLabels[i];
+    btn.onclick = () => {
+      const body = document.getElementById('body-' + id);
+      if (!body.classList.contains('open')) toggleNote(id);
+      document.getElementById('note-' + id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    nav.appendChild(btn);
+  });
+}
+
+function showNotes() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'block';
+}
+
+function hideNotes() {
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+
+function toggleNote(id) {
+  const body = document.getElementById('body-' + id);
+  const toggle = body.previousElementSibling.querySelector('.note-toggle');
+  body.classList.toggle('open');
+  toggle.innerHTML = body.classList.contains('open') ? '&#9650;' : '&#9660;';
+}
+
+var examTimer = null;
+var examSeconds = 3000;
+var examIndex = 0;
+var examCorrect = 0;
+var examTotal = 0;
+var examAllQuestions = [];
+var examHistory = [];
+var examAnswered = false;
+
+function showExam() {
+  examIndex = 0;
+  examCorrect = 0;
+  examHistory = [];
+  examAnswered = false;
+  examSeconds = 3000;
+
+  examAllQuestions = [];
+  for (var i = 0; i < EXAM_MC.length; i++) {
+    var q = EXAM_MC[i];
+    var indices = q.options.map(function(_, j) { return j; });
+    shuffleArray(indices);
+    examAllQuestions.push({ text: q.text, options: q.options, answer: q.answer, explanation: q.explanation, type: 'mc', _shuffled: indices });
+  }
+  for (var i = 0; i < EXAM_OPEN.length; i++) {
+    examAllQuestions.push({ text: EXAM_OPEN[i].text, solution: EXAM_OPEN[i].solution, type: 'open' });
+  }
+  examTotal = examAllQuestions.length;
+
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'block';
+  document.getElementById('exam-result').style.display = 'none';
+  document.getElementById('exam-total').textContent = examTotal;
+
+  showExamQuestion();
+  startExamTimer();
+  window.scrollTo(0, 0);
+}
+
+function hideExam() {
+  clearInterval(examTimer);
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+
+function resetExam() { showExam(); }
+
+function showExamQuestion() {
+  examAnswered = false;
+  var q = examAllQuestions[examIndex];
+  document.getElementById('exam-current').textContent = examIndex + 1;
+  var pct = (examIndex / examTotal) * 100;
+  document.getElementById('exam-progress-bar').style.width = pct + '%';
+  document.getElementById('exam-next-container').style.display = 'none';
+  document.getElementById('exam-question-card').style.display = 'block';
+
+  var meta = document.getElementById('exam-question-meta');
+  if (examIndex === 0) {
+    var warning = document.createElement('div');
+    warning.style.cssText = 'background:linear-gradient(135deg,#1e1b4b,#4c1d95);color:white;padding:18px 24px;border-radius:12px;text-align:center;margin-bottom:16px;font-size:1.1em;font-weight:700;letter-spacing:1px;';
+    warning.innerHTML = 'ATTENZIONE — ESAME<br><span style="font-size:0.8em;font-weight:400;opacity:0.9;">Rispondi con attenzione. Hai 50 minuti di tempo.</span>';
+    document.getElementById('exam-answer-area').before(warning);
+  }
+
+  if (q.type === 'mc') {
+    meta.innerHTML = '<span class="badge badge-topic">Verifica</span><span class="badge badge-type">Domanda ' + (examIndex + 1) + '/' + examTotal + '</span>';
+  } else {
+    meta.innerHTML = '<span class="badge badge-topic">Verifica</span><span class="badge badge-diff-3">Domanda aperta</span>';
+  }
+
+  document.getElementById('exam-question-text').textContent = q.text;
+
+  var area = document.getElementById('exam-answer-area');
+  area.innerHTML = '';
+
+  if (q.type === 'mc') {
+    var container = document.createElement('div');
+    container.className = 'options-container';
+    var letters = ['A','B','C','D','E'];
+    for (var di = 0; di < q._shuffled.length; di++) {
+      var origIdx = q._shuffled[di];
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'option-btn';
+      btn.textContent = letters[di] + '. ' + q.options[origIdx];
+      btn.dataset.origIdx = origIdx;
+      btn.dataset.dispIdx = di;
+      btn.onclick = (function(oIdx, dIdx) { return function() { handleExamMC(oIdx, dIdx); }; })(origIdx, di);
+      container.appendChild(btn);
+    }
+    area.appendChild(container);
+  } else {
+    var ta = document.createElement('textarea');
+    ta.style.cssText = 'width:100%;min-height:150px;padding:14px;border:2px solid #e0e0e0;border-radius:8px;font-family:inherit;font-size:1em;resize:vertical;';
+    ta.placeholder = 'Scrivi qui la tua risposta...';
+    ta.id = 'exam-open-textarea';
+    area.appendChild(ta);
+    var showBtn = document.createElement('button');
+    showBtn.type = 'button';
+    showBtn.className = 'btn btn-primary';
+    showBtn.style.marginTop = '12px';
+    showBtn.textContent = 'Mostra soluzione';
+    showBtn.onclick = function() { handleExamOpen(); };
+    area.appendChild(showBtn);
+  }
+}
+
+function handleExamMC(origIdx, dispIdx) {
+  if (examAnswered) return;
+  examAnswered = true;
+  var q = examAllQuestions[examIndex];
+  var isCorrect = origIdx === q.answer;
+  if (isCorrect) examCorrect++;
+  examHistory.push({ text: q.text, correct: isCorrect, type: 'mc' });
+
+  var btns = document.querySelectorAll('#exam-answer-area .option-btn');
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].classList.add('disabled');
+    var oi = parseInt(btns[i].dataset.origIdx);
+    if (oi === q.answer) btns[i].classList.add('correct');
+    if (parseInt(btns[i].dataset.dispIdx) === dispIdx && !isCorrect) btns[i].classList.add('wrong');
+  }
+
+  var fb = document.createElement('div');
+  fb.style.cssText = 'margin-top:14px;padding:14px 18px;border-radius:10px;line-height:1.6;';
+  if (isCorrect) {
+    fb.style.background = 'var(--success-light)';
+    fb.style.borderLeft = '4px solid var(--success)';
+    fb.innerHTML = '<strong style="color:var(--success)">Corretta!</strong> ' + q.explanation;
+  } else {
+    fb.style.background = 'var(--danger-light)';
+    fb.style.borderLeft = '4px solid var(--danger)';
+    fb.innerHTML = '<strong style="color:var(--danger)">Sbagliata.</strong> ' + q.explanation;
+  }
+  document.getElementById('exam-answer-area').appendChild(fb);
+  document.getElementById('exam-next-container').style.display = 'block';
+}
+
+function handleExamOpen() {
+  if (examAnswered) return;
+  examAnswered = true;
+  var q = examAllQuestions[examIndex];
+  examHistory.push({ text: q.text, correct: null, type: 'open' });
+
+  var fb = document.createElement('div');
+  fb.style.cssText = 'margin-top:14px;padding:14px 18px;border-radius:10px;line-height:1.6;background:var(--success-light);border-left:4px solid var(--success);';
+  fb.innerHTML = '<strong>Soluzione:</strong><pre style="white-space:pre-wrap;font-family:inherit;margin-top:8px;">' + q.solution + '</pre>';
+  document.getElementById('exam-answer-area').appendChild(fb);
+  document.getElementById('exam-next-container').style.display = 'block';
+}
+
+function nextExamQuestion() {
+  examIndex++;
+  if (examIndex >= examTotal) {
+    endExam();
+  } else {
+    showExamQuestion();
+    document.getElementById('exam-question-card').scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+function endExam() {
+  clearInterval(examTimer);
+  document.getElementById('exam-question-card').style.display = 'none';
+  document.getElementById('exam-next-container').style.display = 'none';
+  document.getElementById('exam-result').style.display = 'block';
+  document.getElementById('exam-progress-bar').style.width = '100%';
+
+  var mcTotal = EXAM_MC.length;
+  var grade = (examCorrect / mcTotal * 10).toFixed(1);
+  var gradeEl = document.getElementById('exam-grade');
+  gradeEl.textContent = grade + '/10';
+  gradeEl.className = 'big-score ' + (examCorrect >= 7 ? 'good' : examCorrect >= 5 ? 'medium' : 'bad');
+  document.getElementById('exam-grade-detail').innerHTML =
+    examCorrect + '/' + mcTotal + ' risposte multiple corrette<br>Le domande aperte vanno confrontate con le soluzioni mostrate.';
+
+  var reviewHtml = '<h3 style="margin:20px 0 10px;">Riepilogo risposte</h3>';
+  for (var i = 0; i < examHistory.length; i++) {
+    var h = examHistory[i];
+    var mark = h.type === 'open' ? '<span style="color:var(--gray)">Aperta</span>' : (h.correct ? '<span class="correct-mark">Corretta</span>' : '<span class="wrong-mark">Errata</span>');
+    reviewHtml += '<div class="history-item"><span>' + (i+1) + '. ' + h.text.substring(0,50) + (h.text.length > 50 ? '...' : '') + '</span>' + mark + '</div>';
+  }
+  document.getElementById('exam-review').innerHTML = reviewHtml;
+  document.getElementById('exam-result').scrollIntoView({ behavior: 'smooth' });
+}
+
+function startExamTimer() {
+  examSeconds = 3000;
+  clearInterval(examTimer);
+  updateTimerDisplay();
+  examTimer = setInterval(function() {
+    examSeconds--;
+    updateTimerDisplay();
+    if (examSeconds <= 0) { clearInterval(examTimer); endExam(); }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  var m = Math.floor(examSeconds / 60);
+  var s = examSeconds % 60;
+  var sStr = s < 10 ? '0' + s : '' + s;
+  var el = document.getElementById('exam-timer');
+  el.textContent = m + ':' + sStr;
+  el.style.color = examSeconds < 300 ? 'var(--danger)' : 'var(--dark)';
+}
+
+</script>
+</body>
+</html>
