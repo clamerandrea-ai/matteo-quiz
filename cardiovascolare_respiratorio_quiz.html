@@ -1,0 +1,4257 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Cardiovascolare e Respiratorio - Allenamento e Verifica</title>
+<style>
+/* ============================================
+   STILI GENERALI
+   ============================================ */
+:root {
+  --primary: #4361ee;
+  --primary-light: #e8ecff;
+  --success: #06d6a0;
+  --success-light: #e6faf4;
+  --danger: #ef476f;
+  --danger-light: #fde8ed;
+  --warning: #ffd166;
+  --dark: #1d3557;
+  --gray: #6c757d;
+  --light: #f8f9fa;
+  --white: #ffffff;
+  --shadow: 0 6px 24px rgba(0,0,0,0.10);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.15);
+  --radius: 14px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(160deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  min-height: 100vh;
+  color: var(--dark);
+  line-height: 1.6;
+}
+
+/* ============================================
+   PROF. PALUDETTO — PERSONAGGIO CARTOON
+   ============================================ */
+.prof-container {
+  display: none;
+  position: relative;
+  margin: 20px auto;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.prof-container.show {
+  display: flex;
+  animation: profAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes profAppear {
+  0% { opacity: 0; transform: translateY(60px) scale(0.5); }
+  60% { transform: translateY(-10px) scale(1.05); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes profBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes profShake {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(-5deg); }
+  30% { transform: rotate(5deg); }
+  45% { transform: rotate(-4deg); }
+  60% { transform: rotate(4deg); }
+  75% { transform: rotate(-2deg); }
+}
+
+.prof-svg-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 0 auto;
+}
+
+.prof-container.correct .prof-svg-container {
+  animation: profBounce 0.8s ease 0.3s;
+  filter: drop-shadow(0 8px 30px rgba(6, 214, 160, 0.35));
+}
+
+.prof-container.wrong .prof-svg-container {
+  animation: profShake 0.6s ease;
+  filter: drop-shadow(0 8px 30px rgba(239, 71, 111, 0.35));
+}
+
+/* Fumetto / Bubble */
+.prof-bubble {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 18px 24px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  font-size: 1.1em;
+  font-weight: 600;
+  line-height: 1.5;
+  max-width: 480px;
+  margin-top: -10px;
+}
+
+.prof-bubble::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+  border-bottom-color: var(--white);
+}
+
+.prof-container.correct .prof-bubble {
+  border: 3px solid var(--success);
+  background: linear-gradient(135deg, #f0fff8, var(--white));
+}
+
+.prof-container.wrong .prof-bubble {
+  border: 3px solid var(--danger);
+  background: linear-gradient(135deg, #fff5f7, var(--white));
+}
+
+.prof-container.correct .prof-bubble::before { border-bottom-color: var(--success); }
+.prof-container.wrong .prof-bubble::before { border-bottom-color: var(--danger); }
+
+.prof-name {
+  font-size: 0.7em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+
+.prof-container.correct .prof-name { color: var(--success); }
+.prof-container.wrong .prof-name { color: var(--danger); }
+
+/* SVG nascosti/mostrati */
+.prof-svg-correct, .prof-svg-wrong { display: none; }
+.prof-container.correct .prof-svg-correct { display: block; }
+.prof-container.wrong .prof-svg-wrong { display: block; }
+
+/* Header start screen - versione piccola */
+.prof-header-container {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 10px;
+}
+
+.container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Sfondo decorativo sottile */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 20%, rgba(67, 97, 238, 0.05) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, rgba(124, 58, 237, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ============================================
+   SCHERMATA INIZIALE
+   ============================================ */
+#start-screen {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  margin-top: 30px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+#start-screen h1 {
+  font-size: 2.1em;
+  color: var(--dark);
+  margin-bottom: 6px;
+}
+
+#start-screen h1 span {
+  background: linear-gradient(135deg, var(--primary), #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#start-screen .subtitle {
+  color: var(--gray);
+  font-size: 1em;
+  margin-bottom: 10px;
+}
+
+.prof-welcome {
+  font-size: 0.9em;
+  color: var(--dark);
+  background: var(--light);
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.topic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.topic-item {
+  background: var(--primary-light);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topic-item input[type="checkbox"] { accent-color: var(--primary); }
+
+.mode-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.btn {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+.btn:active { transform: translateY(0) scale(0.97); }
+
+.btn-primary { background: var(--primary); color: var(--white); }
+.btn-success { background: var(--success); color: var(--white); }
+.btn-warning { background: var(--warning); color: var(--dark); }
+.btn-danger { background: var(--danger); color: var(--white); }
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+}
+
+.btn-ultra {
+  background: linear-gradient(135deg, #ff6a00, #ee0979);
+  color: var(--white);
+  position: relative;
+  overflow: hidden;
+}
+.btn-ultra::after {
+  content: '🔥';
+  margin-left: 6px;
+}
+
+.btn-exam {
+  background: linear-gradient(135deg, #1d3557, #457b9d);
+  color: var(--white);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.btn-demo {
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: var(--white);
+  font-weight: 700;
+}
+
+/* Sezioni menu principale */
+.menu-section {
+  background: var(--light);
+  border: 1px solid #e0e0e0;
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.menu-section-title {
+  font-size: 0.85em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--gray);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.menu-section-title .section-icon {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.section-icon.test { background: var(--primary); }
+.section-icon.study { background: var(--success); }
+
+/* ============================================
+   SEZIONE ESAME
+   ============================================ */
+#exam-screen .exam-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 30px 34px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+
+.exam-header {
+  text-align: center;
+  border-bottom: 2px solid var(--dark);
+  padding-bottom: 14px;
+  margin-bottom: 24px;
+}
+
+.exam-header h2 { font-size: 1.4em; margin-bottom: 4px; letter-spacing: 1px; }
+.exam-header .exam-info {
+  display: flex; justify-content: space-between; font-size: 0.9em; color: var(--gray);
+  margin-top: 8px;
+}
+
+.exam-question {
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #eee;
+}
+
+.exam-question:last-child { border-bottom: none; }
+
+.exam-question .eq-number {
+  font-weight: 700;
+  color: var(--primary);
+  margin-right: 6px;
+}
+
+.exam-question .eq-text {
+  font-size: 1.02em;
+  margin-bottom: 10px;
+  line-height: 1.7;
+}
+
+.exam-options { padding-left: 10px; }
+
+.exam-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 10px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.exam-option:hover { background: var(--light); }
+.exam-option input[type="radio"] { margin-top: 4px; accent-color: var(--primary); }
+.exam-option label { cursor: pointer; line-height: 1.5; }
+
+.exam-option.correct-highlight { background: var(--success-light); }
+.exam-option.wrong-highlight { background: var(--danger-light); }
+
+.exam-open-area {
+  margin-top: 10px;
+}
+
+.exam-open-area textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95em;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.exam-open-area textarea:focus { border-color: var(--primary); }
+
+.exam-section-title {
+  font-size: 1.1em;
+  font-weight: 700;
+  color: var(--dark);
+  margin: 24px 0 14px;
+  padding: 8px 12px;
+  background: var(--light);
+  border-radius: 6px;
+}
+
+.exam-correction {
+  display: none;
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.93em;
+  line-height: 1.6;
+}
+
+.exam-correction.show { display: block; }
+.exam-correction.correct-box { background: var(--success-light); border-left: 4px solid var(--success); }
+.exam-correction.wrong-box { background: var(--danger-light); border-left: 4px solid var(--danger); }
+
+.exam-result-bar {
+  text-align: center;
+  padding: 20px;
+  background: var(--light);
+  border-radius: var(--radius);
+  margin-top: 20px;
+}
+
+.exam-result-bar .exam-grade {
+  font-size: 2.5em;
+  font-weight: 800;
+}
+
+.exam-timer {
+  font-weight: 600;
+  font-size: 1.1em;
+  color: var(--danger);
+}
+
+.prev-stats {
+  margin-top: 25px;
+  padding: 15px;
+  background: var(--light);
+  border-radius: 8px;
+  font-size: 0.9em;
+}
+
+/* ============================================
+   SCHERMATA QUIZ
+   ============================================ */
+#quiz-screen {
+  display: none;
+  margin-top: 20px;
+}
+
+.quiz-header {
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 16px 24px;
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.progress-info { font-weight: 600; color: var(--dark); }
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), #7c3aed, #a855f7);
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+}
+
+.score-display {
+  display: flex;
+  gap: 15px;
+  font-size: 0.9em;
+}
+
+.score-correct { color: var(--success); font-weight: 600; }
+.score-wrong { color: var(--danger); font-weight: 600; }
+
+.question-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 16px;
+  border: 1px solid rgba(0,0,0,0.04);
+  animation: cardAppear 0.4s ease;
+}
+
+@keyframes cardAppear {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.question-meta {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+.badge-topic { background: var(--primary-light); color: var(--primary); }
+.badge-diff-1 { background: #d4edda; color: #155724; }
+.badge-diff-2 { background: #fff3cd; color: #856404; }
+.badge-diff-3 { background: #f8d7da; color: #721c24; }
+.badge-type { background: #e2e3e5; color: #383d41; }
+
+.question-text {
+  font-size: 1.15em;
+  font-weight: 500;
+  margin-bottom: 20px;
+  line-height: 1.7;
+}
+
+/* Opzioni scelta multipla */
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  background: var(--white);
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.option-btn:hover:not(.disabled) {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: translateX(6px);
+  box-shadow: 0 3px 12px rgba(67, 97, 238, 0.15);
+}
+
+.option-btn.selected { border-color: var(--primary); background: var(--primary-light); }
+.option-btn.correct {
+  border-color: var(--success);
+  background: var(--success-light);
+  animation: correctPulse 0.4s ease;
+}
+.option-btn.wrong {
+  border-color: var(--danger);
+  background: var(--danger-light);
+  animation: wrongShake 0.4s ease;
+}
+.option-btn.disabled { cursor: default; opacity: 0.85; }
+
+@keyframes correctPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+@keyframes wrongShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* Input per risposte aperte/numeriche */
+.answer-input-container { margin-top: 10px; }
+
+.answer-input {
+  width: 100%;
+  padding: 14px 18px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1em;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.answer-input:focus { border-color: var(--primary); }
+
+.submit-answer-btn {
+  margin-top: 12px;
+}
+
+/* Feedback */
+.feedback-box {
+  display: none;
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.feedback-correct {
+  background: var(--success-light);
+  border-left: 5px solid var(--success);
+}
+
+.feedback-wrong {
+  background: var(--danger-light);
+  border-left: 5px solid var(--danger);
+}
+
+.feedback-title {
+  font-weight: 700;
+  font-size: 1.1em;
+  margin-bottom: 8px;
+}
+
+.feedback-correct .feedback-title { color: var(--success); }
+.feedback-wrong .feedback-title { color: var(--danger); }
+
+.feedback-text { margin-bottom: 10px; line-height: 1.7; }
+
+/* Approfondimento */
+.deepdive-box {
+  display: none;
+  background: #fff8e1;
+  border-left: 5px solid var(--warning);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  animation: slideIn 0.4s ease;
+}
+
+.deepdive-title {
+  font-weight: 700;
+  color: #e65100;
+  margin-bottom: 8px;
+}
+
+.deepdive-text { line-height: 1.7; }
+
+.next-btn-container {
+  text-align: center;
+  margin: 16px 0;
+}
+
+/* ============================================
+   SCHERMATA RIEPILOGO
+   ============================================ */
+#summary-screen {
+  display: none;
+  margin-top: 20px;
+}
+
+.summary-card {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 34px;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 16px;
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.summary-card h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--dark);
+}
+
+.big-score {
+  text-align: center;
+  font-size: 3em;
+  font-weight: 800;
+  margin: 10px 0;
+}
+
+.big-score.good { color: var(--success); }
+.big-score.medium { color: var(--warning); }
+.big-score.bad { color: var(--danger); }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.stat-box {
+  background: var(--light);
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-number { font-size: 1.8em; font-weight: 700; }
+.stat-label { font-size: 0.85em; color: var(--gray); }
+
+.topic-results { margin: 20px 0; }
+
+.topic-result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.topic-result-item.weak { background: var(--danger-light); }
+.topic-result-item.strong { background: var(--success-light); }
+.topic-result-item.medium-res { background: #fff3cd; }
+
+.topic-bar {
+  width: 100px;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.topic-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.suggestions {
+  background: var(--primary-light);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-top: 15px;
+}
+
+.suggestions h3 { color: var(--primary); margin-bottom: 8px; }
+.suggestions ul { padding-left: 20px; }
+.suggestions li { margin-bottom: 5px; }
+
+.history-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9em;
+}
+
+.history-item .correct-mark { color: var(--success); font-weight: 700; }
+.history-item .wrong-mark { color: var(--danger); font-weight: 700; }
+
+/* ============================================
+   SEZIONE APPUNTI
+   ============================================ */
+.notes-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.notes-nav button {
+  padding: 6px 14px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: var(--light);
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.notes-nav button:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.note-section {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.note-title {
+  padding: 14px 18px;
+  margin: 0;
+  cursor: pointer;
+  background: var(--light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+  user-select: none;
+}
+
+.note-title:hover { background: var(--primary-light); }
+
+.note-toggle { font-size: 0.8em; color: var(--gray); transition: transform 0.3s; }
+
+.note-body {
+  padding: 18px 20px;
+  line-height: 1.8;
+  display: none;
+}
+
+.note-body.open { display: block; }
+
+.note-body h4 {
+  margin: 14px 0 8px;
+  color: var(--primary);
+}
+
+.note-body ul, .note-body ol {
+  padding-left: 22px;
+  margin: 8px 0;
+}
+
+.note-body li { margin-bottom: 4px; }
+
+.formula-box {
+  background: linear-gradient(135deg, #e8ecff, #f0e6ff);
+  border-left: 4px solid var(--primary);
+  padding: 14px 18px;
+  margin: 12px 0;
+  font-size: 1.15em;
+  font-weight: 600;
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  border-radius: 0 8px 8px 0;
+}
+
+.note-tip {
+  background: #fff8e1;
+  border-left: 4px solid var(--warning);
+  padding: 10px 14px;
+  margin: 12px 0;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.95em;
+}
+
+/* Passaggi dimostrazione */
+.demo-step {
+  background: var(--light);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 12px 0;
+  border-left: 4px solid var(--primary);
+  position: relative;
+}
+
+.demo-step .step-num {
+  display: inline-block;
+  background: var(--primary);
+  color: var(--white);
+  font-weight: 700;
+  font-size: 0.8em;
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-right: 8px;
+}
+
+.demo-step .step-label {
+  font-weight: 600;
+  color: var(--dark);
+}
+
+.demo-step p { margin-top: 8px; }
+.demo-step ul { margin-top: 6px; padding-left: 20px; }
+.demo-step li { margin-bottom: 3px; }
+
+/* Infografiche */
+.infographic {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  border: 2px solid #e0e7ff;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 18px;
+  text-align: center;
+  overflow-x: auto;
+}
+
+.infographic svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.info-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 10px 0;
+}
+
+.info-block {
+  background: var(--white);
+  border: 2px solid var(--primary);
+  border-radius: 10px;
+  padding: 10px 16px;
+  min-width: 110px;
+  text-align: center;
+  position: relative;
+}
+
+.info-block.highlight {
+  background: linear-gradient(135deg, #e8ecff, #f0e6ff);
+  border-color: #7c3aed;
+}
+
+.info-block.result {
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
+  border-color: var(--success);
+}
+
+.info-block .ib-title {
+  font-size: 0.75em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gray);
+  margin-bottom: 4px;
+}
+
+.info-block .ib-formula {
+  font-size: 1.1em;
+  font-weight: 700;
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  color: var(--dark);
+}
+
+.info-block .ib-note {
+  font-size: 0.78em;
+  color: var(--gray);
+  margin-top: 3px;
+}
+
+.info-arrow {
+  font-size: 1.5em;
+  color: var(--primary);
+  padding: 0 6px;
+  font-weight: 700;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.info-card {
+  background: var(--white);
+  border-radius: 10px;
+  padding: 12px;
+  border-left: 4px solid var(--primary);
+  text-align: left;
+}
+
+.info-card.green { border-left-color: var(--success); }
+.info-card.red { border-left-color: var(--danger); }
+.info-card.purple { border-left-color: #7c3aed; }
+.info-card.orange { border-left-color: #ff6a00; }
+
+.info-card .ic-title {
+  font-size: 0.8em;
+  font-weight: 700;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-card .ic-content {
+  font-size: 0.95em;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.info-card .ic-formula {
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  font-weight: 700;
+  font-size: 1.05em;
+}
+
+.info-visual {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+
+.info-visual-item {
+  text-align: center;
+}
+
+.info-visual-item .iv-icon {
+  font-size: 2.5em;
+  line-height: 1.2;
+}
+
+.info-visual-item .iv-label {
+  font-size: 0.82em;
+  color: var(--gray);
+  margin-top: 2px;
+}
+
+.info-step-flow {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.info-step-box {
+  background: var(--white);
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  min-width: 100px;
+  max-width: 160px;
+  text-align: center;
+  font-size: 0.88em;
+  line-height: 1.4;
+}
+
+.info-step-box.active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.info-step-box .isb-num {
+  display: inline-block;
+  background: var(--primary);
+  color: var(--white);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 0.8em;
+  font-weight: 700;
+  line-height: 22px;
+  margin-bottom: 4px;
+}
+
+.info-step-box .isb-formula {
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  font-weight: 700;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 600px) {
+  .container { padding: 10px; }
+  #start-screen { padding: 20px; }
+  .question-card { padding: 20px; }
+  .quiz-header { padding: 12px 16px; }
+  #start-screen h1 { font-size: 1.5em; }
+  .prof-svg-container { width: 160px; height: 160px; }
+  .prof-bubble { font-size: 0.95em; padding: 14px 18px; }
+  .info-step-flow { gap: 4px; }
+  .info-arrow { font-size: 1em; padding: 0 2px; }
+  .info-step-box { min-width: 70px; max-width: 110px; font-size: 0.78em; padding: 6px 8px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ============================================
+       SCHERMATA INIZIALE
+       ============================================ -->
+  <div id="start-screen">
+    <div class="prof-header-container" id="prof-header-svg"></div>
+    <h1>Quiz <span>Cardiovascolare e Respiratorio</span></h1>
+    <p class="subtitle">Cuore, vasi, sangue, vie aeree, ventilazione, emoglobina — Anatomia e Fisiologia</p>
+    <div class="prof-welcome">Prof. Paludetto dice: "Vediamo se conosci ogni valvola e ogni alveolo."</div>
+
+    <!-- SEZIONE 1: TEST E PREPARAZIONE -->
+    <div class="menu-section">
+      <div class="menu-section-title"><span class="section-icon test"></span> Test e Preparazione</div>
+
+      <h3 style="margin-bottom:10px; text-align:left; font-size:0.95em;">Filtra per argomento:</h3>
+      <div class="topic-grid" id="topic-filters"></div>
+
+      <div class="mode-buttons">
+        <button class="btn btn-primary" onclick="startQuiz('all')">Test completo</button>
+        <button class="btn btn-warning" onclick="startQuiz('random')">Modalita casuale</button>
+        <button class="btn btn-danger" onclick="startQuiz('errors')" id="btn-errors" style="display:none;">Ripassa gli errori</button>
+        <button class="btn btn-ultra" onclick="startQuiz('ultra')">Ultra Preparazione</button>
+      </div>
+      <div class="mode-buttons" style="margin-top:10px;">
+        <button class="btn btn-exam" onclick="showExam()">Simulazione Verifica</button>
+        <button class="btn btn-demo" onclick="showDemoExam()">Verifica Dimostrazioni</button>
+      </div>
+    </div>
+
+    <!-- SEZIONE 2: STUDIO -->
+    <div class="menu-section">
+      <div class="menu-section-title"><span class="section-icon study"></span> Studio e Ripasso</div>
+      <div class="mode-buttons">
+        <button class="btn btn-outline" style="border-color:var(--success);color:var(--success);" onclick="showNotes()">Appunti e Teoria</button>
+        <button class="btn btn-outline" style="border-color:#7c3aed;color:#7c3aed;" onclick="showNotes('dimostrazioni')">Dimostrazioni</button>
+      </div>
+    </div>
+
+    <div class="prev-stats" id="prev-stats" style="display:none;">
+      <strong>Sessione precedente:</strong>
+      <span id="prev-stats-text"></span>
+      <br><button class="btn btn-outline" style="margin-top:8px; padding:6px 16px; font-size:0.85em;" onclick="clearProgress()">Cancella progressi</button>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA QUIZ
+       ============================================ -->
+  <div id="quiz-screen">
+    <div class="quiz-header">
+      <div class="progress-info">
+        Domanda <span id="current-q">1</span> di <span id="total-q">0</span>
+      </div>
+      <div class="score-display">
+        <span class="score-correct">Corrette: <span id="score-correct">0</span></span>
+        <span class="score-wrong">Errate: <span id="score-wrong">0</span></span>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="question-card" id="question-card">
+      <div class="question-meta" id="question-meta"></div>
+      <div class="question-text" id="question-text"></div>
+      <div id="answer-area"></div>
+      <div class="submit-answer-btn" id="submit-area" style="display:none;">
+        <button class="btn btn-primary" onclick="checkOpenAnswer()">Verifica risposta</button>
+      </div>
+    </div>
+
+    <!-- Prof. Paludetto — Cartoon -->
+    <div class="prof-container" id="prof-container">
+      <div class="prof-svg-container">
+        <div class="prof-svg-correct" id="prof-svg-happy"></div>
+        <div class="prof-svg-wrong" id="prof-svg-angry"></div>
+      </div>
+      <div class="prof-bubble">
+        <div class="prof-name" id="prof-name">Prof. Paludetto</div>
+        <div id="prof-phrase"></div>
+      </div>
+    </div>
+
+    <div class="feedback-box" id="feedback-box">
+      <div class="feedback-title" id="feedback-title"></div>
+      <div class="feedback-text" id="feedback-text"></div>
+    </div>
+
+    <div class="deepdive-box" id="deepdive-box">
+      <div class="deepdive-title">Approfondimento</div>
+      <div class="deepdive-text" id="deepdive-text"></div>
+    </div>
+
+    <div class="next-btn-container" id="next-btn-container" style="display:none;">
+      <button class="btn btn-primary" onclick="nextQuestion()">Prossima domanda</button>
+      <button class="btn btn-outline" style="margin-left:8px;" onclick="endQuiz()">Termina</button>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA RIEPILOGO
+       ============================================ -->
+  <div id="summary-screen">
+    <div class="summary-card">
+      <h2>Riepilogo della Sessione</h2>
+
+      <!-- Prof nel riepilogo -->
+      <div class="prof-container show" id="prof-summary" style="margin-bottom:16px;">
+        <div class="prof-svg-container" id="prof-summary-svg"></div>
+        <div class="prof-bubble">
+          <div class="prof-name" id="prof-summary-name">Prof. Paludetto</div>
+          <div id="prof-summary-phrase"></div>
+        </div>
+      </div>
+
+      <div class="big-score" id="final-score"></div>
+      <p style="text-align:center;color:var(--gray);" id="final-score-label"></p>
+
+      <div class="stats-grid" id="stats-grid"></div>
+
+      <h3 style="margin:20px 0 10px;">Risultati per argomento</h3>
+      <div class="topic-results" id="topic-results"></div>
+
+      <div class="suggestions" id="suggestions"></div>
+
+      <h3 style="margin:20px 0 10px;">Cronologia risposte</h3>
+      <div class="history-list" id="history-list"></div>
+    </div>
+
+    <div style="text-align:center; margin:20px 0 40px;">
+      <button class="btn btn-primary" onclick="location.reload()">Ricomincia</button>
+      <button class="btn btn-danger" style="margin-left:10px;" onclick="startQuiz('errors')">Ripassa gli errori</button>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA SIMULAZIONE VERIFICA
+       ============================================ -->
+  <div id="exam-screen" style="display:none; margin-top:20px;">
+
+    <div class="exam-card">
+      <div class="exam-header">
+        <h2>VERIFICA DI ANATOMIA — CARDIOVASCOLARE E RESPIRATORIO</h2>
+        <div class="exam-info">
+          <span>Nome: _______________&nbsp;&nbsp; Cognome: _______________</span>
+          <span>Classe: 4°&nbsp;&nbsp; Data: ___/___/______</span>
+        </div>
+        <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+          <span class="exam-timer" id="exam-timer">Tempo: 50:00</span>
+          <button class="btn btn-outline" style="padding:6px 14px; font-size:0.85em;" onclick="hideExam()">Torna al menu</button>
+        </div>
+      </div>
+
+      <!-- PARTE 1: Scelta multipla (10 domande, 5 opzioni A-E) -->
+      <div class="exam-section-title">PARTE 1 — Domande a risposta multipla (10 domande)</div>
+      <div id="exam-mc-questions"></div>
+
+      <!-- PARTE 2: Domande aperte / dimostrative (3 domande) -->
+      <div class="exam-section-title">PARTE 2 — Domande aperte e dimostrazioni (3 domande)</div>
+      <div id="exam-open-questions"></div>
+
+      <div style="text-align:center; margin-top:24px;">
+        <button class="btn btn-primary" onclick="submitExam()" id="exam-submit-btn" style="padding:14px 40px; font-size:1.05em;">Consegna Verifica</button>
+      </div>
+
+      <div class="exam-result-bar" id="exam-result" style="display:none;">
+        <p style="font-size:1.1em; margin-bottom:8px;">Risultato della verifica:</p>
+        <div class="exam-grade" id="exam-grade"></div>
+        <p id="exam-grade-detail" style="color:var(--gray);margin-top:6px;"></p>
+        <div style="margin-top:16px;">
+          <button class="btn btn-primary" onclick="resetExam()">Ripeti la verifica</button>
+          <button class="btn btn-outline" style="margin-left:8px;" onclick="hideExam()">Torna al menu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA VERIFICA DIMOSTRAZIONI
+       ============================================ -->
+  <div id="demo-exam-screen" style="display:none; margin-top:20px;">
+    <div class="exam-card">
+      <div class="exam-header" style="border-bottom-color:#7c3aed;">
+        <h2 style="color:#7c3aed;">PROCEDIMENTI E SPIEGAZIONI — CARDIOVASCOLARE/RESPIRATORIO</h2>
+        <p style="font-size:0.9em; color:var(--gray); margin-top:4px;">Riproduci ogni dimostrazione passo per passo, come se fosse un compito in classe.</p>
+        <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+          <span class="exam-timer" id="demo-exam-timer">Tempo: 40:00</span>
+          <button class="btn btn-outline" style="padding:6px 14px; font-size:0.85em;" onclick="hideDemoExam()">Torna al menu</button>
+        </div>
+      </div>
+
+      <div id="demo-exam-questions"></div>
+
+      <div style="text-align:center; margin-top:24px;">
+        <button class="btn btn-demo" onclick="submitDemoExam()" id="demo-exam-submit-btn" style="padding:14px 40px; font-size:1.05em;">Consegna Verifica</button>
+      </div>
+
+      <div class="exam-result-bar" id="demo-exam-result" style="display:none;">
+        <p style="font-size:1.1em; margin-bottom:8px;">Verifica consegnata!</p>
+        <p id="demo-exam-grade-detail" style="color:var(--gray);"></p>
+        <div style="margin-top:16px;">
+          <button class="btn btn-demo" onclick="resetDemoExam()">Ripeti la verifica</button>
+          <button class="btn btn-outline" style="margin-left:8px;" onclick="hideDemoExam()">Torna al menu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA APPUNTI
+       ============================================ -->
+  <div id="notes-screen" style="display:none; margin-top:20px;">
+    <div class="summary-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:20px;">
+        <h2 style="margin:0;">Appunti di Cardiovascolare e Respiratorio</h2>
+        <button class="btn btn-outline" onclick="hideNotes()" style="padding:8px 18px; font-size:0.9em;">Torna al menu</button>
+      </div>
+
+      <!-- Navigazione argomenti -->
+      <div class="notes-nav" id="notes-nav"></div>
+
+      <!-- Contenuto argomenti -->
+      <div id="notes-content">
+
+                        <div class="note-section" id="note-circolazione">
+          <h3 class="note-title" onclick="toggleNote('circolazione')">1. Le due circolazioni <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-circolazione">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px; font-size:1.05em;">Polmonare e Sistemica — Schema</div>
+              <div class="info-flow">
+                <div class="info-block"><div class="ib-title">Polmonare</div><div class="ib-formula">VD → polmoni → AS</div><div class="ib-note">ossigena il sangue</div></div>
+                <div class="info-arrow">↔</div>
+                <div class="info-block highlight"><div class="ib-title">Sistemica</div><div class="ib-formula">VS → corpo → AD</div><div class="ib-note">distribuisce O2, raccoglie CO2</div></div>
+              </div>
+              <div class="info-grid" style="margin-top:14px;">
+                <div class="info-card red"><div class="ic-title">Arteria polmonare</div><div class="ic-content">Sangue NON ossigenato (eccezione)</div></div>
+                <div class="info-card green"><div class="ic-title">Vena polmonare</div><div class="ic-content">Sangue OSSIGENATO (eccezione)</div></div>
+                <div class="info-card"><div class="ic-title">Arterie sistemiche</div><div class="ic-content">Sangue ossigenato</div></div>
+                <div class="info-card purple"><div class="ic-title">Vene sistemiche</div><div class="ic-content">Sangue non ossigenato</div></div>
+              </div>
+            </div>
+
+            <p>Il sistema cardiovascolare e' formato da DUE circolazioni in serie:</p>
+
+            <h4>Circolazione POLMONARE</h4>
+            <ol>
+              <li>Parte dal <strong>ventricolo destro</strong> (cavita' del cuore che manda fuori il sangue)</li>
+              <li>Passa dalle <strong>arterie polmonari</strong> e arriva ai polmoni dove cede CO2 e prende O2</li>
+              <li>Va nelle <strong>vene polmonari</strong></li>
+              <li>Poi nell'<strong>atrio sinistro</strong> e quindi nel <strong>ventricolo sinistro</strong></li>
+            </ol>
+
+            <h4>Circolazione SISTEMICA</h4>
+            <ol>
+              <li>Parte dal <strong>ventricolo sinistro</strong></li>
+              <li><strong>Aorta</strong> verso alto e basso, in tutto il corpo</li>
+              <li>Attraverso vene e <strong>capillari</strong> il sangue cede O2 e acquisisce CO2</li>
+              <li>Passa dalla <strong>vena cava inferiore e superiore</strong></li>
+              <li>Poi nell'<strong>atrio destro</strong> e quindi nel <strong>ventricolo destro</strong></li>
+            </ol>
+
+            <div class="note-tip">Regola corretta: ARTERIA = vaso che ESCE dal cuore (anche se trasporta sangue non ossigenato, come nelle arterie polmonari). VENA = vaso che ENTRA nel cuore.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-cuore">
+          <h3 class="note-title" onclick="toggleNote('cuore')">2. Struttura del cuore <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-cuore">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px; font-size:1.05em;">Cuore — 3 strati + 4 valvole</div>
+              <div class="info-grid">
+                <div class="info-card"><div class="ic-title">Epicardio</div><div class="ic-content">Strato esterno<br>tessuto epiteliale</div></div>
+                <div class="info-card red"><div class="ic-title">Miocardio</div><div class="ic-content">Tessuto muscolare<br>striato MA involontario</div></div>
+                <div class="info-card green"><div class="ic-title">Endocardio</div><div class="ic-content">Riveste cavita' interne<br>e valvole</div></div>
+                <div class="info-card purple"><div class="ic-title">Pericardio</div><div class="ic-content">Epicardio + membrana<br>(avvolge il cuore)</div></div>
+              </div>
+              <div class="info-flow" style="margin-top:14px;">
+                <div class="info-block"><div class="ib-title">2 atrio-ventricolari</div><div class="ib-formula">DX: tricuspide<br>SX: bicuspide</div><div class="ib-note">no reflusso in sistole</div></div>
+                <div class="info-arrow">+</div>
+                <div class="info-block highlight"><div class="ib-title">2 semilunari</div><div class="ib-formula">polmonare<br>aortica</div><div class="ib-note">no reflusso in diastole</div></div>
+              </div>
+            </div>
+
+            <h4>3 STRATI</h4>
+            <ul>
+              <li><strong>EPICARDIO:</strong> strato esterno, membrana di tessuto epiteliale → epicardio + membrana = <strong>pericardio</strong></li>
+              <li><strong>MIOCARDIO:</strong> tessuto muscolare striato ma involontario</li>
+              <li><strong>ENDOCARDIO:</strong> tessuto epiteliale che riveste le cavita' e le valvole</li>
+            </ul>
+
+            <h4>4 VALVOLE (composte da tessuto connettivo)</h4>
+            <ul>
+              <li><strong>2 valvole atrio-ventricolari</strong> tra atri e ventricoli:
+                <ul><li>Destra: TRICUSPIDE</li><li>Sinistra: BICUSPIDE (mitrale)</li></ul>
+                Evitano il reflusso quando il ventricolo si contrae.
+              </li>
+              <li><strong>2 valvole semilunari</strong> tra ventricoli e arterie:
+                <ul><li>Polmonare (a destra)</li><li>Aortica (a sinistra)</li></ul>
+                Evitano il reflusso quando il ventricolo si rilassa.
+              </li>
+            </ul>
+
+            <h4>Arterie coronarie</h4>
+            <p>Il cuore e' circondato dalle <strong>arterie coronarie</strong>: una rete fitta che irrora la parete di atri e ventricoli, fornendo O2 al miocardio stesso.</p>
+
+            <div class="note-tip">Mnemonico: TRicuspide a desTRa, BIcuspide a sinistra. Le valvole sono passive: si aprono e chiudono per differenza di pressione, non per contrazione attiva.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-ciclo">
+          <h3 class="note-title" onclick="toggleNote('ciclo')">3. Il ciclo cardiaco <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-ciclo">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px; font-size:1.05em;">Ciclo cardiaco — durata ~0,8 s</div>
+              <div class="info-step-flow">
+                <div class="info-step-box"><div class="isb-num">1</div><br><strong>Diastole</strong><br>cuore rilassato<br>AV aperte<br>semilunari chiuse</div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">2</div><br><strong>Sistole atriale</strong><br>~0,1 s<br>completa il riempimento ventricoli</div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box active"><div class="isb-num">3</div><br><strong>Sistole ventricolare</strong><br>AV chiuse<br>semilunari aperte<br>sangue → arterie</div>
+              </div>
+            </div>
+
+            <p><strong>Durata totale del ciclo:</strong> circa 0,8 secondi.</p>
+
+            <h4>Prima fase: DIASTOLE</h4>
+            <ul>
+              <li>Il cuore e' rilassato</li>
+              <li>Il sangue fluisce passivamente nelle cavita'</li>
+              <li>Valvole AV: <strong>aperte</strong></li>
+              <li>Valvole semilunari: <strong>chiuse</strong></li>
+            </ul>
+
+            <h4>Seconda fase: SISTOLE</h4>
+            <p>Inizia con una breve <strong>sistole atriale (~0,1 s)</strong> che completa il riempimento dei ventricoli. Poi:</p>
+            <ul>
+              <li>I ventricoli si contraggono con forza</li>
+              <li>La pressione interna ventricolare sale → le AV si <strong>chiudono</strong></li>
+              <li>Le semilunari si <strong>aprono</strong></li>
+              <li>Il sangue viene spinto nelle arterie</li>
+            </ul>
+
+            <h4>Gittata cardiaca</h4>
+            <p>La <strong>gittata cardiaca</strong> e' la quantita' di sangue pompata al minuto da ciascun ventricolo. Dipende dalla frequenza cardiaca (battiti al minuto) → aumenta con stress e sforzo.</p>
+
+            <div class="formula-box">Gittata cardiaca = gittata sistolica × frequenza cardiaca</div>
+
+            <div class="note-tip">Soffio cardiaco = difetto del normale flusso, spesso valvolare. I "tum tum" del battito corrispondono alla chiusura delle valvole: 1° tono = AV, 2° tono = semilunari.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-conduzione">
+          <h3 class="note-title" onclick="toggleNote('conduzione')">4. Sistema di conduzione elettrica <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-conduzione">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px; font-size:1.05em;">Sequenza degli impulsi elettrici</div>
+              <div class="info-step-flow">
+                <div class="info-step-box"><div class="isb-num">1</div><br>Nodo SA<br><span class="isb-formula">pacemaker</span></div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">2</div><br>Atri<br>contrazione</div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">3</div><br>Nodo AV<br><strong>RITARDO</strong></div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">4</div><br>Fascio di His</div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box active"><div class="isb-num">5</div><br>Fibre di Purkinje<br>ventricoli</div>
+              </div>
+            </div>
+
+            <h4>Nodo seno-atriale (SA)</h4>
+            <p>E' il <strong>pacemaker naturale</strong> del cuore. Si trova nella parete superiore dell'atrio destro. Stabilisce il ritmo per tutte le cellule cardiache, generando spontaneamente impulsi elettrici (60-100 al minuto).</p>
+
+            <h4>Nodo atrio-ventricolare (AV)</h4>
+            <p>Costituito da cellule che trasmettono gli impulsi ai ventricoli. INTRODUCE UN RITARDO essenziale: permette agli atri di completare lo svuotamento prima che i ventricoli si contraggano.</p>
+
+            <h4>Sequenza completa del battito</h4>
+            <ol>
+              <li>I segnali partono dal nodo SA e si propagano attraverso gli atri</li>
+              <li>Sono ritardati dal nodo AV</li>
+              <li>Le fibre trasmettono i segnali all'apice del cuore (<strong>fascio di His</strong>)</li>
+              <li>I segnali si propagano attraverso i ventricoli (<strong>fibre di Purkinje</strong>)</li>
+            </ol>
+
+            <div class="note-tip">Senza il ritardo del nodo AV, atri e ventricoli si contrarrebbero quasi simultaneamente. La pausa imposta da AV permette il riempimento ventricolare ottimale.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-patologie-cv">
+          <h3 class="note-title" onclick="toggleNote('patologie-cv')">5. Patologie cardiovascolari <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-patologie-cv">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px; font-size:1.05em;">Patologie principali</div>
+              <div class="info-grid">
+                <div class="info-card red"><div class="ic-title">Aritmia</div><div class="ic-content">Problema elettrico<br>(nodo SA)</div></div>
+                <div class="info-card"><div class="ic-title">Infarto</div><div class="ic-content">Ostruzione coronarie<br>tessuto muore</div></div>
+                <div class="info-card purple"><div class="ic-title">Aterosclerosi</div><div class="ic-content">Placche di grasso<br>ATEROMI</div></div>
+                <div class="info-card green"><div class="ic-title">Prevenzione</div><div class="ic-content">Statine<br>Cardioaspirina</div></div>
+              </div>
+            </div>
+
+            <h4>Aritmie</h4>
+            <ul>
+              <li>Se il <strong>nodo SA malfunziona</strong> → si impianta un pacemaker artificiale</li>
+              <li>Se il nodo SA si <strong>ferma</strong> → arresto cardiaco (es. shock anafilattico)</li>
+            </ul>
+
+            <h4>Infarto</h4>
+            <p>Causato dall'<strong>ostruzione delle arterie coronarie</strong>: il tessuto cardiaco a valle non riceve O2 e muore. (L'infarto puo' avvenire in qualunque tessuto.)</p>
+
+            <h4>Aterosclerosi</h4>
+            <p>Graduale ostruzione dei vasi sanguigni nel tempo:</p>
+            <ul>
+              <li>Si forma grasso (colesterolo) → <strong>ATEROMA</strong> (placca)</li>
+              <li>Aumenta la pressione → restringe le vene</li>
+              <li>Fa contrarre la muscolatura → ulteriore aterogenesi</li>
+            </ul>
+
+            <h4>Prevenzione</h4>
+            <ul>
+              <li>Cardioaspirina (riduce aggregazione piastrinica)</li>
+              <li>Statine (farmaci che riducono il colesterolo)</li>
+            </ul>
+
+            <h4>Cura</h4>
+            <ul>
+              <li>Posizionamento di uno <strong>STENT</strong> (cilindro espandibile) nel vaso ostruito</li>
+            </ul>
+
+            <h4>Fattori di rischio</h4>
+            <ul>
+              <li>Fumo</li>
+              <li>Vita sedentaria</li>
+              <li>Dieta non equilibrata</li>
+            </ul>
+
+            <div class="note-tip">Distinzione chiave: aritmia = problema ELETTRICO. Infarto / aterosclerosi = problema VASCOLARE. Sono cose diverse anche se possono coesistere.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-vasi">
+          <h3 class="note-title" onclick="toggleNote('vasi')">6. Vasi sanguigni e pressione <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-vasi">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px; font-size:1.05em;">Tipi di vasi</div>
+              <div class="info-grid">
+                <div class="info-card"><div class="ic-title">Capillari</div><div class="ic-content">diametro piccolo<br>pareti sottili (endotelio)<br>scambi gassosi</div></div>
+                <div class="info-card red"><div class="ic-title">Arterie</div><div class="ic-content">grandi<br>endotelio + muscolare + connettivo<br>alta pressione</div></div>
+                <div class="info-card green"><div class="ic-title">Vene</div><div class="ic-content">valvole anti-reflusso<br>bassa pressione</div></div>
+              </div>
+              <div class="info-flow" style="margin-top:14px;">
+                <div class="info-block"><div class="ib-title">Sistolica (max)</div><div class="ib-formula">~120 mmHg</div></div>
+                <div class="info-arrow">/</div>
+                <div class="info-block highlight"><div class="ib-title">Diastolica (min)</div><div class="ib-formula">~80 mmHg</div></div>
+                <div class="info-arrow">→</div>
+                <div class="info-block result"><div class="ib-title">Strumento</div><div class="ib-formula">Sfigmomanometro</div></div>
+              </div>
+            </div>
+
+            <h4>Funzioni dei vasi sanguigni</h4>
+            <ul>
+              <li>Trasporto e scambio di gas (CO2, O2)</li>
+              <li>Trasporto e scambio di sostanze nutritive e di rifiuto</li>
+              <li>Mantenimento dell'omeostasi</li>
+              <li>Supporto della difesa immunitaria</li>
+              <li>Regolazione della temperatura corporea</li>
+              <li>Trasporto di ormoni</li>
+            </ul>
+
+            <h4>Strutture</h4>
+            <ul>
+              <li><strong>CAPILLARI:</strong> diametro piccolo, pareti sottili (endotelio), diffondono bene; estesi e ramificati</li>
+              <li><strong>ARTERIE:</strong> formate da endotelio + tessuto muscolare + tessuto connettivo + parete spessa (sopportano pressione elevata)</li>
+              <li><strong>VENE:</strong> hanno valvole per evitare il ritorno venoso (sangue non sale e torna giu'); minore pressione</li>
+            </ul>
+
+            <h4>Pressione sanguigna</h4>
+            <p>E' la forza che il sangue esercita contro la parete dei vasi.</p>
+            <ul>
+              <li><strong>Sistolica (massima):</strong> quando il cuore si contrae</li>
+              <li><strong>Diastolica (minima):</strong> quando il cuore si dilata</li>
+            </ul>
+
+            <h4>Da cosa dipende la pressione</h4>
+            <ul>
+              <li>Gittata cardiaca</li>
+              <li>Diametro dei vasi (regolato dalla muscolatura liscia)</li>
+            </ul>
+            <p>La velocita' di scorrimento decresce quando i vasi si diramano. La respirazione cambia i livelli di pressione nel torace (in inspirazione le vene si espandono). Anche i muscoli aiutano il sangue a risalire al cuore.</p>
+
+            <h4>Vasocostrizione e vasodilatazione</h4>
+            <ul>
+              <li><strong>VASOCOSTRIZIONE:</strong> i vasi si restringono → la pressione aumenta</li>
+              <li><strong>VASODILATAZIONE:</strong> i vasi si dilatano → la pressione diminuisce</li>
+            </ul>
+
+            <h4>Misurazione</h4>
+            <p><strong>Sfigmomanometro</strong> → valori di riferimento: 120 mmHg sistolica / 80 mmHg diastolica.</p>
+
+            <div class="note-tip">Ipertensione = pressione alta cronica → rischio elevato di malattie cardiovascolari (ictus, infarto, scompenso).</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-sangue">
+          <h3 class="note-title" onclick="toggleNote('sangue')">7. Il sangue: plasma e cellule <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-sangue">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px; font-size:1.05em;">Composizione del sangue</div>
+              <div class="info-flow">
+                <div class="info-block"><div class="ib-title">Plasma</div><div class="ib-formula">~55%</div><div class="ib-note">90% acqua + soluti</div></div>
+                <div class="info-arrow">+</div>
+                <div class="info-block highlight"><div class="ib-title">Frazione corpuscolare</div><div class="ib-formula">~45%</div><div class="ib-note">cellule</div></div>
+              </div>
+              <div class="info-grid" style="margin-top:14px;">
+                <div class="info-card red"><div class="ic-title">Globuli rossi (RBC)</div><div class="ic-content">trasportano O2<br>contengono emoglobina</div></div>
+                <div class="info-card"><div class="ic-title">Globuli bianchi (WBC)</div><div class="ic-content">sistema immunitario</div></div>
+                <div class="info-card purple"><div class="ic-title">Piastrine (PLT)</div><div class="ic-content">coagulazione<br>riparazione tessuti</div></div>
+              </div>
+            </div>
+
+            <h4>Plasma (parte liquida)</h4>
+            <ul>
+              <li>Composto per circa il <strong>90% da acqua</strong></li>
+              <li>Contiene: elettroliti (sali inorganici), proteine, sostanze nutritive, prodotti di rifiuto, O2 e CO2, ormoni</li>
+              <li>Tra le proteine: <strong>fibrinogeno</strong> (partecipa alla coagulazione → forma fibrina, primo strato del coagulo) e <strong>immunoglobuline</strong> (sistema immunitario)</li>
+            </ul>
+
+            <h4>Frazione corpuscolare</h4>
+            <ul>
+              <li><strong>Globuli rossi (eritrociti):</strong> trasportano O2 grazie all'emoglobina</li>
+              <li><strong>Globuli bianchi (leucociti):</strong> sistema immunitario (nel sangue e nel liquido interstiziale)</li>
+              <li><strong>Piastrine:</strong> elementi cellulari senza nucleo che riparano i tessuti → coagulazione</li>
+            </ul>
+
+            <h4>Emopoiesi</h4>
+            <p>Le cellule del sangue vengono prodotte dal <strong>midollo osseo</strong>, da cellule staminali. Si differenziano in tutti gli elementi del sangue.</p>
+            <p>Due tipologie di staminali:</p>
+            <ol>
+              <li><strong>Linfoidi:</strong> producono linfociti (sistema immunitario)</li>
+              <li><strong>Mieloidi:</strong> producono globuli rossi, altri globuli bianchi e piastrine</li>
+            </ol>
+
+            <h4>Eritropoiesi e EPO</h4>
+            <p>Eritropoiesi = produzione di globuli rossi.</p>
+            <p>Se i tessuti non ricevono abbastanza O2, i <strong>reni</strong> producono <strong>ERITROPOIETINA (EPO)</strong>: ormone che stimola il midollo osseo a produrre piu' globuli rossi.</p>
+
+            <h4>Esami del sangue piu' comuni</h4>
+            <ul>
+              <li>Globuli bianchi (WBC), globuli rossi (RBC) — anemia</li>
+              <li>Emoglobina (HB)</li>
+              <li>Piastrine (PLT)</li>
+              <li>Leucemia</li>
+              <li>Glicemia, colesterolo</li>
+            </ul>
+
+            <h4>Scambio sostanze tra capillari e tessuti</h4>
+            <ul>
+              <li>Diffusione (es. CO2 e O2)</li>
+              <li>Vescicole (endocitosi → esocitosi)</li>
+              <li>Spazi tra le cellule endoteliali</li>
+            </ul>
+            <p><strong>Pressione sanguigna:</strong> tende a far uscire H2O. <strong>Pressione osmotica:</strong> opposta, tende a tenere H2O all'interno.</p>
+
+            <div class="note-tip">Le piastrine NON sono cellule complete: sono frammenti citoplasmatici di megacariociti (privi di nucleo).</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-respiratorio">
+          <h3 class="note-title" onclick="toggleNote('respiratorio')">8. Sistema respiratorio: anatomia <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-respiratorio">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px; font-size:1.05em;">Vie aeree dall'esterno agli alveoli</div>
+              <div class="info-step-flow">
+                <div class="info-step-box"><div class="isb-num">1</div><br>Cavita' nasali</div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">2</div><br>Faringe</div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">3</div><br>Laringe<br><span class="isb-formula">epiglottide</span></div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">4</div><br>Trachea</div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">5</div><br>Bronchi<br>bronchioli</div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box active"><div class="isb-num">6</div><br>Alveoli<br><strong>scambi</strong></div>
+              </div>
+            </div>
+
+            <p>Il sistema respiratorio assicura gli scambi gassosi.</p>
+
+            <h4>Suddivisione</h4>
+            <ul>
+              <li><strong>Vie aeree superiori:</strong> naso, faringe</li>
+              <li><strong>Vie aeree inferiori:</strong> laringe, trachea, bronchi, polmoni</li>
+            </ul>
+
+            <h4>Polmoni e diaframma</h4>
+            <p>I polmoni si trovano nella <strong>cavita' toracica</strong> (gabbia toracica), separata dalla cavita' addominale dal <strong>diaframma</strong> (muscolo a cupola): si alza quando e' rilassato, si abbassa quando si contrae.</p>
+
+            <h4>Percorso macroscopico dell'aria</h4>
+            <ol>
+              <li><strong>Cavita' nasali</strong> (in alto i recettori olfattivi)</li>
+              <li><strong>Faringe</strong></li>
+              <li><strong>Epiglottide</strong> all'inizio della laringe: struttura cartilaginea che impedisce al cibo di entrare nelle vie aeree</li>
+              <li><strong>Laringe</strong> (con corde vocali)</li>
+              <li><strong>Trachea</strong></li>
+              <li><strong>2 bronchi</strong> (uno per polmone) → si ramificano in <strong>bronchioli</strong></li>
+              <li>Grappoli di sacche aeree chiamati <strong>alveoli</strong>: dove avvengono gli scambi gassosi</li>
+            </ol>
+
+            <h4>Le 3 fasi degli scambi gassosi</h4>
+            <ol>
+              <li><strong>Respirazione</strong> (alternarsi di inspirazione ed espirazione)</li>
+              <li><strong>Trasporto dei gas</strong> (dai polmoni alle cellule attraverso il sistema circolatorio)</li>
+              <li><strong>Scambi di O2 e CO2</strong> (tra cellule del corpo e sistema circolatorio)</li>
+            </ol>
+
+            <div class="note-tip">L'epiglottide e' la struttura che 'va di traverso' quando il cibo entra in trachea. Il riflesso della tosse serve a espellerlo.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-ventilazione">
+          <h3 class="note-title" onclick="toggleNote('ventilazione')">9. Ventilazione polmonare <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-ventilazione">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px; font-size:1.05em;">Inspirazione vs Espirazione</div>
+              <div class="info-flow">
+                <div class="info-block"><div class="ib-title">Inspirazione</div><div class="ib-formula">diaframma ↓<br>volume ↑<br>pressione ↓</div><div class="ib-note">aria ENTRA</div></div>
+                <div class="info-arrow">↔</div>
+                <div class="info-block highlight"><div class="ib-title">Espirazione</div><div class="ib-formula">diaframma ↑<br>volume ↓<br>pressione ↑</div><div class="ib-note">aria ESCE</div></div>
+              </div>
+              <div class="info-grid" style="margin-top:14px;">
+                <div class="info-card"><div class="ic-title">Capacita' vitale</div><div class="ic-content">Donne: ~3,4 L<br>Uomini: ~4,8 L</div></div>
+                <div class="info-card green"><div class="ic-title">Controllo</div><div class="ic-content">involontario<br>centri nel midollo allungato</div></div>
+                <div class="info-card purple"><div class="ic-title">Tipo</div><div class="ic-content">a pressione<br>NEGATIVA</div></div>
+              </div>
+            </div>
+
+            <h4>Inspirazione</h4>
+            <p>La cassa toracica si espande, il <strong>diaframma si contrae</strong> (si abbassa) → aumenta il volume e diminuisce la pressione dell'aria.</p>
+            <p>L'aria passa da regione a pressione maggiore (esterna) a regione a pressione minore (interna): questa e' detta <strong>respirazione a pressione negativa</strong>.</p>
+
+            <h4>Espirazione</h4>
+            <p>Il <strong>diaframma si rilassa</strong> (si alza), diminuisce il volume, aumenta la pressione dell'aria che viene forzata a uscire.</p>
+
+            <h4>Capacita' vitale</h4>
+            <p>Volume massimo di aria che possiamo inspirare ed espirare durante una respirazione forzata:</p>
+            <ul>
+              <li><strong>3,4 L</strong> (donne)</li>
+              <li><strong>4,8 L</strong> (uomini)</li>
+            </ul>
+            <p>(In realta' nei polmoni resta sempre un po' piu' di aria della capacita' vitale: il volume residuo.)</p>
+
+            <h4>Controllo della respirazione</h4>
+            <p>E' <strong>involontario</strong>. I centri di controllo si trovano nel <strong>midollo osseo allungato</strong> (parte del sistema nervoso).</p>
+
+            <h4>Malattie respiratorie</h4>
+            <ul>
+              <li><strong>BPCO</strong> (broncopneumopatia cronica ostruttiva): risultato di lunga esposizione a inquinanti come polveri sottili e fumo di tabacco</li>
+              <li><strong>Bronchite cronica:</strong> infiammazione della mucosa bronchiale</li>
+              <li><strong>Asma:</strong> parziale ostruzione dei bronchi</li>
+              <li><strong>Polmonite:</strong> infezione caratterizzata da infiammazione degli alveoli</li>
+            </ul>
+            <p>Il fumo e' la causa del <strong>90% dei casi di cancro ai polmoni</strong>.</p>
+
+            <div class="note-tip">Il diaframma a riposo e' a CUPOLA ALTA (rilassato). Si appiattisce quando si contrae per allargare il torace. Ricordare: contratto = abbassato = inspirazione.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-emoglobina">
+          <h3 class="note-title" onclick="toggleNote('emoglobina')">10. Scambi gassosi ed emoglobina <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-emoglobina">
+            <div class="infographic">
+              <div style="font-weight:700; color:var(--primary); margin-bottom:12px; font-size:1.05em;">Diffusione e trasporto gas</div>
+              <div class="info-flow">
+                <div class="info-block"><div class="ib-title">Negli alveoli</div><div class="ib-formula">O2: aria → sangue<br>CO2: sangue → aria</div></div>
+                <div class="info-arrow">↔</div>
+                <div class="info-block highlight"><div class="ib-title">Nei tessuti</div><div class="ib-formula">O2: sangue → cellule<br>CO2: cellule → sangue</div></div>
+              </div>
+              <div class="info-grid" style="margin-top:14px;">
+                <div class="info-card"><div class="ic-title">Emoglobina</div><div class="ic-content">4 catene + 4 emi<br>4 atomi di Fe<br>nel sangue</div></div>
+                <div class="info-card green"><div class="ic-title">Mioglobina</div><div class="ic-content">1 catena<br>nei muscoli<br>riserva O2</div></div>
+                <div class="info-card purple"><div class="ic-title">CO2 in plasma</div><div class="ic-content">come HCO3-<br>(maggior parte)</div></div>
+                <div class="info-card red"><div class="ic-title">pH</div><div class="ic-content">tamponato<br>dall'emoglobina</div></div>
+              </div>
+            </div>
+
+            <p>Lo scambio dei gas e' <strong>coordinato con la circolazione sanguigna</strong> e avviene per <strong>diffusione secondo gradiente di pressione</strong>.</p>
+
+            <h4>Pressione parziale</h4>
+            <p>In una miscela ogni gas contribuisce con una <strong>pressione parziale</strong>, misurata in <strong>mmHg</strong>. La diffusione va dai gas a pressione piu' alta a quelli a pressione piu' bassa.</p>
+
+            <h4>Negli alveoli</h4>
+            <ul>
+              <li>Nei capillari degli alveoli la <strong>CO2 e' piu' concentrata</strong> e l'<strong>O2 e' meno concentrato</strong> che nell'aria</li>
+              <li>Quindi: O2 si sposta nei capillari, CO2 nell'aria (che viene espirata)</li>
+            </ul>
+
+            <h4>Nei tessuti</h4>
+            <ul>
+              <li>Nei tessuti la <strong>CO2 e' piu' concentrata</strong> e l'<strong>O2 e' meno concentrato</strong> che nel sangue</li>
+              <li>Quindi: O2 si sposta nei tessuti, CO2 nel sangue</li>
+            </ul>
+
+            <h4>Trasporto dell'O2</h4>
+            <p>L'O2 e' poco solubile in acqua, quindi nel sangue viene trasportato legato all'<strong>emoglobina</strong>:</p>
+            <ul>
+              <li>Formata da <strong>4 catene polipeptidiche</strong></li>
+              <li>Ogni catena lega un <strong>gruppo eme</strong>, che ha al centro un <strong>atomo di ferro</strong></li>
+              <li>L'atomo di ferro lega e trasporta una molecola di O2 (4 O2 per emoglobina)</li>
+              <li>Contribuisce a regolare il <strong>pH del sangue</strong> e a trasportare la CO2</li>
+            </ul>
+
+            <h4>Trasporto della CO2</h4>
+            <p>La maggior parte viene trasportata sotto forma di <strong>ioni carbonato (HCO3-)</strong> in soluzione nel plasma. Reazione:</p>
+            <div class="formula-box">CO2 + H2O   ⇄   H2CO3   ⇄   H+ + HCO3-</div>
+            <p>(diossido di carbonio + acqua ⇄ acido carbonico ⇄ ione idrogeno + ione bicarbonato)</p>
+            <ul>
+              <li>L'<strong>emoglobina lega gli ioni H+</strong> tamponando il pH</li>
+              <li>Quando il sangue arriva nei capillari polmonari avviene la <strong>reazione inversa</strong>: HCO3- + H+ → CO2 + H2O (espirata)</li>
+            </ul>
+
+            <h4>Mioglobina</h4>
+            <p>La mioglobina e' una proteina simile all'emoglobina, ma presente nei <strong>muscoli</strong>. Quando i muscoli sono a corto di ossigeno la mioglobina rilascia l'O2 che aveva legato per permettere alla cellula di continuare a produrre energia.</p>
+
+            <div class="note-tip">Mnemonico: emo- = sangue, mio- = muscolo. Emoglobina = 4 catene (sangue), mioglobina = 1 catena (muscolo).</div>
+          </div>
+        </div>
+
+        <!-- ============================================
+             SEZIONE PROCEDIMENTI
+             ============================================ -->
+        <div style="margin-top:30px; padding-top:20px; border-top:3px solid var(--primary);">
+          <h2 style="color:var(--primary); margin-bottom:16px;">Procedimenti da sapere</h2>
+        </div>
+
+        <div class="note-section" id="note-dim-conduzione">
+          <h3 class="note-title" onclick="toggleNote('dim-conduzione')">PROC 1. Sequenza eventi elettrici nel battito <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-dim-conduzione">
+            <div class="infographic" style="border-color:#c3b1e1;">
+              <div style="font-weight:700; color:#7c3aed; margin-bottom:10px;">Flusso del procedimento</div>
+              <div class="info-step-flow">
+                <div class="info-step-box"><div class="isb-num">1</div><br>Nodo SA<br><span class="isb-formula">impulso</span></div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">2</div><br>Atri<br>contrazione</div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">3</div><br>Nodo AV<br><strong>RITARDO</strong></div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">4</div><br>Fascio di His</div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box active"><div class="isb-num">5</div><br>Purkinje<br>ventricoli</div>
+              </div>
+            </div>
+
+            <p><strong>Obiettivo:</strong> descrivere come l'impulso elettrico propaga attraverso il cuore.</p>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 1</span>
+              <span class="step-label">Generazione dell'impulso al nodo SA</span>
+              <p>Il nodo seno-atriale (parete superiore atrio destro) genera spontaneamente impulsi elettrici: e' il <strong>pacemaker naturale</strong> (60-100 al minuto).</p>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 2</span>
+              <span class="step-label">Propagazione attraverso gli atri</span>
+              <p>L'impulso si propaga radialmente nelle cellule muscolari atriali → contrazione (sistole atriale ~0,1 s) → completamento riempimento ventricoli.</p>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 3</span>
+              <span class="step-label">Ritardo al nodo AV</span>
+              <p>L'impulso raggiunge il nodo AV dove viene <strong>rallentato</strong>. Funzione del ritardo: permettere agli atri di completare lo svuotamento prima che i ventricoli si contraggano. Senza ritardo, atri e ventricoli si contrarrebbero quasi simultaneamente.</p>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 4</span>
+              <span class="step-label">Fascio di His</span>
+              <p>Dopo il ritardo, l'impulso prosegue rapidamente nel fascio di His (setto interventricolare), che si divide in branche destra e sinistra per i due ventricoli.</p>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 5</span>
+              <span class="step-label">Fibre di Purkinje e contrazione ventricolare</span>
+              <p>Le fibre di Purkinje distribuiscono l'impulso a tutta la muscolatura ventricolare → sistole ventricolare coordinata dall'apice verso la base → espulsione del sangue nelle arterie.</p>
+            </div>
+
+            <div class="note-tip">Sequenza riassuntiva: SA → atri → AV (ritardo) → His → branche → Purkinje → ventricoli. ANOMALIE: pacemaker artificiale (se SA malfunziona), arresto cardiaco (se SA si ferma), blocchi di branca (se difetto del fascio).</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-dim-ventilazione">
+          <h3 class="note-title" onclick="toggleNote('dim-ventilazione')">PROC 2. Ventilazione polmonare a pressione negativa <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-dim-ventilazione">
+            <div class="infographic" style="border-color:#c3b1e1;">
+              <div style="font-weight:700; color:#7c3aed; margin-bottom:10px;">Flusso del procedimento — Inspirazione</div>
+              <div class="info-step-flow">
+                <div class="info-step-box"><div class="isb-num">1</div><br>Diaframma<br>si contrae<br>(↓)</div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">2</div><br>Volume torace<br>aumenta</div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">3</div><br>Pressione<br>interna ↓</div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box active"><div class="isb-num">4</div><br>Aria ENTRA<br>(p atmosferica &gt;<br>p interna)</div>
+              </div>
+            </div>
+
+            <p><strong>Obiettivo:</strong> spiegare il meccanismo a pressione negativa che fa entrare e uscire l'aria.</p>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 1</span>
+              <span class="step-label">Punto di partenza: anatomia</span>
+              <p>La cavita' toracica e' separata dall'addominale dal diaframma (muscolo a cupola). I polmoni sono passivi: si espandono o contraggono in base al volume del torace.</p>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 2</span>
+              <span class="step-label">Inspirazione: contrazione muscolare</span>
+              <p>Il diaframma si <strong>contrae</strong> e si abbassa. I muscoli intercostali esterni si contraggono e sollevano le coste. Risultato: il volume del torace AUMENTA.</p>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 3</span>
+              <span class="step-label">Inspirazione: variazione di pressione</span>
+              <p>A volume maggiore, secondo la legge di Boyle (P·V = costante), la pressione interna DIMINUISCE. Diventa piu' bassa di quella atmosferica.</p>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 4</span>
+              <span class="step-label">Inspirazione: flusso d'aria</span>
+              <p>L'aria si sposta sempre da pressione maggiore a pressione minore: l'aria atmosferica entra nei polmoni attraverso le vie aeree.</p>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 5</span>
+              <span class="step-label">Espirazione: rilassamento</span>
+              <p>Il diaframma si <strong>rilassa</strong> e torna alla sua cupola alta. I muscoli intercostali si rilassano. Il volume diminuisce, la pressione interna aumenta sopra quella atmosferica e l'aria viene FORZATA fuori.</p>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Significato</span>
+              <span class="step-label">Pressione negativa</span>
+              <p>Si chiama "pressione negativa" perche' l'aria entra grazie a una pressione INTERNA piu' bassa di quella ESTERNA, NON per spinta attiva dei polmoni. Ai ventilatori meccanici si applica invece una respirazione a pressione positiva (l'aria viene spinta dentro).</p>
+            </div>
+
+            <div class="note-tip">Mnemonico: contrazione del diaframma = abbassa = inspirazione. Il riflesso e' coordinato dai centri nervosi nel midollo allungato (involontario).</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-dim-co2">
+          <h3 class="note-title" onclick="toggleNote('dim-co2')">PROC 3. Trasporto CO2 e regolazione del pH <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-dim-co2">
+            <div class="infographic" style="border-color:#c3b1e1;">
+              <div style="font-weight:700; color:#7c3aed; margin-bottom:10px;">Flusso del procedimento</div>
+              <div class="info-step-flow">
+                <div class="info-step-box"><div class="isb-num">1</div><br>Tessuti<br>producono CO2</div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">2</div><br>Reazione<br><span class="isb-formula">CO2+H2O →<br>HCO3-+H+</span></div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">3</div><br>Hb lega H+<br>(pH tamponato)</div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box"><div class="isb-num">4</div><br>HCO3- viaggia<br>nel plasma</div>
+                <div class="info-arrow">→</div>
+                <div class="info-step-box active"><div class="isb-num">5</div><br>Polmoni<br>reazione INVERSA<br>CO2 espirata</div>
+              </div>
+            </div>
+
+            <p><strong>Obiettivo:</strong> mostrare come la CO2 viene trasportata e come l'emoglobina mantiene stabile il pH del sangue.</p>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 1</span>
+              <span class="step-label">Il problema del trasporto</span>
+              <p>Le cellule producono CO2 dal metabolismo. La CO2 e' poco solubile nel plasma: solo ~7% viaggia disciolta. Servono altri meccanismi.</p>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 2</span>
+              <span class="step-label">Reazione chimica nel plasma</span>
+              <p>Nei capillari tissutali la CO2 entra nel plasma e reagisce con l'acqua:</p>
+              <div class="formula-box">CO2 + H2O ⇄ H2CO3 ⇄ H+ + HCO3-</div>
+              <p>Circa il 70% della CO2 viaggia come <strong>ioni bicarbonato HCO3-</strong> disciolti nel plasma.</p>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 3</span>
+              <span class="step-label">Il problema degli ioni H+</span>
+              <p>La reazione produce ioni H+ che, se liberi, abbasserebbero il pH del sangue (acidosi). Ma il pH resta costante a ~7,4.</p>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 4</span>
+              <span class="step-label">Ruolo tampone dell'emoglobina</span>
+              <p>L'emoglobina <strong>lega gli ioni H+</strong>, sequestrandoli e tamponando il pH. Triplo ruolo dell'emoglobina:</p>
+              <ul>
+                <li>Trasporto O2 (legato al Fe negli emi)</li>
+                <li>Trasporto piccola parte di CO2 (carbamino-emoglobina, ~23%)</li>
+                <li>Regolazione del pH (legando H+)</li>
+              </ul>
+            </div>
+
+            <div class="demo-step">
+              <span class="step-num">Passo 5</span>
+              <span class="step-label">Reazione inversa nei polmoni</span>
+              <p>Nei capillari alveolari la pressione parziale di CO2 nell'aria e' bassa. La reazione si inverte:</p>
+              <div class="formula-box">HCO3- + H+ → H2CO3 → CO2 + H2O</div>
+              <p>L'emoglobina rilascia gli H+, che si combinano con HCO3- per riformare CO2. La CO2 diffonde nell'aria alveolare e viene espirata. Contemporaneamente l'O2 entra nel sangue legandosi all'emoglobina.</p>
+            </div>
+
+            <div class="note-tip">Senza l'emoglobina come tampone, ogni ingresso di CO2 nel sangue causerebbe acidosi grave. La sua versatilita' (O2 + CO2 + pH) la rende una delle proteine piu' fondamentali del corpo.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================
+   BANCA DATI DOMANDE
+   Ogni domanda ha: text, type, options (se multipla),
+   answer, explanation, commonError, deepdive,
+   difficulty (1-3), topic
+   ============================================ */
+
+const QUESTIONS = [
+
+  // =============================================
+  // CIRCOLAZIONE POLMONARE E SISTEMICA
+  // =============================================
+  {
+    text: "Quale delle due circolazioni si occupa di ossigenare il sangue nei polmoni?",
+    type: "multiple",
+    options: [
+      "La circolazione sistemica",
+      "La circolazione polmonare",
+      "La circolazione coronarica",
+      "La circolazione portale"
+    ],
+    answer: 1,
+    explanation: "La circolazione polmonare porta il sangue ai polmoni dove cede CO2 e si carica di O2.",
+    commonError: "Confondere polmonare con sistemica: la sistemica distribuisce sangue ossigenato a tutto il corpo, non lo ossigena.",
+    deepdive: "Le due circolazioni sono in serie: polmonare (cuore destro → polmoni → cuore sinistro) e sistemica (cuore sinistro → corpo → cuore destro).",
+    difficulty: 1,
+    topic: "Circolazione"
+  },
+  {
+    text: "Da quale cavità del cuore parte la circolazione polmonare?",
+    type: "multiple",
+    options: [
+      "Atrio destro",
+      "Ventricolo sinistro",
+      "Ventricolo destro",
+      "Atrio sinistro"
+    ],
+    answer: 2,
+    explanation: "La circolazione polmonare parte dal ventricolo destro, da cui il sangue povero di O2 viene mandato alle arterie polmonari.",
+    commonError: "Pensare che parta dall'atrio destro: l'atrio raccoglie il sangue, il ventricolo lo spinge fuori.",
+    deepdive: "Sequenza: ventricolo destro → arterie polmonari → polmoni (scambio gas) → vene polmonari → atrio sinistro → ventricolo sinistro.",
+    difficulty: 2,
+    topic: "Circolazione"
+  },
+  {
+    text: "Da dove parte la circolazione sistemica?",
+    type: "multiple",
+    options: [
+      "Atrio destro",
+      "Ventricolo destro",
+      "Atrio sinistro",
+      "Ventricolo sinistro"
+    ],
+    answer: 3,
+    explanation: "La circolazione sistemica parte dal ventricolo sinistro, che spinge il sangue ossigenato nell'aorta.",
+    commonError: "Confondere atrio e ventricolo sinistro: l'atrio riceve dalle vene polmonari, il ventricolo manda fuori nell'aorta.",
+    deepdive: "Sequenza: ventricolo sinistro → aorta → arterie → capillari (scambio in tessuti) → vene cave → atrio destro.",
+    difficulty: 2,
+    topic: "Circolazione"
+  },
+  {
+    text: "Le arterie polmonari trasportano:",
+    type: "truefalse",
+    statement: "Le arterie polmonari trasportano sangue ricco di ossigeno.",
+    answer: false,
+    explanation: "Falso. Le arterie polmonari sono l'eccezione: trasportano sangue povero di O2 dal ventricolo destro ai polmoni.",
+    commonError: "La regola 'arterie = sangue ossigenato' vale per la sistemica ma NON per la polmonare.",
+    deepdive: "Definizione corretta: arteria = vaso che esce dal cuore (indipendentemente dall'ossigenazione). Lo stesso vale per le vene polmonari, che trasportano sangue ossigenato verso l'atrio sinistro.",
+    difficulty: 2,
+    topic: "Circolazione"
+  },
+
+  // =============================================
+  // STRUTTURA DEL CUORE
+  // =============================================
+  {
+    text: "Quale dei tre strati del cuore e' costituito da tessuto muscolare?",
+    type: "multiple",
+    options: [
+      "Epicardio",
+      "Miocardio",
+      "Endocardio",
+      "Pericardio"
+    ],
+    answer: 1,
+    explanation: "Il miocardio e' lo strato medio formato da tessuto muscolare striato ma involontario.",
+    commonError: "Confondere epicardio (esterno) con endocardio (interno): il prefisso 'epi-' significa 'sopra/esterno', 'endo-' significa 'interno'.",
+    deepdive: "Caratteristica chiave del miocardio: e' striato come il muscolo scheletrico, ma involontario come quello liscio. Le sue cellule sono dette miocardiociti.",
+    difficulty: 1,
+    topic: "Struttura del cuore"
+  },
+  {
+    text: "Cosa riveste l'endocardio?",
+    type: "multiple",
+    options: [
+      "Le superfici esterne del cuore",
+      "Solo la parete destra del cuore",
+      "Le cavita' interne e le valvole cardiache",
+      "Solo le arterie coronarie"
+    ],
+    answer: 2,
+    explanation: "L'endocardio e' tessuto epiteliale che riveste l'interno delle cavita' cardiache e le valvole.",
+    commonError: "Pensare che rivesta l'esterno: quello e' compito dell'epicardio.",
+    deepdive: "L'endocardio e' molto liscio per ridurre l'attrito col sangue ed evitare formazione di trombi.",
+    difficulty: 2,
+    topic: "Struttura del cuore"
+  },
+  {
+    text: "Pericardio significa:",
+    type: "multiple",
+    options: [
+      "Tessuto muscolare contrattile del cuore",
+      "Membrana esterna che avvolge il cuore",
+      "Vasi che irrorano il cuore",
+      "Cavita' interne del cuore"
+    ],
+    answer: 1,
+    explanation: "Pericardio = epicardio + membrana esterna. Avvolge tutto il cuore.",
+    commonError: "Confondere pericardio con miocardio: 'peri-' = intorno, 'mio-' = muscolo.",
+    deepdive: "Il pericardio fornisce sostegno meccanico, lubrificazione (con liquido pericardico) e protezione dagli sfregamenti durante il battito.",
+    difficulty: 2,
+    topic: "Struttura del cuore"
+  },
+  {
+    text: "Quante valvole ha il cuore e di quale tessuto sono composte?",
+    type: "multiple",
+    options: [
+      "2 valvole, tessuto muscolare",
+      "4 valvole, tessuto connettivo",
+      "4 valvole, tessuto epiteliale",
+      "6 valvole, tessuto cartilagineo"
+    ],
+    answer: 1,
+    explanation: "Il cuore ha 4 valvole formate da tessuto connettivo: 2 atrio-ventricolari e 2 semilunari.",
+    commonError: "Pensare che siano muscolari: in realta' sono passive e funzionano per pressione.",
+    deepdive: "Le valvole si aprono e chiudono in base alla differenza di pressione tra le cavita', non per contrazione attiva.",
+    difficulty: 1,
+    topic: "Struttura del cuore"
+  },
+  {
+    text: "Le valvole atrio-ventricolari servono a:",
+    type: "multiple",
+    options: [
+      "Spingere il sangue nei ventricoli",
+      "Evitare il reflusso del sangue dai ventricoli agli atri durante la sistole",
+      "Evitare il reflusso del sangue dalle arterie ai ventricoli durante la diastole",
+      "Generare il battito cardiaco"
+    ],
+    answer: 1,
+    explanation: "Quando i ventricoli si contraggono (sistole), le valvole atrio-ventricolari si chiudono per evitare il ritorno del sangue agli atri.",
+    commonError: "Confondere il ruolo delle atrio-ventricolari (chiudono durante sistole) con le semilunari (chiudono durante diastole).",
+    deepdive: "La valvola atrio-ventricolare destra e' la TRICUSPIDE (3 lembi); quella sinistra e' la BICUSPIDE o mitrale (2 lembi).",
+    difficulty: 2,
+    topic: "Struttura del cuore"
+  },
+  {
+    text: "Le valvole semilunari si trovano:",
+    type: "multiple",
+    options: [
+      "Tra ventricoli e arterie (polmonare e aortica)",
+      "Tra atri e ventricoli",
+      "All'imbocco delle vene cave",
+      "All'interno dei capillari"
+    ],
+    answer: 0,
+    explanation: "Le 2 valvole semilunari sono tra ventricoli e arterie: la valvola polmonare (ventricolo destro → arteria polmonare) e la valvola aortica (ventricolo sinistro → aorta).",
+    commonError: "Posizionarle tra atrio e ventricolo: quelle sono le atrio-ventricolari.",
+    deepdive: "Si chiamano semilunari per la forma a mezzaluna dei loro 3 lembi.",
+    difficulty: 2,
+    topic: "Struttura del cuore"
+  },
+  {
+    text: "Cosa sono le arterie coronarie?",
+    type: "multiple",
+    options: [
+      "Le valvole tra atri e ventricoli",
+      "Le arterie che portano sangue ossigenato al cervello",
+      "Le grandi vene che riportano il sangue al cuore",
+      "Le arterie che irrorano la parete del cuore stesso"
+    ],
+    answer: 3,
+    explanation: "Le arterie coronarie formano una rete fitta che irrora la parete di atri e ventricoli, fornendo O2 e nutrienti al miocardio.",
+    commonError: "Pensare che il cuore venga ossigenato dal sangue che pompa: il sangue dentro le cavita' NON nutre la parete, servono le coronarie esterne.",
+    deepdive: "Se una arteria coronaria si ostruisce (es. da un trombo), il tessuto cardiaco a valle muore: e' l'infarto del miocardio.",
+    difficulty: 2,
+    topic: "Struttura del cuore"
+  },
+
+  // =============================================
+  // CICLO CARDIACO
+  // =============================================
+  {
+    text: "Quanto dura mediamente un ciclo cardiaco?",
+    type: "multiple",
+    options: [
+      "Circa 0,1 secondi",
+      "Circa 0,8 secondi",
+      "Circa 4 secondi",
+      "Circa 60 secondi"
+    ],
+    answer: 1,
+    explanation: "Un ciclo cardiaco completo dura mediamente 0,8 secondi (corrispondente a circa 75 battiti al minuto).",
+    commonError: "Confondere durata di un ciclo (0,8 s) con frequenza cardiaca (battiti/min).",
+    deepdive: "Da 0,8 s/battito si calcola la frequenza: 60/0,8 = 75 bpm. A frequenze maggiori, il ciclo si accorcia.",
+    difficulty: 1,
+    topic: "Ciclo cardiaco"
+  },
+  {
+    text: "Cosa accade durante la diastole?",
+    type: "multiple",
+    options: [
+      "I ventricoli si contraggono spingendo il sangue nelle arterie",
+      "Il cuore e' rilassato e il sangue fluisce passivamente nelle cavita'",
+      "Le valvole semilunari si aprono",
+      "Il sangue viene pompato nei polmoni"
+    ],
+    answer: 1,
+    explanation: "Durante la diastole il cuore e' rilassato: il sangue entra passivamente negli atri e ventricoli. Le atrio-ventricolari sono aperte, le semilunari chiuse.",
+    commonError: "Invertire diastole e sistole: la diastole e' il rilassamento, la sistole la contrazione.",
+    deepdive: "Diastole = passivita' = riempimento. Sistole = attivita' = svuotamento.",
+    difficulty: 1,
+    topic: "Ciclo cardiaco"
+  },
+  {
+    text: "Durante la sistole atriale (durata circa 0,1 s) cosa avviene?",
+    type: "multiple",
+    options: [
+      "I ventricoli si contraggono",
+      "Le valvole semilunari si aprono",
+      "Gli atri completano il riempimento dei ventricoli",
+      "Il sangue viene espulso nell'aorta"
+    ],
+    answer: 2,
+    explanation: "La breve sistole atriale (0,1 s) serve a completare il riempimento dei ventricoli prima che inizi la sistole ventricolare.",
+    commonError: "Pensare che la sistole atriale spinga il sangue nelle arterie: e' la sistole ventricolare a farlo.",
+    deepdive: "L'atrio fornisce un 'top up' al riempimento ventricolare gia' avvenuto in modo passivo durante la diastole.",
+    difficulty: 2,
+    topic: "Ciclo cardiaco"
+  },
+  {
+    text: "Durante la sistole ventricolare:",
+    type: "multiple",
+    options: [
+      "Le valvole atrio-ventricolari si aprono",
+      "Le valvole semilunari si chiudono",
+      "La pressione nei ventricoli diminuisce",
+      "Le valvole atrio-ventricolari si chiudono e le semilunari si aprono"
+    ],
+    answer: 3,
+    explanation: "I ventricoli si contraggono → la pressione interna sale → le AV si chiudono (per evitare reflusso negli atri) → le semilunari si aprono → il sangue viene spinto nelle arterie.",
+    commonError: "Pensare che le valvole si aprano/chiudano in modo arbitrario: in realta' rispondono passivamente alla differenza di pressione.",
+    deepdive: "Il caratteristico 'tum-tum' del cuore corrisponde alla chiusura delle valvole: il primo tono = chiusura AV, il secondo = chiusura semilunari.",
+    difficulty: 3,
+    topic: "Ciclo cardiaco"
+  },
+  {
+    text: "Cosa rappresenta la gittata cardiaca?",
+    type: "multiple",
+    options: [
+      "Il volume di sangue eiettato in un singolo battito",
+      "La forza di contrazione del miocardio",
+      "La quantita' di sangue pompata al minuto da ciascun ventricolo",
+      "Il numero di battiti al minuto"
+    ],
+    answer: 2,
+    explanation: "La gittata cardiaca e' la quantita' di sangue pompata al minuto da ciascun ventricolo. Aumenta con stress e sforzo (frequenza cardiaca piu' alta).",
+    commonError: "Confondere gittata cardiaca (per minuto) con gittata sistolica (per singolo battito).",
+    deepdive: "Gittata cardiaca = gittata sistolica × frequenza cardiaca. Esempio: 70 ml × 75 bpm = ~5,25 L/min a riposo.",
+    difficulty: 2,
+    topic: "Ciclo cardiaco"
+  },
+
+  // =============================================
+  // SISTEMA DI CONDUZIONE
+  // =============================================
+  {
+    text: "Dove si trova il nodo seno-atriale (pacemaker)?",
+    type: "multiple",
+    options: [
+      "Alla base del cuore, vicino al ventricolo sinistro",
+      "Nella parete superiore dell'atrio destro",
+      "Nel setto interventricolare",
+      "All'apice del cuore"
+    ],
+    answer: 1,
+    explanation: "Il nodo seno-atriale (SA) si trova nella parete superiore dell'atrio destro e funziona da pacemaker naturale del cuore.",
+    commonError: "Posizionarlo nei ventricoli: in realta' la conduzione PARTE dagli atri e arriva ai ventricoli.",
+    deepdive: "Il nodo SA stabilisce il ritmo per tutte le cellule cardiache, inviando impulsi elettrici a frequenza intrinseca di circa 60-100 al minuto.",
+    difficulty: 2,
+    topic: "Sistema di conduzione"
+  },
+  {
+    text: "Qual e' la sequenza corretta degli eventi elettrici durante il battito cardiaco?",
+    type: "multiple",
+    options: [
+      "Fibre di Purkinje → fascio di His → nodo AV → nodo SA",
+      "Nodo SA → atri → nodo AV → fascio di His → fibre di Purkinje → ventricoli",
+      "Nodo AV → nodo SA → atri → ventricoli → fibre di Purkinje",
+      "Fascio di His → nodo SA → ventricoli → atri"
+    ],
+    answer: 1,
+    explanation: "Sequenza: 1) il nodo SA genera l'impulso, 2) si propaga attraverso gli atri, 3) viene rallentato dal nodo AV, 4) corre lungo il fascio di His, 5) raggiunge i ventricoli tramite le fibre di Purkinje.",
+    commonError: "Saltare il nodo AV o invertire fascio di His e fibre di Purkinje. Il rallentamento al nodo AV e' essenziale: permette agli atri di completare lo svuotamento prima che si contraggano i ventricoli.",
+    deepdive: "Il fascio di His si divide in due branche (destra e sinistra) che decorrono nel setto interventricolare; le fibre di Purkinje si distribuiscono nelle pareti ventricolari.",
+    difficulty: 3,
+    topic: "Sistema di conduzione"
+  },
+  {
+    text: "Perche' il nodo atrio-ventricolare ritarda il segnale elettrico?",
+    type: "multiple",
+    options: [
+      "Per dare tempo agli atri di completare lo svuotamento prima della contrazione ventricolare",
+      "Per ridurre la frequenza cardiaca",
+      "Per aumentare la pressione arteriosa",
+      "Per attivare le valvole semilunari"
+    ],
+    answer: 0,
+    explanation: "Il ritardo al nodo AV permette agli atri di completare lo svuotamento nei ventricoli prima che questi ultimi si contraggano.",
+    commonError: "Pensare che il ritardo sia un difetto: in realta' e' una caratteristica essenziale per la corretta sequenza meccanica.",
+    deepdive: "Senza ritardo, atri e ventricoli si contrarrebbero quasi simultaneamente, riducendo l'efficienza di pompaggio.",
+    difficulty: 3,
+    topic: "Sistema di conduzione"
+  },
+
+  // =============================================
+  // PATOLOGIE CARDIOVASCOLARI
+  // =============================================
+  {
+    text: "Cosa e' una aritmia?",
+    type: "multiple",
+    options: [
+      "Un malfunzionamento del sistema di conduzione elettrica del cuore",
+      "Una infiammazione dei vasi sanguigni",
+      "Una infezione batterica del miocardio",
+      "Una rottura delle valvole cardiache"
+    ],
+    answer: 0,
+    explanation: "Le aritmie sono anomalie del ritmo cardiaco causate spesso da problemi al sistema di conduzione elettrico (es. nodo SA che malfunziona).",
+    commonError: "Confondere aritmia (problema elettrico) con infarto (problema vascolare).",
+    deepdive: "Se il nodo SA malfunziona si puo' impiantare un pacemaker artificiale. Se si ferma del tutto si ha un arresto cardiaco (es. shock anafilattico).",
+    difficulty: 2,
+    topic: "Patologie cardiovascolari"
+  },
+  {
+    text: "L'infarto del miocardio e' causato da:",
+    type: "multiple",
+    options: [
+      "Una eccessiva contrazione del muscolo cardiaco",
+      "Una rottura delle valvole atrio-ventricolari",
+      "L'ostruzione di una arteria coronaria",
+      "Una alterazione del ritmo del nodo SA"
+    ],
+    answer: 2,
+    explanation: "L'infarto miocardico avviene quando una arteria coronaria si ostruisce: il tessuto cardiaco a valle non riceve piu' O2 e muore.",
+    commonError: "Confondere infarto (problema vascolare) con arresto (problema elettrico).",
+    deepdive: "L'infarto puo' avvenire in qualunque tessuto se si ostruisce l'arteria che lo irrora. Quello cardiaco e' il piu' grave.",
+    difficulty: 2,
+    topic: "Patologie cardiovascolari"
+  },
+  {
+    text: "Cosa e' l'aterosclerosi?",
+    type: "multiple",
+    options: [
+      "Una graduale ostruzione dei vasi sanguigni dovuta a placche di grasso (ateromi)",
+      "Una infiammazione acuta delle arterie",
+      "Una malformazione genetica del cuore",
+      "Un disturbo del ritmo cardiaco"
+    ],
+    answer: 0,
+    explanation: "L'aterosclerosi e' una graduale ostruzione dei vasi causata da accumulo di colesterolo che forma placche dette ATEROMI.",
+    commonError: "Confondere aterosclerosi (cronica, da placche) con infarto (acuto, da ostruzione completa).",
+    deepdive: "Sequenza: deposito di grasso → formazione di placca → restringimento del vaso → aumento di pressione → ulteriore ispessimento. Puo' culminare in infarto se la placca si rompe.",
+    difficulty: 2,
+    topic: "Patologie cardiovascolari"
+  },
+  {
+    text: "Quale farmaco e' utilizzato nella PREVENZIONE delle malattie cardiovascolari?",
+    type: "multiple",
+    options: [
+      "Antibiotici a largo spettro",
+      "Statine e cardioaspirina",
+      "Antistaminici",
+      "Antinfiammatori cortisonici"
+    ],
+    answer: 1,
+    explanation: "Statine (riducono il colesterolo) e cardioaspirina (riduce l'aggregazione piastrinica) sono le principali strategie di prevenzione.",
+    commonError: "Confondere prevenzione con cura: per la cura si usano interventi come stent, bypass, defibrillazione.",
+    deepdive: "Lo STENT e' un piccolo cilindro espandibile inserito in un vaso ostruito per mantenerlo aperto.",
+    difficulty: 2,
+    topic: "Patologie cardiovascolari"
+  },
+  {
+    text: "Quale di questi NON e' un fattore di rischio per le malattie cardiovascolari?",
+    type: "multiple",
+    options: [
+      "Fumo",
+      "Vita sedentaria",
+      "Dieta ricca di frutta e verdura",
+      "Dieta non equilibrata"
+    ],
+    answer: 2,
+    explanation: "Una dieta sana (ricca di frutta, verdura, fibre) e' protettiva, NON un fattore di rischio. Fumo, sedentarieta' e dieta povera lo sono.",
+    commonError: "Selezionare il fumo come 'non rischio': il fumo e' uno dei principali fattori di rischio cardiovascolare.",
+    deepdive: "Altri fattori: ipertensione, diabete, obesita', stress cronico, familiarita' genetica.",
+    difficulty: 1,
+    topic: "Patologie cardiovascolari"
+  },
+
+  // =============================================
+  // VASI SANGUIGNI E PRESSIONE
+  // =============================================
+  {
+    text: "Quale tipologia di vaso ha pareti sottili e diffonde meglio le sostanze?",
+    type: "multiple",
+    options: [
+      "Arterie",
+      "Vene",
+      "Capillari",
+      "Aorta"
+    ],
+    answer: 2,
+    explanation: "I capillari hanno diametro piccolo e pareti molto sottili (un solo strato di endotelio), ideali per la diffusione di gas e nutrienti.",
+    commonError: "Pensare che le arterie diffondano: in realta' sono troppo spesse e specializzate per il trasporto a pressione.",
+    deepdive: "I capillari sono estesi e ramificati: la loro superficie totale e' enorme, fondamentale per gli scambi.",
+    difficulty: 1,
+    topic: "Vasi sanguigni"
+  },
+  {
+    text: "Quale tipologia di vaso ha la valvola che evita il ritorno del sangue?",
+    type: "multiple",
+    options: [
+      "Arterie",
+      "Capillari",
+      "Aorta",
+      "Vene"
+    ],
+    answer: 3,
+    explanation: "Le vene hanno valvole che evitano il ritorno venoso (il sangue non puo' tornare indietro): essenziali perche' nelle vene la pressione e' bassa.",
+    commonError: "Confondere le valvole venose con quelle cardiache: le vene hanno tante piccole valvole lungo il loro decorso.",
+    deepdive: "L'azione muscolare scheletrica (camminare, contrarre i polpacci) aiuta il sangue venoso a risalire al cuore vincendo la gravita'.",
+    difficulty: 2,
+    topic: "Vasi sanguigni"
+  },
+  {
+    text: "Le arterie devono sopportare alte pressioni perche':",
+    type: "multiple",
+    options: [
+      "Sono lontane dal cuore",
+      "Sono molto ramificate e lunghe",
+      "Trasportano sangue spinto direttamente dalla forza del ventricolo sinistro",
+      "Sono superficiali"
+    ],
+    answer: 2,
+    explanation: "Le arterie ricevono direttamente il sangue spinto a forte pressione dal ventricolo sinistro, quindi devono avere pareti spesse, elastiche e muscolari.",
+    commonError: "Pensare che arteria = grande dimensione = alta pressione. La causa e' la pompa cardiaca, non la dimensione.",
+    deepdive: "Strato di parete arteriosa: endotelio + tessuto muscolare + tessuto connettivo. La componente elastica permette di accumulare e poi rilasciare energia.",
+    difficulty: 2,
+    topic: "Vasi sanguigni"
+  },
+  {
+    text: "La pressione del sangue durante la contrazione del cuore (sistole) e' detta:",
+    type: "multiple",
+    options: [
+      "Pressione minima",
+      "Pressione media",
+      "Pressione massima o sistolica",
+      "Pressione osmotica"
+    ],
+    answer: 2,
+    explanation: "Durante la sistole il sangue viene spinto con forza nelle arterie: la pressione e' al MASSIMO (pressione sistolica). Tipicamente ~120 mmHg.",
+    commonError: "Confondere sistolica/massima con diastolica/minima.",
+    deepdive: "Valori normali: sistolica ~120 mmHg, diastolica ~80 mmHg. Si scrive '120/80'.",
+    difficulty: 1,
+    topic: "Pressione"
+  },
+  {
+    text: "Lo strumento per misurare la pressione arteriosa si chiama:",
+    type: "multiple",
+    options: [
+      "Stetoscopio",
+      "Sfigmomanometro",
+      "Elettrocardiografo",
+      "Spirometro"
+    ],
+    answer: 1,
+    explanation: "Lo sfigmomanometro misura la pressione arteriosa, fornendo i valori sistolico e diastolico.",
+    commonError: "Confondere sfigmomanometro (pressione) con spirometro (volumi respiratori) o stetoscopio (auscultazione).",
+    deepdive: "Lo stetoscopio si usa INSIEME allo sfigmomanometro per ascoltare i toni di Korotkoff e leggere i valori.",
+    difficulty: 1,
+    topic: "Pressione"
+  },
+  {
+    text: "Cosa accade durante la VASOCOSTRIZIONE?",
+    type: "multiple",
+    options: [
+      "I vasi si dilatano e la pressione diminuisce",
+      "I vasi si restringono e la pressione aumenta",
+      "Il sangue rallenta nei capillari",
+      "La pressione resta invariata"
+    ],
+    answer: 1,
+    explanation: "Vasocostrizione: la muscolatura liscia dei vasi si contrae, il diametro diminuisce, la pressione aumenta.",
+    commonError: "Confondere vasocostrizione con vasodilatazione: 'costrizione' = stretto, 'dilatazione' = largo.",
+    deepdive: "L'organismo regola la pressione modulando il diametro dei vasi: in caso di freddo o stress c'e' vasocostrizione, in caso di sforzo muscolare c'e' vasodilatazione locale.",
+    difficulty: 2,
+    topic: "Pressione"
+  },
+  {
+    text: "Da quali fattori dipende la pressione sanguigna?",
+    type: "multiple",
+    options: [
+      "Solo dalla frequenza cardiaca",
+      "Solo dal diametro dei vasi",
+      "Da gittata cardiaca e diametro dei vasi",
+      "Dal volume di plasma"
+    ],
+    answer: 2,
+    explanation: "La pressione dipende sia dalla gittata cardiaca (quanto sangue il cuore pompa) sia dal diametro dei vasi (regolato dalla muscolatura liscia).",
+    commonError: "Considerare un solo fattore: in realta' i due interagiscono.",
+    deepdive: "Anche la respirazione modifica la pressione (durante l'inspirazione le vene toraciche si espandono) e l'attivita' muscolare aiuta il ritorno venoso.",
+    difficulty: 3,
+    topic: "Pressione"
+  },
+
+  // =============================================
+  // SCAMBI E SANGUE
+  // =============================================
+  {
+    text: "Lo scambio di sostanze tra capillari e tessuti avviene principalmente:",
+    type: "multiple",
+    options: [
+      "Solo per filtrazione attiva",
+      "Per diffusione, vescicole e attraverso spazi tra cellule endoteliali",
+      "Solo per esocitosi",
+      "Tramite la coagulazione"
+    ],
+    answer: 1,
+    explanation: "Tre meccanismi principali: 1) diffusione (es. CO2 e O2), 2) vescicole (endocitosi/esocitosi), 3) passaggio attraverso stretti spazi tra cellule endoteliali.",
+    commonError: "Pensare che ci sia un unico meccanismo: in realta' coesistono diversi processi.",
+    deepdive: "La diffusione vale per molecole piccole; le vescicole per macromolecole; gli spazi intercellulari per acqua e ioni.",
+    difficulty: 2,
+    topic: "Sangue"
+  },
+  {
+    text: "Cosa esprime la pressione osmotica?",
+    type: "multiple",
+    options: [
+      "La forza con cui il sangue spinge sulle pareti dei vasi",
+      "La pressione massima durante la sistole",
+      "La forza che tende a trattenere acqua all'interno dei vasi",
+      "La forza di contrazione del cuore"
+    ],
+    answer: 2,
+    explanation: "La pressione osmotica nei capillari tende a trattenere acqua all'INTERNO dei vasi. Si oppone alla pressione sanguigna (che tende a far uscire H2O).",
+    commonError: "Confondere pressione sanguigna (idrostatica, spinge fuori) con pressione osmotica (richiama dentro).",
+    deepdive: "L'equilibrio tra le due pressioni regola lo scambio: a inizio capillare prevale quella sanguigna (uscita), a fine capillare quella osmotica (rientro).",
+    difficulty: 3,
+    topic: "Sangue"
+  },
+  {
+    text: "Il plasma e' composto per circa il 90% da:",
+    type: "multiple",
+    options: [
+      "Proteine",
+      "Globuli rossi",
+      "Sali inorganici",
+      "Acqua"
+    ],
+    answer: 3,
+    explanation: "Il plasma e' composto per il 90% di acqua e per il restante 10% da elettroliti, proteine, nutrienti, gas, ormoni, prodotti di rifiuto.",
+    commonError: "Confondere plasma (parte liquida, no cellule) con sangue intero (plasma + frazione corpuscolare).",
+    deepdive: "Tra le proteine plasmatiche: fibrinogeno (per la coagulazione, forma fibrina), immunoglobuline (sistema immunitario), albumina (mantiene la pressione osmotica).",
+    difficulty: 1,
+    topic: "Sangue"
+  },
+  {
+    text: "Quale tipo di cellula del sangue trasporta l'ossigeno?",
+    type: "multiple",
+    options: [
+      "Globuli rossi (eritrociti)",
+      "Globuli bianchi (leucociti)",
+      "Piastrine",
+      "Linfociti"
+    ],
+    answer: 0,
+    explanation: "I globuli rossi (eritrociti) trasportano O2 grazie all'emoglobina contenuta al loro interno.",
+    commonError: "Confondere globuli rossi (trasporto O2) con globuli bianchi (immunita') o piastrine (coagulazione).",
+    deepdive: "I globuli rossi maturi non hanno nucleo: tutto lo spazio e' dedicato all'emoglobina per massimizzare il trasporto di O2.",
+    difficulty: 1,
+    topic: "Sangue"
+  },
+  {
+    text: "Quale e' il ruolo principale delle piastrine?",
+    type: "multiple",
+    options: [
+      "Trasportare ormoni",
+      "Trasportare ossigeno",
+      "Riparare i tessuti e contribuire alla coagulazione",
+      "Fagocitare batteri"
+    ],
+    answer: 2,
+    explanation: "Le piastrine sono elementi cellulari senza nucleo che intervengono nella riparazione dei tessuti e nella coagulazione del sangue.",
+    commonError: "Pensare che siano cellule complete con nucleo: sono frammenti citoplasmatici di cellule piu' grandi (megacariociti).",
+    deepdive: "Coagulazione: piastrine + fibrinogeno → fibrina (proteina filamentosa appiccicosa) che intrappola altre cellule formando il coagulo.",
+    difficulty: 2,
+    topic: "Sangue"
+  },
+  {
+    text: "Le cellule del sangue vengono prodotte:",
+    type: "multiple",
+    options: [
+      "Nei reni",
+      "Nel midollo osseo, da cellule staminali (emopoiesi)",
+      "Nella milza",
+      "Nel fegato"
+    ],
+    answer: 1,
+    explanation: "L'emopoiesi avviene nel midollo osseo, dove cellule staminali si differenziano in tutti gli elementi del sangue.",
+    commonError: "Confondere emopoiesi (produzione cellule) con eritropoiesi (solo globuli rossi).",
+    deepdive: "Due tipologie di cellule staminali: 1) linfoidi (producono linfociti), 2) mieloidi (producono globuli rossi, altri bianchi e piastrine).",
+    difficulty: 2,
+    topic: "Sangue"
+  },
+  {
+    text: "Cosa e' l'eritropoietina (EPO)?",
+    type: "multiple",
+    options: [
+      "Una proteina presente nel plasma",
+      "Un ormone prodotto dai reni che stimola la produzione di globuli rossi",
+      "Una proteina del muscolo che lega l'ossigeno",
+      "Un fattore di coagulazione"
+    ],
+    answer: 1,
+    explanation: "L'EPO e' un ormone prodotto dai reni quando i tessuti non ricevono abbastanza O2: stimola il midollo osseo a produrre piu' globuli rossi.",
+    commonError: "Confondere EPO con emoglobina: l'EPO e' un ormone (segnale), l'emoglobina una proteina dei globuli rossi.",
+    deepdive: "L'EPO viene usata illegalmente come doping per aumentare il trasporto di O2 negli atleti di resistenza.",
+    difficulty: 3,
+    topic: "Sangue"
+  },
+
+  // =============================================
+  // SISTEMA RESPIRATORIO - ANATOMIA
+  // =============================================
+  {
+    text: "Le vie aeree superiori comprendono:",
+    type: "multiple",
+    options: [
+      "Naso e faringe",
+      "Trachea e bronchi",
+      "Laringe e polmoni",
+      "Bronchioli e alveoli"
+    ],
+    answer: 0,
+    explanation: "Vie aeree superiori = naso + faringe. Le inferiori = laringe, trachea, bronchi, polmoni.",
+    commonError: "Far rientrare la laringe tra le superiori: in realta' fa parte delle inferiori.",
+    deepdive: "La distinzione superiori/inferiori e' utile clinicamente: le infezioni hanno caratteristiche diverse (es. raffreddore vs bronchite).",
+    difficulty: 2,
+    topic: "Anatomia respiratoria"
+  },
+  {
+    text: "Cos'e' il diaframma?",
+    type: "multiple",
+    options: [
+      "Una membrana che riveste i polmoni",
+      "Un muscolo che separa la cavita' toracica da quella addominale",
+      "Una valvola che impedisce al cibo di entrare nelle vie aeree",
+      "Una porzione del bronco"
+    ],
+    answer: 1,
+    explanation: "Il diaframma e' un muscolo a forma di cupola che separa la cavita' toracica (gabbia toracica) da quella addominale.",
+    commonError: "Confondere diaframma con epiglottide (valvola anti-cibo) o pleura (membrana dei polmoni).",
+    deepdive: "Si abbassa quando si CONTRAE (inspirazione: aumenta il volume toracico) e si alza quando e' RILASSATO (espirazione).",
+    difficulty: 2,
+    topic: "Anatomia respiratoria"
+  },
+  {
+    text: "Qual e' il ruolo dell'epiglottide?",
+    type: "multiple",
+    options: [
+      "Produrre la voce",
+      "Filtrare l'aria",
+      "Impedire al cibo di entrare nelle vie aeree",
+      "Separare bronchi destro e sinistro"
+    ],
+    answer: 2,
+    explanation: "L'epiglottide e' una struttura cartilaginea posta all'inizio della laringe che si chiude durante la deglutizione, deviando il cibo verso l'esofago.",
+    commonError: "Posizionarla nella trachea: in realta' e' all'imbocco della laringe.",
+    deepdive: "Quando 'va di traverso' qualcosa, e' perche' l'epiglottide non si e' chiusa in tempo. Il riflesso della tosse serve a espellere il corpo estraneo.",
+    difficulty: 2,
+    topic: "Anatomia respiratoria"
+  },
+  {
+    text: "Dove avvengono gli scambi gassosi nei polmoni?",
+    type: "multiple",
+    options: [
+      "Nei bronchi principali",
+      "Nella trachea",
+      "Negli alveoli",
+      "Nei bronchioli"
+    ],
+    answer: 2,
+    explanation: "Gli scambi gassosi avvengono negli ALVEOLI: piccoli sacchi a fondo cieco con pareti sottilissime, raggruppati a 'grappolo'.",
+    commonError: "Pensare che gli scambi avvengano nei bronchi: i bronchi sono solo vie di trasporto.",
+    deepdive: "Ogni alveolo e' avvolto da una rete di capillari: l'aria nell'alveolo e' separata dal sangue da sole due cellule (endotelio capillare + epitelio alveolare).",
+    difficulty: 1,
+    topic: "Anatomia respiratoria"
+  },
+  {
+    text: "Qual e' la sequenza corretta delle vie aeree dall'esterno verso gli alveoli?",
+    type: "multiple",
+    options: [
+      "Naso → trachea → faringe → laringe → bronchi → alveoli",
+      "Naso → faringe → laringe → trachea → bronchi → bronchioli → alveoli",
+      "Bronchi → trachea → laringe → naso",
+      "Naso → bronchi → laringe → trachea → alveoli"
+    ],
+    answer: 1,
+    explanation: "Sequenza completa: naso → faringe → laringe (con epiglottide) → trachea → 2 bronchi → bronchioli → alveoli.",
+    commonError: "Invertire trachea e laringe: la laringe e' SOPRA la trachea (contiene le corde vocali).",
+    deepdive: "Anche le cavita' nasali contengono i recettori olfattivi nella parte superiore, che permettono di sentire gli odori.",
+    difficulty: 2,
+    topic: "Anatomia respiratoria"
+  },
+
+  // =============================================
+  // VENTILAZIONE POLMONARE
+  // =============================================
+  {
+    text: "Cosa succede al diaframma durante l'inspirazione?",
+    type: "multiple",
+    options: [
+      "Si contrae e si abbassa",
+      "Si rilassa e si alza",
+      "Resta immobile",
+      "Si gira lateralmente"
+    ],
+    answer: 0,
+    explanation: "Durante l'inspirazione il diaframma si CONTRAE e si ABBASSA: la cassa toracica si espande, il volume aumenta, la pressione diminuisce, l'aria entra.",
+    commonError: "Pensare che il diaframma 'spinga in giu'' durante l'espirazione: e' l'opposto.",
+    deepdive: "Anche i muscoli intercostali esterni si contraggono spostando le coste in alto e in fuori, contribuendo all'espansione toracica.",
+    difficulty: 2,
+    topic: "Ventilazione"
+  },
+  {
+    text: "Quale tipo di respirazione si verifica negli umani?",
+    type: "multiple",
+    options: [
+      "A pressione positiva",
+      "A pressione negativa",
+      "A pressione costante",
+      "Per pompaggio attivo dei polmoni"
+    ],
+    answer: 1,
+    explanation: "Respirazione a pressione NEGATIVA: l'aumento di volume toracico crea una pressione interna piu' bassa di quella esterna, l'aria entra spontaneamente per gradiente.",
+    commonError: "Pensare che i polmoni 'aspirano' attivamente: in realta' i polmoni sono passivi, espandono perche' viene espansa la cassa toracica.",
+    deepdive: "Diversamente, i ventilatori meccanici applicano una respirazione a pressione positiva (pompano aria nei polmoni).",
+    difficulty: 3,
+    topic: "Ventilazione"
+  },
+  {
+    text: "Durante l'espirazione cosa succede?",
+    type: "multiple",
+    options: [
+      "Il diaframma si contrae, il volume aumenta",
+      "Il diaframma si rilassa, il volume diminuisce, l'aria esce",
+      "I polmoni si espandono",
+      "La pressione interna diminuisce"
+    ],
+    answer: 1,
+    explanation: "Espirazione: diaframma rilassato (sale), volume diminuisce, pressione interna sale, l'aria viene forzata fuori.",
+    commonError: "Pensare che servano muscoli attivi per espirare: in respirazione tranquilla l'espirazione e' PASSIVA, dipende solo dal ritorno elastico.",
+    deepdive: "In espirazione forzata (es. tosse, sforzo) intervengono i muscoli intercostali interni e gli addominali.",
+    difficulty: 2,
+    topic: "Ventilazione"
+  },
+  {
+    text: "Cosa indica la 'capacita' vitale'?",
+    type: "multiple",
+    options: [
+      "La quantita' di aria respirata in un minuto",
+      "Il volume residuo dopo espirazione massima",
+      "Il volume massimo di aria inspirabile ed espirabile durante una respirazione forzata",
+      "La frequenza respiratoria a riposo"
+    ],
+    answer: 2,
+    explanation: "Capacita' vitale = volume MAX inspirabile + espirabile in respirazione forzata. Tipicamente 4,8 L (uomini) e 3,4 L (donne).",
+    commonError: "Confondere con volume residuo (che invece resta SEMPRE nei polmoni anche dopo espirazione massima).",
+    deepdive: "In realta' nei polmoni resta sempre un po' piu' di aria oltre la capacita' vitale (volume residuo), che mantiene gli alveoli aperti.",
+    difficulty: 2,
+    topic: "Ventilazione"
+  },
+  {
+    text: "Il controllo della respirazione e' principalmente:",
+    type: "multiple",
+    options: [
+      "Volontario, gestito dal cervelletto",
+      "Involontario, con centri nel midollo allungato",
+      "Coordinato dal cuore",
+      "Regolato solo da ormoni"
+    ],
+    answer: 1,
+    explanation: "La respirazione e' involontaria e regolata da centri nervosi nel midollo allungato (parte del tronco encefalico).",
+    commonError: "Pensare che sia volontaria: anche se possiamo trattenere il fiato per breve tempo, il controllo automatico riprende sempre.",
+    deepdive: "I centri respiratori monitorano i livelli di CO2 (chemorecettori) piu' che quelli di O2 e regolano frequenza e profondita' del respiro.",
+    difficulty: 2,
+    topic: "Ventilazione"
+  },
+
+  // =============================================
+  // SCAMBI GASSOSI E EMOGLOBINA
+  // =============================================
+  {
+    text: "Lo scambio di gas tra alveoli e capillari avviene per:",
+    type: "multiple",
+    options: [
+      "Trasporto attivo con dispendio di ATP",
+      "Diffusione secondo gradiente di pressione parziale",
+      "Endocitosi",
+      "Filtrazione"
+    ],
+    answer: 1,
+    explanation: "Lo scambio gassoso avviene per diffusione semplice: ogni gas si sposta dalla zona a pressione parziale piu' alta a quella piu' bassa.",
+    commonError: "Pensare che serva energia: la diffusione e' un processo passivo.",
+    deepdive: "Negli alveoli: O2 alto → entra nel sangue. Nel sangue arterioso: O2 alto → entra nei tessuti. Per la CO2 vale l'opposto.",
+    difficulty: 2,
+    topic: "Scambi gassosi"
+  },
+  {
+    text: "Cos'e' la pressione parziale di un gas?",
+    type: "multiple",
+    options: [
+      "La pressione totale di una miscela gassosa",
+      "La pressione che ciascun gas contribuisce in una miscela, misurata in mmHg",
+      "La pressione minima a cui un gas resta liquefatto",
+      "La pressione esercitata dal liquido sulle pareti"
+    ],
+    answer: 1,
+    explanation: "In una miscela ogni gas contribuisce con la propria pressione parziale. La somma delle parziali = pressione totale.",
+    commonError: "Confondere pressione parziale con concentrazione: anche se correlate, sono concettualmente diverse.",
+    deepdive: "Nell'aria atmosferica (760 mmHg totali): pO2 ≈ 160 mmHg, pN2 ≈ 600 mmHg. Negli alveoli pO2 ≈ 100 mmHg perche' miscelata con aria residua e vapore acqueo.",
+    difficulty: 3,
+    topic: "Scambi gassosi"
+  },
+  {
+    text: "Nei tessuti, dove si dirige l'O2?",
+    type: "multiple",
+    options: [
+      "Dal sangue ai tessuti (perche' nei tessuti l'O2 e' meno concentrato)",
+      "Dai tessuti al sangue",
+      "Resta intrappolato nei capillari",
+      "Si converte in CO2"
+    ],
+    answer: 0,
+    explanation: "Nei tessuti l'O2 e' meno concentrato che nel sangue arterioso, quindi diffonde DAL sangue AI tessuti.",
+    commonError: "Invertire la direzione: in tessuto l'O2 viene CONSUMATO (e CO2 prodotta), quindi il gradiente porta O2 a entrare e CO2 a uscire.",
+    deepdive: "Negli alveoli vale l'opposto: l'aria e' ricca di O2 e povera di CO2, quindi O2 entra nel sangue e CO2 esce.",
+    difficulty: 3,
+    topic: "Scambi gassosi"
+  },
+  {
+    text: "Perche' l'O2 viene trasportato legato all'emoglobina e non sciolto nel plasma?",
+    type: "multiple",
+    options: [
+      "Perche' e' tossico in forma libera",
+      "Perche' e' poco solubile in acqua e quindi serve un trasportatore",
+      "Perche' in plasma reagisce con la fibrina",
+      "Perche' la pressione del plasma e' troppo bassa"
+    ],
+    answer: 1,
+    explanation: "L'O2 e' poco solubile in acqua: senza emoglobina il sangue trasporterebbe quantita' insufficienti di O2.",
+    commonError: "Pensare che la solubilita' sia alta: in realta' nel plasma 'libero' e' trasportato pochissimo O2.",
+    deepdive: "L'emoglobina aumenta la capacita' di trasporto di O2 di circa 70 volte rispetto al solo plasma.",
+    difficulty: 3,
+    topic: "Scambi gassosi"
+  },
+  {
+    text: "Da quante catene polipeptidiche e' formata l'emoglobina?",
+    type: "multiple",
+    options: [
+      "1 catena",
+      "2 catene",
+      "4 catene",
+      "8 catene"
+    ],
+    answer: 2,
+    explanation: "L'emoglobina e' formata da 4 catene polipeptidiche, ciascuna delle quali lega un gruppo eme contenente un atomo di ferro.",
+    commonError: "Confondere con la mioglobina (1 catena, 1 eme).",
+    deepdive: "Quattro catene → quattro siti di legame per O2 → fino a 4 molecole di O2 trasportate per ciascuna emoglobina. La mioglobina muscolare ha invece 1 sola catena.",
+    difficulty: 2,
+    topic: "Emoglobina"
+  },
+  {
+    text: "Cosa lega effettivamente l'O2 nell'emoglobina?",
+    type: "multiple",
+    options: [
+      "Un atomo di ferro al centro del gruppo eme",
+      "Un atomo di rame nel sito attivo",
+      "Una catena laterale di acido glutammico",
+      "Lo zolfo della cisteina"
+    ],
+    answer: 0,
+    explanation: "Al centro di ciascun gruppo eme c'e' un atomo di ferro che lega reversibilmente una molecola di O2.",
+    commonError: "Pensare che leghi rame (in altre proteine come l'emocianina dei molluschi) o zolfo (errato).",
+    deepdive: "Il legame Fe-O2 e' reversibile: nei polmoni si forma, nei tessuti si rompe per cedere O2.",
+    difficulty: 2,
+    topic: "Emoglobina"
+  },
+  {
+    text: "Come viene trasportata la maggior parte della CO2 nel sangue?",
+    type: "multiple",
+    options: [
+      "Disciolta direttamente nel plasma",
+      "Legata covalentemente alle piastrine",
+      "Sotto forma di ioni bicarbonato (HCO3-) nel plasma",
+      "Esclusivamente nell'emoglobina"
+    ],
+    answer: 2,
+    explanation: "La maggior parte della CO2 viene trasportata come ioni bicarbonato HCO3- in soluzione nel plasma.",
+    commonError: "Pensare che la CO2 viaggi solo legata all'emoglobina: solo una piccola parte si lega cosi'.",
+    deepdive: "Reazione: CO2 + H2O ⇄ H2CO3 ⇄ H+ + HCO3-. L'emoglobina assorbe gli ioni H+ liberati, contribuendo a regolare il pH.",
+    difficulty: 3,
+    topic: "Emoglobina"
+  },
+  {
+    text: "Qual e' la differenza principale tra emoglobina e mioglobina?",
+    type: "multiple",
+    options: [
+      "L'emoglobina e' nei muscoli, la mioglobina nel sangue",
+      "L'emoglobina ha 4 catene e si trova nel sangue, la mioglobina ha 1 catena ed e' nei muscoli",
+      "Sono identiche",
+      "L'emoglobina lega CO2, la mioglobina lega O2"
+    ],
+    answer: 1,
+    explanation: "L'emoglobina (4 catene) si trova nei globuli rossi del sangue. La mioglobina (1 catena) si trova nei muscoli e funge da deposito di O2.",
+    commonError: "Invertire le posizioni: 'mio-' deriva da muscolo (mioglobina = muscolare), 'emo-' da sangue (emoglobina = ematica).",
+    deepdive: "Quando i muscoli sono in deficit di O2, la mioglobina rilascia l'O2 immagazzinato per permettere alle cellule di continuare a produrre energia.",
+    difficulty: 3,
+    topic: "Emoglobina"
+  },
+
+  // =============================================
+  // MALATTIE RESPIRATORIE
+  // =============================================
+  {
+    text: "Cos'e' la BPCO?",
+    type: "multiple",
+    options: [
+      "Un'infezione virale acuta dei polmoni",
+      "Broncopneumopatia cronica ostruttiva, dovuta a esposizione prolungata a inquinanti e fumo",
+      "Una infiammazione della pleura",
+      "Una malattia genetica delle vie aeree"
+    ],
+    answer: 1,
+    explanation: "La BPCO e' una malattia cronica delle vie aeree dovuta in genere a lunga esposizione a sostanze inquinanti come polveri sottili e fumo di tabacco.",
+    commonError: "Confondere BPCO (cronica, ostruttiva) con polmonite (acuta, infettiva).",
+    deepdive: "Il fumo e' il responsabile del 90% dei casi di cancro ai polmoni e di gran parte dei casi di BPCO.",
+    difficulty: 2,
+    topic: "Malattie respiratorie"
+  },
+  {
+    text: "Cosa caratterizza la polmonite?",
+    type: "multiple",
+    options: [
+      "Una infiammazione cronica della mucosa bronchiale",
+      "Un'infezione caratterizzata da infiammazione degli alveoli",
+      "Una ostruzione parziale dei bronchi su base allergica",
+      "Una malattia degenerativa del diaframma"
+    ],
+    answer: 1,
+    explanation: "La polmonite e' un'infezione (batterica o virale) che provoca infiammazione e riempimento di liquidi/pus negli alveoli, riducendo gli scambi gassosi.",
+    commonError: "Confondere polmonite (alveoli) con bronchite (mucosa bronchiale) o asma (broncospasmo allergico).",
+    deepdive: "Riempiendosi di essudato, gli alveoli non riescono piu' a scambiare gas: di qui i sintomi di insufficienza respiratoria.",
+    difficulty: 2,
+    topic: "Malattie respiratorie"
+  },
+  {
+    text: "Quale di queste malattie e' caratterizzata da una parziale ostruzione dei bronchi?",
+    type: "multiple",
+    options: [
+      "Polmonite",
+      "Bronchite cronica",
+      "Asma",
+      "Pleurite"
+    ],
+    answer: 2,
+    explanation: "L'asma e' caratterizzata da una parziale ostruzione dei bronchi, spesso reversibile, dovuta a broncospasmo e infiammazione.",
+    commonError: "Confondere asma con BPCO: l'asma e' tipicamente reversibile (broncodilatatori), la BPCO e' progressiva.",
+    deepdive: "Le crisi asmatiche sono spesso scatenate da allergeni, sforzo, freddo. Si trattano con broncodilatatori (es. salbutamolo).",
+    difficulty: 2,
+    topic: "Malattie respiratorie"
+  }
+];
+
+/* ============================================
+   ULTRA PREPARAZIONE - 5 domande da 10
+   Esercizi avanzati con ragionamento multi-step
+   ============================================ */
+const ULTRA_QUESTIONS = [
+  {
+    text: "Una persona ha frequenza cardiaca di 70 bpm e gittata sistolica di 75 ml. Calcola la gittata cardiaca in litri al minuto. Rispondi con 1 decimale.",
+    type: "numeric",
+    answer: 5.25,
+    tolerance: 0.2,
+    explanation: "Gittata cardiaca = frequenza cardiaca × gittata sistolica = 70 × 75 = 5250 ml/min = 5,25 L/min.",
+    commonError: "Dimenticare di convertire ml in litri (1000 ml = 1 L) o usare il volume sistolico per la gittata cardiaca al minuto.",
+    deepdive: "A riposo la gittata cardiaca e' di circa 5 L/min: l'intero volume di sangue del corpo viene 'rigirato' una volta al minuto. Sotto sforzo puo' aumentare fino a 4-5 volte.",
+    difficulty: 3,
+    topic: "Ultra Preparazione"
+  },
+  {
+    text: "Se una persona ha capacita' vitale di 4,5 L e respira con frequenza di 12 atti al minuto utilizzando solo il 50% della capacita' vitale per ogni respiro, qual e' il volume d'aria mosso al minuto in litri/min?",
+    type: "numeric",
+    answer: 27,
+    tolerance: 1,
+    explanation: "Volume per respiro = 50% × 4,5 = 2,25 L. Volume al minuto = 2,25 × 12 = 27 L/min.",
+    commonError: "Sommare invece di moltiplicare frequenza e volume; oppure dimenticare la percentuale.",
+    deepdive: "In realta', a riposo si usa solo una piccola frazione della capacita' vitale (volume corrente ≈ 500 ml). Il calcolo qui e' di tipo 'sotto sforzo'.",
+    difficulty: 3,
+    topic: "Ultra Preparazione"
+  },
+  {
+    text: "Quanti battiti compie il cuore in un'ora se la durata di ogni ciclo cardiaco e' 0,8 secondi?",
+    type: "numeric",
+    answer: 4500,
+    tolerance: 50,
+    explanation: "1 ora = 3600 s. Battiti/ora = 3600 / 0,8 = 4500 battiti/ora.",
+    commonError: "Confondere durata ciclo (0,8 s) con frequenza (75 bpm): il calcolo sui secondi e' piu' rigoroso.",
+    deepdive: "In un giorno: 4500 × 24 = 108.000 battiti. In una vita media: oltre 2,5 miliardi di battiti senza pause.",
+    difficulty: 2,
+    topic: "Ultra Preparazione"
+  },
+  {
+    text: "Una valvola atrio-ventricolare e' lesionata e permette il reflusso del sangue. Durante la sistole ventricolare, parte del sangue tornera' nell'atrio. Se la gittata sistolica nominale e' 80 ml e il reflusso e' del 25%, quanto sangue effettivo arriva nelle arterie? Rispondi in ml.",
+    type: "numeric",
+    answer: 60,
+    tolerance: 2,
+    explanation: "Reflusso = 25% × 80 = 20 ml. Sangue effettivo = 80 - 20 = 60 ml.",
+    commonError: "Non sottrarre il reflusso, oppure calcolare il 25% di 80 in modo errato.",
+    deepdive: "L'insufficienza valvolare comporta che il cuore deve lavorare di piu' per garantire la stessa gittata effettiva: se cronica porta a ipertrofia e poi insufficienza cardiaca.",
+    difficulty: 3,
+    topic: "Ultra Preparazione"
+  },
+  {
+    text: "Sapendo che 1 grammo di emoglobina lega circa 1,34 ml di O2 e che il sangue contiene mediamente 15 g/dL di emoglobina, quanti ml di O2 sono trasportati da 1 dL (= 100 ml) di sangue arterioso (saturo al 100%)? Arrotonda all'intero.",
+    type: "numeric",
+    answer: 20,
+    tolerance: 1,
+    explanation: "O2 trasportato per dL = 1,34 ml/g × 15 g/dL = 20,1 ml/dL ≈ 20 ml di O2 per 100 ml di sangue.",
+    commonError: "Saltare la conversione dL ↔ 100 ml o sbagliare il valore di emoglobina (15 g/dL).",
+    deepdive: "Considerando una gittata cardiaca di 5 L/min, il trasporto totale di O2 e' circa 1 L/min. Una persona normale consuma circa 250 ml/min di O2 a riposo.",
+    difficulty: 3,
+    topic: "Ultra Preparazione"
+  }
+];
+
+/* ============================================
+   VARIABILI DI STATO
+   ============================================ */
+let currentQuestions = [];  // domande della sessione corrente
+let currentIndex = 0;       // indice domanda corrente
+let correctCount = 0;       // risposte corrette
+let wrongCount = 0;         // risposte errate
+let history = [];           // cronologia risposte
+let topicStats = {};        // statistiche per argomento
+let errorQuestionIds = [];  // indici domande sbagliate (per ripasso)
+let answered = false;       // se la domanda corrente ha ricevuto risposta
+
+/* ============================================
+   INIZIALIZZAZIONE
+   ============================================ */
+(function init() {
+  // Popola i filtri per argomento
+  const topics = [...new Set(QUESTIONS.map(q => q.topic))];
+  const grid = document.getElementById('topic-filters');
+  topics.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'topic-item';
+    div.innerHTML = `<input type="checkbox" checked value="${t}" class="topic-cb"> ${t}`;
+    grid.appendChild(div);
+  });
+
+  // Mostra statistiche precedenti da localStorage
+  loadPreviousStats();
+})();
+
+/* Carica statistiche salvate */
+function loadPreviousStats() {
+  const saved = localStorage.getItem('cardio_respiratorio_stats');
+  if (saved) {
+    const data = JSON.parse(saved);
+    document.getElementById('prev-stats').style.display = 'block';
+    document.getElementById('prev-stats-text').textContent =
+      `${data.correct}/${data.total} corrette (${data.percentage}%) - ${data.date}`;
+    // Mostra pulsante "ripassa errori" se ci sono errori salvati
+    const savedErrors = localStorage.getItem('cardio_respiratorio_errors');
+    if (savedErrors && JSON.parse(savedErrors).length > 0) {
+      document.getElementById('btn-errors').style.display = 'inline-block';
+    }
+  }
+}
+
+/* Cancella progressi */
+function clearProgress() {
+  localStorage.removeItem('cardio_respiratorio_stats');
+  localStorage.removeItem('cardio_respiratorio_errors');
+  document.getElementById('prev-stats').style.display = 'none';
+  document.getElementById('btn-errors').style.display = 'none';
+}
+
+/* ============================================
+   AVVIO QUIZ
+   ============================================ */
+function startQuiz(mode) {
+  // Reset stato
+  currentIndex = 0;
+  correctCount = 0;
+  wrongCount = 0;
+  history = [];
+  topicStats = {};
+  errorQuestionIds = [];
+  answered = false;
+
+  // Seleziona domande in base alla modalita'
+  const selectedTopics = [...document.querySelectorAll('.topic-cb:checked')].map(cb => cb.value);
+
+  if (mode === 'ultra') {
+    currentQuestions = [...ULTRA_QUESTIONS];
+  } else if (mode === 'errors') {
+    const savedErrors = localStorage.getItem('cardio_respiratorio_errors');
+    if (savedErrors) {
+      const errorIds = JSON.parse(savedErrors);
+      currentQuestions = errorIds.map(id => QUESTIONS[id]).filter(q => q);
+    }
+    if (currentQuestions.length === 0) {
+      alert('Non ci sono errori salvati da ripassare!');
+      return;
+    }
+  } else {
+    currentQuestions = QUESTIONS.filter(q => selectedTopics.includes(q.topic));
+    if (currentQuestions.length === 0) {
+      alert('Seleziona almeno un argomento!');
+      return;
+    }
+  }
+
+  if (mode === 'random') {
+    shuffleArray(currentQuestions);
+  } else if (mode === 'all') {
+    // Ordina per difficolta' crescente
+    currentQuestions.sort((a, b) => a.difficulty - b.difficulty);
+  }
+
+  // Inizializza statistiche per argomento
+  const topics = [...new Set(currentQuestions.map(q => q.topic))];
+  topics.forEach(t => { topicStats[t] = { correct: 0, wrong: 0, total: 0 }; });
+
+  // Mostra schermata quiz
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('total-q').textContent = currentQuestions.length;
+
+  showQuestion();
+}
+
+/* Mescola array (Fisher-Yates) */
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+/* ============================================
+   MOSTRA DOMANDA
+   ============================================ */
+function showQuestion() {
+  answered = false;
+  const q = currentQuestions[currentIndex];
+
+  // Aggiorna header
+  document.getElementById('current-q').textContent = currentIndex + 1;
+  document.getElementById('score-correct').textContent = correctCount;
+  document.getElementById('score-wrong').textContent = wrongCount;
+  const pct = ((currentIndex) / currentQuestions.length) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+
+  // Meta (argomento, difficolta', tipo)
+  const meta = document.getElementById('question-meta');
+  const diffLabels = ['Facile', 'Media', 'Difficile'];
+  const typeLabels = { multiple: 'Scelta multipla', truefalse: 'Vero/Falso', numeric: 'Esercizio numerico', completion: 'Completamento' };
+  meta.innerHTML = `
+    <span class="badge badge-topic">${q.topic}</span>
+    <span class="badge badge-diff-${q.difficulty}">${diffLabels[q.difficulty - 1]}</span>
+    <span class="badge badge-type">${typeLabels[q.type]}</span>
+  `;
+
+  // Testo domanda
+  document.getElementById('question-text').textContent = q.text;
+
+  // Area risposta
+  const area = document.getElementById('answer-area');
+  area.innerHTML = '';
+  document.getElementById('submit-area').style.display = 'none';
+
+  if (q.type === 'multiple') {
+    // Crea array di indici e mescolali per randomizzare l'ordine delle opzioni
+    const indices = q.options.map((_, i) => i);
+    shuffleArray(indices);
+    q._shuffledIndices = indices; // salva la mappatura per la correzione
+
+    const container = document.createElement('div');
+    container.className = 'options-container';
+    indices.forEach((origIdx, displayIdx) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = q.options[origIdx];
+      btn.onclick = () => handleMultipleChoice(displayIdx);
+      btn.id = 'opt-' + displayIdx;
+      btn.dataset.origIdx = origIdx;
+      container.appendChild(btn);
+    });
+    area.appendChild(container);
+  } else if (q.type === 'truefalse') {
+    // Mostra l'affermazione
+    const stmt = document.createElement('p');
+    stmt.style.cssText = 'font-style:italic; margin-bottom:15px; padding:12px; background:#f0f0f0; border-radius:8px;';
+    stmt.textContent = '\"' + q.statement + '\"';
+    area.appendChild(stmt);
+
+    const container = document.createElement('div');
+    container.className = 'options-container';
+    ['Vero', 'Falso'].forEach((label, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = label;
+      btn.onclick = () => handleTrueFalse(i === 0);
+      btn.id = 'tf-' + i;
+      container.appendChild(btn);
+    });
+    area.appendChild(container);
+  } else if (q.type === 'numeric') {
+    const container = document.createElement('div');
+    container.className = 'answer-input-container';
+    container.innerHTML = `<input type="text" class="answer-input" id="numeric-input" placeholder="Scrivi il valore numerico..." onkeydown="if(event.key==='Enter')checkOpenAnswer()">`;
+    area.appendChild(container);
+    document.getElementById('submit-area').style.display = 'block';
+  } else if (q.type === 'completion') {
+    const container = document.createElement('div');
+    container.className = 'answer-input-container';
+    container.innerHTML = `
+      <input type="text" class="answer-input" id="completion-input-0" placeholder="Prima parola mancante..." style="margin-bottom:8px;" onkeydown="if(event.key==='Enter')document.getElementById('completion-input-1').focus()">
+      <input type="text" class="answer-input" id="completion-input-1" placeholder="Seconda parola mancante..." onkeydown="if(event.key==='Enter')checkOpenAnswer()">
+    `;
+    area.appendChild(container);
+    document.getElementById('submit-area').style.display = 'block';
+  }
+
+  // Nascondi feedback, professore e pulsante next
+  document.getElementById('feedback-box').style.display = 'none';
+  document.getElementById('deepdive-box').style.display = 'none';
+  document.getElementById('next-btn-container').style.display = 'none';
+  document.getElementById('prof-container').className = 'prof-container';
+}
+
+/* ============================================
+   GESTIONE RISPOSTE
+   ============================================ */
+
+/* Scelta multipla */
+function handleMultipleChoice(displayIdx) {
+  if (answered) return;
+  answered = true;
+
+  const q = currentQuestions[currentIndex];
+  // Ricava l'indice originale dalla mappatura mescolata
+  const origSelected = q._shuffledIndices[displayIdx];
+  const isCorrect = origSelected === q.answer;
+
+  // Evidenzia opzioni usando l'indice originale salvato in data-origIdx
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    const origIdx = parseInt(btn.dataset.origIdx);
+    if (origIdx === q.answer) btn.classList.add('correct');
+    if (i === displayIdx && !isCorrect) btn.classList.add('wrong');
+  });
+
+  processAnswer(isCorrect, q);
+}
+
+/* Vero/Falso */
+function handleTrueFalse(selected) {
+  if (answered) return;
+  answered = true;
+
+  const q = currentQuestions[currentIndex];
+  const isCorrect = selected === q.answer;
+
+  const correctIdx = q.answer ? 0 : 1;
+  const selectedIdx = selected ? 0 : 1;
+
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (i === correctIdx) btn.classList.add('correct');
+    if (i === selectedIdx && !isCorrect) btn.classList.add('wrong');
+  });
+
+  processAnswer(isCorrect, q);
+}
+
+/* Risposta aperta (numerica o completamento) */
+function checkOpenAnswer() {
+  if (answered) return;
+  answered = true;
+
+  const q = currentQuestions[currentIndex];
+  let isCorrect = false;
+
+  if (q.type === 'numeric') {
+    const input = document.getElementById('numeric-input');
+    const val = parseFloat(input.value.replace(',', '.'));
+    isCorrect = !isNaN(val) && Math.abs(val - q.answer) <= q.tolerance;
+    input.style.borderColor = isCorrect ? 'var(--success)' : 'var(--danger)';
+    input.style.background = isCorrect ? 'var(--success-light)' : 'var(--danger-light)';
+  } else if (q.type === 'completion') {
+    const inputs = [
+      document.getElementById('completion-input-0').value.trim().toLowerCase(),
+      document.getElementById('completion-input-1').value.trim().toLowerCase()
+    ];
+    const answers = q.answer.map(a => a.toLowerCase());
+    isCorrect = inputs[0].includes(answers[0]) && inputs[1].includes(answers[1]);
+
+    [0, 1].forEach(i => {
+      const el = document.getElementById('completion-input-' + i);
+      const ok = inputs[i].includes(answers[i]);
+      el.style.borderColor = ok ? 'var(--success)' : 'var(--danger)';
+      el.style.background = ok ? 'var(--success-light)' : 'var(--danger-light)';
+    });
+  }
+
+  processAnswer(isCorrect, q);
+}
+
+/* Logica comune di elaborazione risposta */
+function processAnswer(isCorrect, q) {
+  // Aggiorna contatori
+  if (isCorrect) {
+    correctCount++;
+    topicStats[q.topic].correct++;
+  } else {
+    wrongCount++;
+    topicStats[q.topic].wrong++;
+    // Salva indice per ripasso
+    const globalIdx = QUESTIONS.indexOf(q);
+    if (globalIdx !== -1) errorQuestionIds.push(globalIdx);
+  }
+  topicStats[q.topic].total++;
+
+  // Cronologia
+  history.push({
+    question: q.text,
+    topic: q.topic,
+    correct: isCorrect,
+    difficulty: q.difficulty
+  });
+
+  // Mostra feedback
+  showFeedback(isCorrect, q);
+
+  // Aggiorna punteggio
+  document.getElementById('score-correct').textContent = correctCount;
+  document.getElementById('score-wrong').textContent = wrongCount;
+}
+
+/* ============================================
+   FEEDBACK E APPROFONDIMENTI
+   ============================================ */
+/* ============================================
+   PROF. PALUDETTO — SVG CARTOON
+   Ispirato alla foto: capelli ricci scuri, barba,
+   occhiali, espressione autorevole
+   ============================================ */
+
+// SVG del prof felice/approvazione
+const PROF_SVG_HAPPY = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sfondo glow verde -->
+  <defs>
+    <radialGradient id="glowG" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#06d6a0;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#06d6a0;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowG)"/>
+  <!-- Corpo/giacca -->
+  <path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+  <path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#1e40af" stroke="none"/>
+  <!-- Collo -->
+  <rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/>
+  <!-- Testa -->
+  <ellipse cx="110" cy="105" rx="48" ry="52" fill="#deb887"/>
+  <!-- Capelli ricci scuri -->
+  <path d="M62 95 Q58 55 80 42 Q95 33 110 32 Q125 33 140 42 Q162 55 158 95" fill="#2c1810" stroke="#1a0f0a" stroke-width="1"/>
+  <circle cx="68" cy="82" r="8" fill="#2c1810"/><circle cx="72" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="152" cy="82" r="8" fill="#2c1810"/><circle cx="148" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="78" cy="90" r="6" fill="#2c1810"/><circle cx="142" cy="90" r="6" fill="#2c1810"/>
+  <circle cx="85" cy="65" r="6" fill="#2c1810"/><circle cx="135" cy="65" r="6" fill="#2c1810"/>
+  <circle cx="95" cy="50" r="7" fill="#2c1810"/><circle cx="125" cy="50" r="7" fill="#2c1810"/>
+  <circle cx="110" cy="45" r="8" fill="#2c1810"/>
+  <circle cx="100" cy="55" r="5" fill="#2c1810"/><circle cx="120" cy="55" r="5" fill="#2c1810"/>
+  <!-- Barba -->
+  <path d="M78 118 Q80 145 110 152 Q140 145 142 118 Q142 130 130 140 Q110 150 90 140 Q78 130 78 118Z" fill="#3d2914" stroke="#2c1810" stroke-width="1"/>
+  <path d="M75 108 Q72 125 78 118" fill="#3d2914"/><path d="M145 108 Q148 125 142 118" fill="#3d2914"/>
+  <!-- Occhiali -->
+  <rect x="76" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <rect x="116" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <line x1="104" y1="102" x2="116" y2="102" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="76" y1="100" x2="66" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="144" y1="100" x2="154" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <!-- Occhi felici (archi sorridenti) -->
+  <path d="M84 102 Q90 96 96 102" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M124 102 Q130 96 136 102" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Sopracciglia alzate (contento) -->
+  <path d="M78 86 Q90 80 100 84" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M120 84 Q130 80 142 86" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Bocca sorridente (nella barba) -->
+  <path d="M96 132 Q110 142 124 132" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Pollice su -->
+  <g transform="translate(165,140) rotate(-15)">
+    <rect x="0" y="12" width="18" height="26" rx="5" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/>
+    <rect x="4" y="-8" width="12" height="24" rx="6" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/>
+  </g>
+  <!-- Badge check -->
+  <circle cx="180" cy="45" r="18" fill="#06d6a0"/>
+  <path d="M171 45 L177 51 L189 39" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+// SVG del prof arrabbiato/disapprovazione
+const PROF_SVG_ANGRY = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sfondo glow rosso -->
+  <defs>
+    <radialGradient id="glowR" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ef476f;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#ef476f;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowR)"/>
+  <!-- Corpo/giacca -->
+  <path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+  <path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#1e40af" stroke="none"/>
+  <!-- Collo -->
+  <rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/>
+  <!-- Testa -->
+  <ellipse cx="110" cy="105" rx="48" ry="52" fill="#deb887"/>
+  <!-- Capelli ricci scuri -->
+  <path d="M62 95 Q58 55 80 42 Q95 33 110 32 Q125 33 140 42 Q162 55 158 95" fill="#2c1810" stroke="#1a0f0a" stroke-width="1"/>
+  <circle cx="68" cy="82" r="8" fill="#2c1810"/><circle cx="72" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="152" cy="82" r="8" fill="#2c1810"/><circle cx="148" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="78" cy="90" r="6" fill="#2c1810"/><circle cx="142" cy="90" r="6" fill="#2c1810"/>
+  <circle cx="85" cy="65" r="6" fill="#2c1810"/><circle cx="135" cy="65" r="6" fill="#2c1810"/>
+  <circle cx="95" cy="50" r="7" fill="#2c1810"/><circle cx="125" cy="50" r="7" fill="#2c1810"/>
+  <circle cx="110" cy="45" r="8" fill="#2c1810"/>
+  <circle cx="100" cy="55" r="5" fill="#2c1810"/><circle cx="120" cy="55" r="5" fill="#2c1810"/>
+  <!-- Barba -->
+  <path d="M78 118 Q80 145 110 152 Q140 145 142 118 Q142 130 130 140 Q110 150 90 140 Q78 130 78 118Z" fill="#3d2914" stroke="#2c1810" stroke-width="1"/>
+  <path d="M75 108 Q72 125 78 118" fill="#3d2914"/><path d="M145 108 Q148 125 142 118" fill="#3d2914"/>
+  <!-- Occhiali -->
+  <rect x="76" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <rect x="116" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <line x1="104" y1="102" x2="116" y2="102" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="76" y1="100" x2="66" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="144" y1="100" x2="154" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <!-- Occhi arrabbiati (puntini intensi) -->
+  <circle cx="90" cy="101" r="3.5" fill="#1a1a2e"/>
+  <circle cx="130" cy="101" r="3.5" fill="#1a1a2e"/>
+  <!-- Sopracciglia aggrottate -->
+  <path d="M78 88 Q88 82 100 88" fill="none" stroke="#2c1810" stroke-width="3" stroke-linecap="round" transform="rotate(8, 89, 85)"/>
+  <path d="M120 88 Q132 82 142 88" fill="none" stroke="#2c1810" stroke-width="3" stroke-linecap="round" transform="rotate(-8, 131, 85)"/>
+  <!-- Bocca contrariata -->
+  <path d="M96 135 Q110 128 124 135" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Mano facepalm -->
+  <g transform="translate(152,120) rotate(10)">
+    <rect x="0" y="0" width="22" height="14" rx="5" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/>
+    <rect x="3" y="-6" width="5" height="10" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/>
+    <rect x="9" y="-8" width="5" height="12" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/>
+    <rect x="15" y="-6" width="5" height="10" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/>
+  </g>
+  <!-- Badge X -->
+  <circle cx="180" cy="45" r="18" fill="#ef476f"/>
+  <path d="M173 38 L187 52 M187 38 L173 52" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Vena frustrazione -->
+  <g transform="translate(55,55)">
+    <path d="M0 5 L5 0 L10 5 L5 10 Z" fill="none" stroke="#ef476f" stroke-width="2"/>
+  </g>
+</svg>`;
+
+// SVG versione neutra per header
+const PROF_SVG_NEUTRAL = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glowN" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#4361ee;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#4361ee;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowN)"/>
+  <path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+  <path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#1e40af" stroke="none"/>
+  <rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/>
+  <ellipse cx="110" cy="105" rx="48" ry="52" fill="#deb887"/>
+  <path d="M62 95 Q58 55 80 42 Q95 33 110 32 Q125 33 140 42 Q162 55 158 95" fill="#2c1810" stroke="#1a0f0a" stroke-width="1"/>
+  <circle cx="68" cy="82" r="8" fill="#2c1810"/><circle cx="72" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="152" cy="82" r="8" fill="#2c1810"/><circle cx="148" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="78" cy="90" r="6" fill="#2c1810"/><circle cx="142" cy="90" r="6" fill="#2c1810"/>
+  <circle cx="85" cy="65" r="6" fill="#2c1810"/><circle cx="135" cy="65" r="6" fill="#2c1810"/>
+  <circle cx="95" cy="50" r="7" fill="#2c1810"/><circle cx="125" cy="50" r="7" fill="#2c1810"/>
+  <circle cx="110" cy="45" r="8" fill="#2c1810"/>
+  <circle cx="100" cy="55" r="5" fill="#2c1810"/><circle cx="120" cy="55" r="5" fill="#2c1810"/>
+  <path d="M78 118 Q80 145 110 152 Q140 145 142 118 Q142 130 130 140 Q110 150 90 140 Q78 130 78 118Z" fill="#3d2914" stroke="#2c1810" stroke-width="1"/>
+  <path d="M75 108 Q72 125 78 118" fill="#3d2914"/><path d="M145 108 Q148 125 142 118" fill="#3d2914"/>
+  <rect x="76" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <rect x="116" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <line x1="104" y1="102" x2="116" y2="102" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="76" y1="100" x2="66" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="144" y1="100" x2="154" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <circle cx="90" cy="101" r="3" fill="#1a1a2e"/>
+  <circle cx="130" cy="101" r="3" fill="#1a1a2e"/>
+  <path d="M80 86 Q90 82 100 85" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M120 85 Q130 82 140 86" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M100 134 L120 134" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+</svg>`;
+
+// Inietta SVG nei container
+(function initProfSVG() {
+  document.getElementById('prof-svg-happy').innerHTML = PROF_SVG_HAPPY;
+  document.getElementById('prof-svg-angry').innerHTML = PROF_SVG_ANGRY;
+  document.getElementById('prof-header-svg').innerHTML = PROF_SVG_NEUTRAL;
+})();
+
+/* Frasi del Prof. Paludetto */
+const PROF_CORRECT_PHRASES = [
+  "Bene. Questa e' fisica fatta con criterio.",
+  "Corretto. Finalmente una risposta degna.",
+  "Ottimo. Qui il campo elettrico non ti spaventa.",
+  "Bravo. Coulomb sarebbe soddisfatto.",
+  "Si', ci siamo. Ragionamento pulito.",
+  "Esatto. Vedo che qualcuno ha studiato.",
+  "Risposta corretta. Continua cosi' e il 10 e' tuo.",
+  "Perfetto. Gauss approva dal paradiso dei fisici.",
+  "Bene bene. Questo lo metto sul registro con il segno piu'.",
+  "Corretto. Non ti servira' neanche il ripasso.",
+  "Giusto. Hai la stoffa del fisico.",
+  "Ok, non male. Forse c'e' speranza per questa classe."
+];
+
+const PROF_WRONG_PHRASES = [
+  "No. Cosi' non va.",
+  "Attenzione: qui hai confuso i concetti.",
+  "Errore. Rivedi bene il ragionamento.",
+  "Questa risposta non regge. Riprova.",
+  "Fermati un attimo: qui c'e' da ripassare.",
+  "No, no, no. Torna sugli appunti.",
+  "Sbagliato. Ma almeno ci hai provato.",
+  "Questo errore lo vedo ogni anno. Leggi la spiegazione.",
+  "Coulomb si sta rivoltando. Concentrati.",
+  "Errore grave. Apri il quaderno e rileggi.",
+  "Non ci siamo. Ma il bello della fisica e' che si puo' rimediare.",
+  "Risposta sbagliata. Ti do un'altra possibilita' dopo."
+];
+
+function showFeedback(isCorrect, q) {
+  const fb = document.getElementById('feedback-box');
+  const dd = document.getElementById('deepdive-box');
+  const prof = document.getElementById('prof-container');
+
+  // --- Prof. Paludetto ---
+  prof.className = 'prof-container show ' + (isCorrect ? 'correct' : 'wrong');
+  const phrases = isCorrect ? PROF_CORRECT_PHRASES : PROF_WRONG_PHRASES;
+  document.getElementById('prof-phrase').textContent = phrases[Math.floor(Math.random() * phrases.length)];
+  document.getElementById('prof-name').textContent = 'Prof. Paludetto';
+
+  // --- Feedback ---
+  fb.style.display = 'block';
+  fb.className = 'feedback-box ' + (isCorrect ? 'feedback-correct' : 'feedback-wrong');
+
+  if (isCorrect) {
+    document.getElementById('feedback-title').textContent = 'Risposta corretta!';
+    document.getElementById('feedback-text').textContent = q.explanation;
+    dd.style.display = 'none';
+  } else {
+    document.getElementById('feedback-title').textContent = 'Risposta sbagliata';
+    document.getElementById('feedback-text').innerHTML =
+      `<strong>Errore comune:</strong> ${q.commonError}<br><br><strong>Spiegazione:</strong> ${q.explanation}`;
+
+    // Mostra approfondimento
+    dd.style.display = 'block';
+    document.getElementById('deepdive-text').textContent = q.deepdive;
+  }
+
+  document.getElementById('next-btn-container').style.display = 'block';
+
+  // Scroll al professore (che e' sopra il feedback)
+  prof.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/* ============================================
+   NAVIGAZIONE
+   ============================================ */
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= currentQuestions.length) {
+    endQuiz();
+  } else {
+    showQuestion();
+    document.getElementById('question-card').scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+/* ============================================
+   FINE QUIZ E RIEPILOGO
+   ============================================ */
+function endQuiz() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'block';
+
+  const total = correctCount + wrongCount;
+  const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+
+  // Punteggio grande
+  const scoreEl = document.getElementById('final-score');
+  scoreEl.textContent = pct + '%';
+  scoreEl.className = 'big-score ' + (pct >= 70 ? 'good' : pct >= 50 ? 'medium' : 'bad');
+  document.getElementById('final-score-label').textContent =
+    `${correctCount} corrette su ${total} domande`;
+
+  // Commento del Prof nel riepilogo
+  const profSummary = document.getElementById('prof-summary');
+  let summaryPhrase, summaryClass;
+  if (pct >= 90) {
+    summaryPhrase = "Eccellente. Risultato da primo della classe. Quasi quasi ti metto 10.";
+    summaryClass = 'correct';
+  } else if (pct >= 70) {
+    summaryPhrase = "Bene, risultato solido. Ma non adagiarti: c'e' ancora margine di miglioramento.";
+    summaryClass = 'correct';
+  } else if (pct >= 50) {
+    summaryPhrase = "Sufficiente, ma di poco. Hai le basi, pero' devi ripassare. Sul serio.";
+    summaryClass = 'wrong';
+  } else {
+    summaryPhrase = "Insufficiente. Ci vediamo all'interrogazione di recupero. Studia.";
+    summaryClass = 'wrong';
+  }
+  profSummary.className = 'prof-container show ' + summaryClass;
+  document.getElementById('prof-summary-svg').innerHTML = pct >= 70 ? PROF_SVG_HAPPY : PROF_SVG_ANGRY;
+  document.getElementById('prof-summary-phrase').textContent = summaryPhrase;
+  document.getElementById('prof-summary-name').textContent = 'Prof. Paludetto';
+
+  // Griglia statistiche
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-box"><div class="stat-number">${total}</div><div class="stat-label">Domande totali</div></div>
+    <div class="stat-box"><div class="stat-number" style="color:var(--success)">${correctCount}</div><div class="stat-label">Corrette</div></div>
+    <div class="stat-box"><div class="stat-number" style="color:var(--danger)">${wrongCount}</div><div class="stat-label">Errate</div></div>
+    <div class="stat-box"><div class="stat-number">${pct}%</div><div class="stat-label">Percentuale</div></div>
+  `;
+
+  // Risultati per argomento
+  const topicDiv = document.getElementById('topic-results');
+  topicDiv.innerHTML = '';
+  const weakTopics = [];
+
+  for (const [topic, stats] of Object.entries(topicStats)) {
+    if (stats.total === 0) continue;
+    const topicPct = Math.round((stats.correct / stats.total) * 100);
+    const cls = topicPct >= 70 ? 'strong' : topicPct >= 50 ? 'medium-res' : 'weak';
+    const barColor = topicPct >= 70 ? 'var(--success)' : topicPct >= 50 ? 'var(--warning)' : 'var(--danger)';
+
+    if (topicPct < 70) weakTopics.push(topic);
+
+    topicDiv.innerHTML += `
+      <div class="topic-result-item ${cls}">
+        <span><strong>${topic}</strong> — ${stats.correct}/${stats.total} (${topicPct}%)</span>
+        <div class="topic-bar"><div class="topic-bar-fill" style="width:${topicPct}%;background:${barColor}"></div></div>
+      </div>
+    `;
+  }
+
+  // Suggerimenti
+  const sugDiv = document.getElementById('suggestions');
+  if (weakTopics.length > 0) {
+    sugDiv.innerHTML = `
+      <h3>Suggerimenti per il ripasso</h3>
+      <p>Dovresti concentrarti su questi argomenti:</p>
+      <ul>${weakTopics.map(t => `<li><strong>${t}</strong> — rileggi gli appunti e rifai gli esercizi su questo tema</li>`).join('')}</ul>
+      <p style="margin-top:8px;">Usa il pulsante "Ripassa gli errori" per rifare solo le domande sbagliate.</p>
+    `;
+  } else {
+    sugDiv.innerHTML = `
+      <h3>Ottimo lavoro!</h3>
+      <p>Hai risposto bene su tutti gli argomenti. Continua cosi'! Prova la modalita' casuale per consolidare.</p>
+    `;
+  }
+
+  // Cronologia
+  const histDiv = document.getElementById('history-list');
+  histDiv.innerHTML = '';
+  history.forEach((h, i) => {
+    histDiv.innerHTML += `
+      <div class="history-item">
+        <span>${i + 1}. ${h.question.substring(0, 60)}${h.question.length > 60 ? '...' : ''}</span>
+        <span class="${h.correct ? 'correct-mark' : 'wrong-mark'}">${h.correct ? 'Corretta' : 'Errata'}</span>
+      </div>
+    `;
+  });
+
+  // Salva in localStorage
+  localStorage.setItem('cardio_respiratorio_stats', JSON.stringify({
+    total, correct: correctCount, wrong: wrongCount, percentage: pct,
+    date: new Date().toLocaleDateString('it-IT')
+  }));
+  localStorage.setItem('cardio_respiratorio_errors', JSON.stringify(errorQuestionIds));
+}
+
+/* ============================================
+   SEZIONE APPUNTI
+   ============================================ */
+const noteIds = ['circolazione','cuore','ciclo','conduzione','patologie-cv','vasi','sangue','respiratorio','ventilazione','emoglobina','dim-conduzione','dim-ventilazione','dim-co2'];
+const noteLabels = ['Le due circolazioni','Struttura del cuore','Ciclo cardiaco','Sistema di conduzione','Patologie cardiovascolari','Vasi e pressione','Sangue','Sistema respiratorio','Ventilazione','Emoglobina','PROC: Conduzione','PROC: Ventilazione','PROC: Trasporto CO2'];
+
+// Popola navigazione rapida appunti
+(function initNotes() {
+  const nav = document.getElementById('notes-nav');
+  if (!nav) return;
+  noteIds.forEach((id, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = noteLabels[i];
+    btn.onclick = () => {
+      // Apri la sezione e scrolla
+      const body = document.getElementById('body-' + id);
+      if (!body.classList.contains('open')) toggleNote(id);
+      document.getElementById('note-' + id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    nav.appendChild(btn);
+  });
+})();
+
+function showNotes(section) {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'block';
+
+  // Se richiesto, scrolla direttamente alle dimostrazioni
+  if (section === 'dimostrazioni') {
+    setTimeout(() => {
+      const el = document.getElementById('note-dim-conduzione');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+}
+
+function hideNotes() {
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+
+function toggleNote(id) {
+  const body = document.getElementById('body-' + id);
+  const toggle = body.previousElementSibling.querySelector('.note-toggle');
+  body.classList.toggle('open');
+  toggle.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+/* ============================================
+   SIMULAZIONE VERIFICA
+   Struttura identica alla verifica del prof:
+   - Parte 1: 10 domande scelta multipla (A-E)
+   - Parte 2: 3 domande aperte/dimostrative
+   ============================================ */
+
+const EXAM_MC = [
+  {
+    text: "Quale dei seguenti rappresenta correttamente la sequenza della circolazione polmonare?",
+    options: [
+      "Atrio sinistro → vene polmonari → polmoni → arterie polmonari → ventricolo destro",
+      "Ventricolo sinistro → aorta → polmoni → vena cava → atrio destro",
+      "Ventricolo destro → arterie polmonari → polmoni → vene polmonari → atrio sinistro",
+      "Atrio destro → polmoni → ventricolo destro → atrio sinistro",
+      "Nessuna delle precedenti"
+    ],
+    answer: 2,
+    explanation: "La sequenza corretta e' ventricolo destro → arterie polmonari → polmoni (scambio gas) → vene polmonari → atrio sinistro."
+  },
+  {
+    text: "Quale tessuto costituisce il miocardio?",
+    options: [
+      "Tessuto epiteliale stratificato",
+      "Tessuto connettivo lasso",
+      "Tessuto muscolare striato volontario",
+      "Tessuto muscolare striato involontario",
+      "Nessuna delle precedenti"
+    ],
+    answer: 3,
+    explanation: "Il miocardio e' formato da tessuto muscolare striato (come quello scheletrico) ma involontario (come quello liscio)."
+  },
+  {
+    text: "Le valvole semilunari si chiudono durante:",
+    options: [
+      "La sistole atriale",
+      "La sistole ventricolare",
+      "La diastole, per evitare il reflusso del sangue dalle arterie ai ventricoli",
+      "Lo svuotamento degli atri",
+      "Nessuna delle precedenti"
+    ],
+    answer: 2,
+    explanation: "Durante la diastole, quando i ventricoli si rilassano, le semilunari si chiudono per impedire al sangue arterioso di tornare indietro."
+  },
+  {
+    text: "Quale struttura genera il ritmo cardiaco intrinseco?",
+    options: [
+      "Nodo atrio-ventricolare",
+      "Fascio di His",
+      "Fibre di Purkinje",
+      "Nodo seno-atriale",
+      "Nessuna delle precedenti"
+    ],
+    answer: 3,
+    explanation: "Il nodo seno-atriale (nella parete superiore dell'atrio destro) e' il pacemaker naturale del cuore."
+  },
+  {
+    text: "L'aterosclerosi consiste in:",
+    options: [
+      "Una infezione virale dei vasi sanguigni",
+      "Un'ostruzione graduale dei vasi causata da accumulo di grasso (ateromi)",
+      "Una contrazione spasmodica delle arterie",
+      "Una alterazione del ritmo cardiaco",
+      "Nessuna delle precedenti"
+    ],
+    answer: 1,
+    explanation: "L'aterosclerosi e' un processo cronico in cui depositi di colesterolo formano placche (ateromi) che restringono i vasi."
+  },
+  {
+    text: "Le vene possiedono valvole perche':",
+    options: [
+      "Devono sostenere la pressione sistolica",
+      "Devono evitare il reflusso del sangue, dato che la pressione al loro interno e' bassa",
+      "Devono regolare la temperatura corporea",
+      "Devono ossigenare il sangue",
+      "Nessuna delle precedenti"
+    ],
+    answer: 1,
+    explanation: "Le vene hanno bassa pressione e necessitano di valvole per impedire al sangue di tornare indietro spinto dalla gravita'."
+  },
+  {
+    text: "I valori normali di pressione arteriosa sono circa:",
+    options: [
+      "200/100 mmHg",
+      "60/40 mmHg",
+      "120/80 mmHg",
+      "150/100 mmHg",
+      "Nessuna delle precedenti"
+    ],
+    answer: 2,
+    explanation: "Pressione sistolica ~120 mmHg e diastolica ~80 mmHg sono i valori di riferimento dell'adulto sano."
+  },
+  {
+    text: "L'eritropoietina e' prodotta:",
+    options: [
+      "Dal midollo osseo",
+      "Dalle ghiandole surrenali",
+      "Dal fegato",
+      "Dai reni, in risposta a bassa ossigenazione tissutale",
+      "Nessuna delle precedenti"
+    ],
+    answer: 3,
+    explanation: "L'EPO viene prodotta dai reni e stimola il midollo osseo a produrre piu' globuli rossi quando i tessuti ricevono poco O2."
+  },
+  {
+    text: "Durante l'inspirazione:",
+    options: [
+      "Il diaframma si rilassa e il volume toracico diminuisce",
+      "Il diaframma si contrae, il volume toracico aumenta e la pressione interna diminuisce",
+      "La pressione interna aumenta e l'aria viene spinta fuori",
+      "Le coste si abbassano",
+      "Nessuna delle precedenti"
+    ],
+    answer: 1,
+    explanation: "Il diaframma si abbassa contraendosi, il torace si espande, la pressione interna scende sotto quella atmosferica e l'aria entra (respirazione a pressione negativa)."
+  },
+  {
+    text: "L'emoglobina:",
+    options: [
+      "E' una proteina dei muscoli che funge da riserva di O2",
+      "E' formata da 2 catene polipeptidiche",
+      "E' formata da 4 catene polipeptidiche, ognuna con un gruppo eme contenente ferro",
+      "Trasporta solo CO2",
+      "Nessuna delle precedenti"
+    ],
+    answer: 2,
+    explanation: "L'emoglobina ha 4 catene polipeptidiche; ogni catena ha un gruppo eme con un atomo di ferro che lega una molecola di O2."
+  }
+];
+
+const EXAM_OPEN = [
+  {
+    text: "Descrivi le due circolazioni (polmonare e sistemica) indicando per ognuna: 1) la cavita' di partenza del cuore, 2) il tipo di sangue trasportato, 3) le tappe principali, 4) la cavita' di arrivo. Specifica anche il tipo di sangue (ossigenato/non) presente in arterie polmonari e vene polmonari.",
+    solution: "CIRCOLAZIONE POLMONARE\n1) Parte dal ventricolo destro\n2) Trasporta sangue povero di O2 (e ricco di CO2)\n3) Tappe: ventricolo destro → arterie polmonari → polmoni (scambio: cede CO2, prende O2) → vene polmonari\n4) Arriva all'atrio sinistro (poi passa al ventricolo sinistro)\n\nCIRCOLAZIONE SISTEMICA\n1) Parte dal ventricolo sinistro\n2) Trasporta sangue ricco di O2\n3) Tappe: ventricolo sinistro → aorta (sopra/sotto) → arterie → capillari (scambio nei tessuti: cede O2, prende CO2) → vene → vena cava superiore e inferiore\n4) Arriva all'atrio destro (poi passa al ventricolo destro)\n\nECCEZIONI rispetto alla regola 'arteria = ossigenato':\n- ARTERIE POLMONARI: contengono sangue NON ossigenato (vanno dal cuore ai polmoni per ossigenare)\n- VENE POLMONARI: contengono sangue OSSIGENATO (tornano dai polmoni al cuore)\n\nLa regola corretta e': arteria = vaso che ESCE dal cuore; vena = vaso che ENTRA nel cuore."
+  },
+  {
+    text: "Spiega cosa accade durante un ciclo cardiaco completo (durata ~0,8 s), descrivendo: la diastole, la sistole atriale (~0,1 s) e la sistole ventricolare. Indica per ogni fase il movimento delle valvole atrio-ventricolari e semilunari, e il movimento del sangue. Conclude spiegando cosa accadrebbe se le valvole atrio-ventricolari fossero lesionate.",
+    solution: "FASE 1 — DIASTOLE\n- Il cuore e' rilassato\n- Le valvole atrio-ventricolari (tricuspide a destra, bicuspide a sinistra) sono APERTE\n- Le valvole semilunari (polmonare e aortica) sono CHIUSE\n- Il sangue fluisce passivamente dalle vene cave nell'atrio destro e dalle vene polmonari nell'atrio sinistro, e da li' direttamente nei ventricoli\n\nFASE 2 — SISTOLE ATRIALE (~0,1 s)\n- Gli atri si contraggono\n- Le valvole AV restano aperte\n- Il sangue residuo viene 'spremuto' dagli atri ai ventricoli, completando il loro riempimento\n\nFASE 3 — SISTOLE VENTRICOLARE\n- I ventricoli si contraggono con forza\n- La pressione interna ventricolare supera quella atriale: le valvole AV si CHIUDONO (primo tono cardiaco)\n- La pressione supera anche quella delle arterie: le valvole semilunari si APRONO\n- Il sangue viene espulso: dal ventricolo destro nelle arterie polmonari, dal ventricolo sinistro nell'aorta\n- Quando i ventricoli si rilassano, le semilunari si chiudono (secondo tono cardiaco) ed inizia un nuovo ciclo\n\nLESIONE VALVOLE AV:\nDurante la sistole ventricolare, parte del sangue tornerebbe indietro negli atri (rigurgito mitralico/tricuspidalico). Conseguenze:\n- Riduzione della gittata effettiva nelle arterie\n- Aumento di pressione negli atri e a monte (nei polmoni o nelle vene cave)\n- A lungo termine il cuore deve lavorare di piu' (ipertrofia) e si rischia insufficienza cardiaca."
+  },
+  {
+    text: "Spiega come avviene lo scambio dei gas nei polmoni e nei tessuti. Definisci il concetto di pressione parziale. Indica come l'O2 viene trasportato nel sangue (ruolo dell'emoglobina, struttura) e come viene trasportata la CO2 (almeno la forma principale).",
+    solution: "SCAMBIO GASSOSO — il principio\nLo scambio avviene per DIFFUSIONE secondo gradiente di pressione parziale: ogni gas si sposta dalla zona a pressione parziale piu' alta a quella piu' bassa.\n\nPRESSIONE PARZIALE\nIn una miscela gassosa ogni gas contribuisce con una pressione parziale (in mmHg). La somma delle parziali = pressione totale della miscela.\n\nNEI POLMONI (alveoli ↔ capillari)\n- Aria alveolare: pO2 alta (~100 mmHg), pCO2 bassa\n- Sangue venoso in arrivo: pO2 bassa, pCO2 alta\n- Risultato: O2 diffonde dall'aria al sangue; CO2 diffonde dal sangue all'aria (espirata)\n\nNEI TESSUTI (capillari ↔ cellule)\n- Sangue arterioso: pO2 alta, pCO2 bassa\n- Cellule (consumano O2, producono CO2): pO2 bassa, pCO2 alta\n- Risultato: O2 esce dal sangue verso le cellule; CO2 entra nel sangue\n\nTRASPORTO DELL'O2\nL'O2 e' poco solubile in acqua: solo una piccola parte viaggia disciolta nel plasma. La maggior parte si lega all'EMOGLOBINA, contenuta nei globuli rossi:\n- Struttura: 4 catene polipeptidiche\n- Ogni catena ha un gruppo eme con un atomo di ferro al centro\n- Ogni atomo di ferro lega una molecola di O2 (4 O2 per emoglobina)\n- Il legame e' reversibile: si forma nei polmoni (alta pO2) e si rompe nei tessuti (bassa pO2)\n\nTRASPORTO DELLA CO2\n- Forma principale: ione bicarbonato (HCO3-) disciolto nel plasma (>60% del totale)\n- Reazione: CO2 + H2O ⇄ H2CO3 ⇄ H+ + HCO3-\n- L'emoglobina lega gli ioni H+ liberati, contribuendo a regolare il pH del sangue\n- Una piccola parte di CO2 e' trasportata legata all'emoglobina stessa (carbamino-emoglobina) e una parte disciolta nel plasma\n\nNei capillari polmonari avviene la reazione INVERSA: HCO3- + H+ → H2CO3 → CO2 + H2O, e la CO2 viene espirata."
+  }
+];
+
+let examTimer = null;
+let examSeconds = 3000; // 50 minuti
+let examSubmitted = false;
+
+function showExam() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'block';
+
+  examSubmitted = false;
+  document.getElementById('exam-submit-btn').style.display = 'inline-block';
+  document.getElementById('exam-result').style.display = 'none';
+
+  renderExamMC();
+  renderExamOpen();
+  startExamTimer();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function hideExam() {
+  clearInterval(examTimer);
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+
+function resetExam() {
+  examSeconds = 3000;
+  showExam();
+}
+
+/* Renderizza domande a scelta multipla con opzioni mescolate */
+function renderExamMC() {
+  const container = document.getElementById('exam-mc-questions');
+  container.innerHTML = '';
+
+  EXAM_MC.forEach((q, qi) => {
+    // Mescola opzioni
+    const indices = q.options.map((_, i) => i);
+    shuffleArray(indices);
+    q._shuffled = indices;
+
+    const letters = ['A', 'B', 'C', 'D', 'E'];
+    let html = `<div class="exam-question" id="exam-q-${qi}">
+      <div class="eq-text"><span class="eq-number">${qi + 1}.</span> ${q.text}</div>
+      <div class="exam-options">`;
+
+    indices.forEach((origIdx, dispIdx) => {
+      html += `
+        <div class="exam-option" id="exam-opt-${qi}-${dispIdx}">
+          <input type="radio" name="exam-q-${qi}" id="exam-radio-${qi}-${dispIdx}" value="${origIdx}">
+          <label for="exam-radio-${qi}-${dispIdx}">${letters[dispIdx]}. ${q.options[origIdx]}</label>
+        </div>`;
+    });
+
+    html += `</div>
+      <div class="exam-correction" id="exam-corr-${qi}"></div>
+    </div>`;
+    container.innerHTML += html;
+  });
+}
+
+/* Renderizza domande aperte */
+function renderExamOpen() {
+  const container = document.getElementById('exam-open-questions');
+  container.innerHTML = '';
+
+  EXAM_OPEN.forEach((q, qi) => {
+    const num = EXAM_MC.length + qi + 1;
+    container.innerHTML += `
+      <div class="exam-question" id="exam-open-${qi}">
+        <div class="eq-text"><span class="eq-number">${num}.</span> ${q.text}</div>
+        <div class="exam-open-area">
+          <textarea id="exam-textarea-${qi}" placeholder="Scrivi qui la tua risposta..."></textarea>
+        </div>
+        <div class="exam-correction" id="exam-open-corr-${qi}"></div>
+      </div>`;
+  });
+}
+
+/* Timer */
+function startExamTimer() {
+  examSeconds = 3000;
+  clearInterval(examTimer);
+  updateTimerDisplay();
+  examTimer = setInterval(() => {
+    examSeconds--;
+    updateTimerDisplay();
+    if (examSeconds <= 0) {
+      clearInterval(examTimer);
+      if (!examSubmitted) submitExam();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(examSeconds / 60);
+  const s = examSeconds % 60;
+  const el = document.getElementById('exam-timer');
+  el.textContent = `Tempo: ${m}:${s.toString().padStart(2, '0')}`;
+  el.style.color = examSeconds < 300 ? 'var(--danger)' : 'var(--dark)';
+}
+
+/* Consegna verifica */
+function submitExam() {
+  if (examSubmitted) return;
+  if (!confirm('Sei sicuro di voler consegnare la verifica?')) return;
+
+  examSubmitted = true;
+  clearInterval(examTimer);
+
+  let correctMC = 0;
+
+  // Correggi scelta multipla
+  EXAM_MC.forEach((q, qi) => {
+    const selected = document.querySelector(`input[name="exam-q-${qi}"]:checked`);
+    const corrDiv = document.getElementById('exam-corr-' + qi);
+    const selectedVal = selected ? parseInt(selected.value) : -1;
+    const isCorrect = selectedVal === q.answer;
+
+    if (isCorrect) {
+      correctMC++;
+      corrDiv.className = 'exam-correction show correct-box';
+      corrDiv.innerHTML = `<strong>Corretta!</strong> ${q.explanation}`;
+    } else {
+      corrDiv.className = 'exam-correction show wrong-box';
+      corrDiv.innerHTML = `<strong>Sbagliata.</strong> ${q.explanation}`;
+    }
+
+    // Evidenzia opzioni
+    q._shuffled.forEach((origIdx, dispIdx) => {
+      const optEl = document.getElementById(`exam-opt-${qi}-${dispIdx}`);
+      if (origIdx === q.answer) optEl.classList.add('correct-highlight');
+      if (dispIdx === getDisplayIdx(qi, selectedVal) && !isCorrect) optEl.classList.add('wrong-highlight');
+    });
+
+    // Disabilita radio
+    document.querySelectorAll(`input[name="exam-q-${qi}"]`).forEach(r => r.disabled = true);
+  });
+
+  // Mostra soluzioni aperte
+  EXAM_OPEN.forEach((q, qi) => {
+    const corrDiv = document.getElementById('exam-open-corr-' + qi);
+    corrDiv.className = 'exam-correction show correct-box';
+    corrDiv.innerHTML = `<strong>Soluzione completa:</strong><pre style="white-space:pre-wrap;font-family:inherit;margin-top:8px;">${q.solution}</pre>`;
+  });
+
+  // Calcolo voto: 10 MC (0.6 punti ciascuna = 6 pt) + 3 aperte (valutazione manuale suggerita)
+  const mcPoints = correctMC * 0.6;
+  const grade = Math.min(10, mcPoints + 4); // mc da 0 a 6 + max 4 per aperte (autovalutazione)
+  const mcGrade = (mcPoints / 6 * 10).toFixed(1);
+
+  document.getElementById('exam-submit-btn').style.display = 'none';
+  const resultDiv = document.getElementById('exam-result');
+  resultDiv.style.display = 'block';
+
+  const gradeEl = document.getElementById('exam-grade');
+  gradeEl.textContent = `${correctMC}/10 risposte multiple corrette`;
+  gradeEl.style.color = correctMC >= 7 ? 'var(--success)' : correctMC >= 5 ? 'var(--warning)' : 'var(--danger)';
+
+  document.getElementById('exam-grade-detail').innerHTML =
+    `Parte 1 (scelta multipla): <strong>${correctMC}/10</strong> — Voto stimato parte 1: <strong>${mcGrade}/10</strong><br>
+     Parte 2 (domande aperte): confronta le tue risposte con le soluzioni mostrate sopra.`;
+
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function getDisplayIdx(qi, origVal) {
+  const shuffled = EXAM_MC[qi]._shuffled;
+  return shuffled.indexOf(origVal);
+}
+
+/* ============================================
+   VERIFICA DIMOSTRAZIONI
+   6 domande aperte: riproduci la dimostrazione
+   ============================================ */
+
+const DEMO_EXAM = [
+  {
+    title: "Sequenza degli eventi elettrici nel battito cardiaco",
+    text: "Descrivi passo-passo la sequenza degli eventi elettrici durante un battito cardiaco, partendo dal nodo seno-atriale fino alla contrazione ventricolare. Indica il ruolo del nodo atrio-ventricolare e perche' il ritardo che introduce e' essenziale.",
+    solution: "PASSO 1 — Generazione dell'impulso\nIl nodo seno-atriale (SA), situato nella parete superiore dell'atrio destro, genera spontaneamente un impulso elettrico (depolarizzazione automatica). E' il pacemaker naturale del cuore (frequenza intrinseca 60-100 al minuto).\n\nPASSO 2 — Propagazione attraverso gli atri\nL'impulso si propaga radialmente attraverso le cellule muscolari atriali, provocando la contrazione (sistole atriale, ~0,1 s) che completa il riempimento dei ventricoli.\n\nPASSO 3 — Ritardo al nodo atrio-ventricolare\nL'impulso raggiunge il nodo atrio-ventricolare (AV), dove viene RALLENTATO. Questo ritardo e' essenziale: permette agli atri di completare lo svuotamento del sangue nei ventricoli prima che questi inizino a contrarsi. Senza ritardo le contrazioni sarebbero quasi simultanee, riducendo l'efficienza di pompaggio.\n\nPASSO 4 — Discesa lungo il fascio di His\nDopo il ritardo, l'impulso prosegue rapidamente nel fascio di His, che decorre nel setto interventricolare e si divide in due branche (destra e sinistra) per i due ventricoli.\n\nPASSO 5 — Distribuzione tramite le fibre di Purkinje\nLe branche del fascio di His si ramificano nelle fibre di Purkinje, che distribuiscono l'impulso a tutta la muscolatura ventricolare. La conduzione e' rapida e simultanea: i ventricoli si contraggono in modo coordinato dall'apice verso la base, espellendo efficacemente il sangue (sistole ventricolare).\n\nRiassunto sequenza:\nNodo SA → atri → nodo AV (ritardo) → fascio di His → branche dx/sx → fibre di Purkinje → ventricoli\n\nANOMALIE: se il nodo SA non funziona puo' essere sostituito da un pacemaker artificiale; se si ferma del tutto si ha arresto cardiaco. Difetti del fascio di His causano blocchi di branca."
+  },
+  {
+    title: "Meccanismo della ventilazione polmonare a pressione negativa",
+    text: "Spiega come avviene la ventilazione polmonare partendo dal movimento del diaframma. Descrivi inspirazione ed espirazione collegando: contrazione/rilassamento muscolare, variazione di volume toracico, variazione di pressione, direzione del flusso d'aria. Spiega perche' si parla di 'respirazione a pressione negativa'.",
+    solution: "PASSO 1 — Punto di partenza: anatomia\nLa cavita' toracica (gabbia toracica) e' separata dalla cavita' addominale dal diaframma, un muscolo a cupola. I polmoni sono passivi: si espandono o contraggono in base al volume toracico.\n\nPASSO 2 — Inspirazione: contrazione del diaframma\nIl diaframma si CONTRAE e si abbassa (passa da cupola alta a piu' piatta). Contemporaneamente i muscoli intercostali esterni si contraggono e sollevano le coste. Risultato: il volume della cavita' toracica AUMENTA.\n\nPASSO 3 — Inspirazione: variazione di pressione\nA volume maggiore, secondo la legge di Boyle (P·V = costante a temperatura costante), la pressione interna DIMINUISCE. Diventa piu' bassa della pressione atmosferica esterna.\n\nPASSO 4 — Inspirazione: flusso dell'aria\nL'aria si sposta sempre da zona a pressione maggiore a zona a pressione minore. Quindi l'aria atmosferica entra nei polmoni attraverso le vie aeree (naso → faringe → laringe → trachea → bronchi → bronchioli → alveoli).\n\nPASSO 5 — Espirazione: rilassamento del diaframma\nIl diaframma si RILASSA e torna alla sua forma a cupola alta. I muscoli intercostali si rilassano, le coste si abbassano. Risultato: il volume toracico DIMINUISCE.\n\nPASSO 6 — Espirazione: pressione e flusso\nA volume minore la pressione interna AUMENTA, diventa maggiore di quella atmosferica. L'aria viene FORZATA a uscire dai polmoni.\n\nPERCHE' 'PRESSIONE NEGATIVA'\nSi parla di respirazione a pressione negativa perche' l'aria entra nei polmoni grazie a una pressione INTERNA piu' bassa di quella ESTERNA, NON per una spinta attiva dei polmoni o delle vie aeree.\n\nDiverso e' il caso dei ventilatori meccanici (es. terapia intensiva): questi spingono attivamente aria nei polmoni → respirazione a pressione positiva. Anche i pesci usano una respirazione a pressione positiva (pompano acqua sulle branchie)."
+  },
+  {
+    title: "Trasporto della CO2 e ruolo dell'emoglobina nella regolazione del pH",
+    text: "Descrivi i meccanismi di trasporto della CO2 nel sangue. Indica la reazione chimica principale che avviene nel plasma e spiega perche' il sangue funge da 'tampone'. Specifica il ruolo dell'emoglobina nel legare gli ioni H+ e cosa accade quando il sangue arriva ai polmoni.",
+    solution: "PASSO 1 — Il problema del trasporto\nLe cellule del corpo producono continuamente CO2 come prodotto del metabolismo. Questa deve essere trasportata dai tessuti ai polmoni per essere espirata. La CO2 e' poco solubile in acqua: solo una piccola parte (~7%) viaggia disciolta nel plasma. Servono altri meccanismi.\n\nPASSO 2 — Reazione principale nel plasma\nNei capillari tissutali la CO2 entra nel plasma e reagisce con l'acqua:\n\n      CO2 + H2O   ⇄   H2CO3   ⇄   H+ + HCO3-\n\n(diossido di carbonio + acqua) ⇄ (acido carbonico) ⇄ (ione idrogeno + ione bicarbonato)\n\nLa maggior parte (~70%) della CO2 viene cosi' trasportata sotto forma di ioni BICARBONATO (HCO3-) disciolti nel plasma.\n\nPASSO 3 — Il problema degli ioni H+\nLa reazione produce anche ioni H+ che, se liberi, abbasserebbero il pH del sangue (acidificandolo). Ma il sangue mantiene un pH costante (~7,4): come fa?\n\nPASSO 4 — Ruolo dell'emoglobina come tampone\nL'EMOGLOBINA lega gli ioni H+ rilasciati nella reazione, sequestrandoli. In questo modo il pH del sangue resta tamponato. L'emoglobina contribuisce quindi:\n- al trasporto dell'O2 (legandolo nell'eme)\n- al trasporto della CO2 (legandone una piccola parte direttamente come carbamino-emoglobina, ~23%)\n- alla regolazione del pH (sequestrando H+)\n\nPASSO 5 — Inversione nei polmoni\nQuando il sangue arriva nei capillari alveolari dei polmoni, la pressione parziale di CO2 nell'aria alveolare e' bassa, quindi:\n- La reazione si inverte: HCO3- + H+ → H2CO3 → CO2 + H2O\n- L'emoglobina rilascia gli ioni H+ che si combinano con HCO3- per riformare CO2\n- La CO2 prodotta diffonde nell'aria alveolare e viene espirata\n- Contemporaneamente l'O2 entra nel sangue e si lega all'emoglobina\n\nRIASSUNTO\nNei tessuti: CO2 → HCO3- + H+ (tamponato dall'emoglobina)\nNei polmoni: HCO3- + H+ → CO2 (espirata)\n\nSenza l'emoglobina come sistema tampone, l'ingresso di CO2 nel sangue causerebbe rapidamente acidosi grave."
+  }
+];
+
+let demoExamTimer = null;
+let demoExamSeconds = 2400;
+let demoExamSubmitted = false;
+
+function showDemoExam() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'block';
+
+  demoExamSubmitted = false;
+  document.getElementById('demo-exam-submit-btn').style.display = 'inline-block';
+  document.getElementById('demo-exam-result').style.display = 'none';
+
+  renderDemoExamQuestions();
+  startDemoExamTimer();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function hideDemoExam() {
+  clearInterval(demoExamTimer);
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+
+function resetDemoExam() {
+  demoExamSeconds = 2400;
+  showDemoExam();
+}
+
+function renderDemoExamQuestions() {
+  const container = document.getElementById('demo-exam-questions');
+  container.innerHTML = '';
+
+  DEMO_EXAM.forEach((q, qi) => {
+    container.innerHTML += `
+      <div class="exam-question" id="demo-q-${qi}">
+        <div class="eq-text">
+          <span class="eq-number">${qi + 1}.</span>
+          <strong style="color:#7c3aed;">[${q.title}]</strong><br>
+          ${q.text}
+        </div>
+        <div class="exam-open-area">
+          <textarea id="demo-textarea-${qi}" placeholder="Scrivi qui la dimostrazione passo per passo..."></textarea>
+        </div>
+        <div class="exam-correction" id="demo-corr-${qi}"></div>
+      </div>`;
+  });
+}
+
+function startDemoExamTimer() {
+  demoExamSeconds = 2400;
+  clearInterval(demoExamTimer);
+  updateDemoTimerDisplay();
+  demoExamTimer = setInterval(() => {
+    demoExamSeconds--;
+    updateDemoTimerDisplay();
+    if (demoExamSeconds <= 0) {
+      clearInterval(demoExamTimer);
+      if (!demoExamSubmitted) submitDemoExam();
+    }
+  }, 1000);
+}
+
+function updateDemoTimerDisplay() {
+  const m = Math.floor(demoExamSeconds / 60);
+  const s = demoExamSeconds % 60;
+  const el = document.getElementById('demo-exam-timer');
+  el.textContent = `Tempo: ${m}:${s.toString().padStart(2, '0')}`;
+  el.style.color = demoExamSeconds < 300 ? 'var(--danger)' : 'var(--dark)';
+}
+
+function submitDemoExam() {
+  if (demoExamSubmitted) return;
+  if (!confirm('Sei sicuro di voler consegnare la verifica sulle dimostrazioni?')) return;
+
+  demoExamSubmitted = true;
+  clearInterval(demoExamTimer);
+
+  // Mostra le soluzioni per ogni dimostrazione
+  DEMO_EXAM.forEach((q, qi) => {
+    const corrDiv = document.getElementById('demo-corr-' + qi);
+    const textarea = document.getElementById('demo-textarea-' + qi);
+    const userAnswer = textarea.value.trim();
+
+    corrDiv.className = 'exam-correction show correct-box';
+    corrDiv.innerHTML = `
+      <strong>Soluzione completa — ${q.title}:</strong>
+      <pre style="white-space:pre-wrap; font-family:inherit; margin-top:8px; line-height:1.7;">${q.solution}</pre>
+      ${userAnswer.length < 10 ? '<p style="color:var(--danger); margin-top:8px;"><strong>Non hai scritto una risposta per questa domanda.</strong></p>' : '<p style="color:var(--primary); margin-top:8px;"><strong>Confronta la tua risposta con la soluzione qui sopra.</strong></p>'}
+    `;
+    textarea.disabled = true;
+    textarea.style.opacity = '0.7';
+  });
+
+  document.getElementById('demo-exam-submit-btn').style.display = 'none';
+  const resultDiv = document.getElementById('demo-exam-result');
+  resultDiv.style.display = 'block';
+  document.getElementById('demo-exam-grade-detail').innerHTML =
+    'Le dimostrazioni richiedono valutazione manuale. Confronta attentamente ogni tua risposta con la soluzione mostrata sopra.<br>Controlla: hai incluso tutti i passaggi? Le semplificazioni sono corrette? Hai spiegato il significato fisico?';
+
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+</script>
+
+</body>
+</html>
