@@ -3016,7 +3016,517 @@ const QUESTIONS = [
     deepdive: "Le crisi asmatiche sono spesso scatenate da allergeni, sforzo, freddo. Si trattano con broncodilatatori (es. salbutamolo).",
     difficulty: 2,
     topic: "Malattie respiratorie"
-  }
+  },
+
+  // =============================================
+  // 30 DOMANDE EXTRA — DIFFICOLTA' 3
+  // =============================================
+
+  // CIRCOLAZIONE (2)
+  {
+    text: "Considera una persona con un difetto interatriale (foro tra atrio destro e sinistro). Cosa succede emodinamicamente?",
+    type: "multiple",
+    options: [
+      "Il sangue venoso e quello arterioso si mescolano, riducendo l'efficienza dell'ossigenazione sistemica",
+      "La pressione del ventricolo sinistro diminuisce drasticamente in modo permanente",
+      "Si ha solo un soffio innocuo, senza alcuna conseguenza emodinamica nel tempo",
+      "Il cuore inverte la direzione del pompaggio per compensare il difetto"
+    ],
+    answer: 0,
+    explanation: "Con un difetto interatriale, il sangue puo' passare tra i due atri (di solito sinistro → destro per gradiente di pressione). Cio' altera i normali volumi e mescola sangue ossigenato con non ossigenato, riducendo l'efficienza.",
+    commonError: "Pensare che un foro tra atri sia trascurabile: in realta' altera in modo significativo l'emodinamica e a lungo termine puo' causare ipertensione polmonare.",
+    deepdive: "Il flusso netto dipende dal gradiente di pressione: l'atrio sinistro e' a pressione leggermente maggiore, quindi il flusso anomalo e' tipicamente sinistro→destro (shunt sx-dx). A lungo termine il sovraccarico di flusso polmonare puo' invertire il flusso.",
+    difficulty: 3,
+    topic: "Circolazione"
+  },
+  {
+    text: "In quale cavita' del cuore si registra la pressione MASSIMA durante un battito cardiaco normale?",
+    type: "multiple",
+    options: [
+      "Atrio destro durante la sistole atriale",
+      "Atrio sinistro durante la sistole atriale",
+      "Ventricolo sinistro durante la sistole ventricolare (~120 mmHg)",
+      "Ventricolo destro durante la sistole ventricolare"
+    ],
+    answer: 2,
+    explanation: "Il ventricolo sinistro genera la pressione piu' alta del cuore (~120 mmHg) per spingere il sangue nella circolazione sistemica. Il destro genera solo ~25 mmHg perche' la circolazione polmonare ha resistenza minore.",
+    commonError: "Pensare che entrambi i ventricoli generino la stessa pressione: il sinistro e' molto piu' potente perche' la sistemica oppone piu' resistenza.",
+    deepdive: "Per questo motivo il miocardio del ventricolo sinistro e' piu' spesso (~10-15 mm) rispetto al destro (~3-5 mm). E' un adattamento al carico di lavoro.",
+    difficulty: 3,
+    topic: "Circolazione"
+  },
+
+  // STRUTTURA DEL CUORE (3)
+  {
+    text: "Perche' il miocardio del ventricolo sinistro e' nettamente piu' spesso di quello del destro?",
+    type: "multiple",
+    options: [
+      "Perche' contiene un volume di sangue piu' grande",
+      "Perche' deve sviluppare pressioni molto maggiori per la circolazione sistemica",
+      "Perche' contiene il pacemaker e necessita di piu' tessuto specializzato",
+      "Perche' deve ossigenare se stesso autonomamente, senza coronarie"
+    ],
+    answer: 1,
+    explanation: "Il ventricolo sinistro deve generare pressioni di ~120 mmHg per spingere il sangue in tutta la circolazione sistemica; il destro solo ~25 mmHg per la polmonare. Maggior carico = maggior massa muscolare.",
+    commonError: "Pensare che lo spessore dipenda dal volume di sangue: e' la pressione, non il volume, a determinare l'ipertrofia muscolare.",
+    deepdive: "Il principio e' analogo a quello dei muscoli scheletrici: piu' lavoro contro resistenza → piu' ipertrofia. Per questo l'ipertensione cronica causa ipertrofia patologica del ventricolo sinistro.",
+    difficulty: 3,
+    topic: "Struttura del cuore"
+  },
+  {
+    text: "Una endocardite (infezione dell'endocardio) tende a colpire principalmente:",
+    type: "multiple",
+    options: [
+      "La superficie esterna del cuore (epicardio)",
+      "Il tessuto muscolare compatto del miocardio",
+      "Le coronarie e i vasi epicardici",
+      "Le valvole cardiache, che sono rivestite da endocardio"
+    ],
+    answer: 3,
+    explanation: "L'endocardio riveste sia le cavita' sia le valvole. L'endocardite si localizza tipicamente sulle valvole, dove i lembi piu' sottili e mobili sono i bersagli preferenziali.",
+    commonError: "Confondere endocardite (interno) con pericardite (membrana esterna).",
+    deepdive: "Le valvole sinistre (aortica e mitrale) sono colpite piu' spesso perche' soggette a maggiori stress emodinamici. La diagnosi richiede emocoltura ed ecocardiografia.",
+    difficulty: 3,
+    topic: "Struttura del cuore"
+  },
+  {
+    text: "Cosa garantisce che le valvole atrio-ventricolari non si rovescino verso gli atri durante la sistole ventricolare?",
+    type: "multiple",
+    options: [
+      "La rigidita' propria del tessuto connettivo che le compone",
+      "La pressione del pericardio che le tiene in posizione",
+      "I muscoli papillari e le corde tendinee che agganciano i lembi al ventricolo",
+      "L'innervazione delle fibre di Purkinje che le contrae"
+    ],
+    answer: 2,
+    explanation: "I muscoli papillari (estensioni del miocardio ventricolare) si contraggono durante la sistole tirando le corde tendinee, che mantengono i lembi delle valvole AV chiusi senza farli rovesciare.",
+    commonError: "Pensare che le valvole siano rigide: in realta' sono flessibili e sostenute attivamente da corde tendinee.",
+    deepdive: "Se una corda tendinea si rompe (es. dopo un infarto), la valvola si rovescia (prolasso): si crea insufficienza valvolare con rigurgito di sangue verso l'atrio.",
+    difficulty: 3,
+    topic: "Struttura del cuore"
+  },
+
+  // CICLO CARDIACO (2)
+  {
+    text: "A frequenze cardiache molto elevate (>180 bpm) la gittata cardiaca puo' paradossalmente DIMINUIRE. Perche'?",
+    type: "multiple",
+    options: [
+      "Le coronarie si dilatano riducendo la perfusione miocardica",
+      "La diastole si accorcia troppo, impedendo un riempimento ventricolare adeguato",
+      "Le valvole semilunari non riescono a chiudersi in tempo",
+      "Le fibre di Purkinje non riescono a propagare gli impulsi"
+    ],
+    answer: 1,
+    explanation: "A frequenze elevate il tempo del ciclo si accorcia. Si accorcia soprattutto la diastole (riempimento), riducendo il volume di sangue accumulato nei ventricoli prima della sistole. La gittata sistolica scende e la gittata cardiaca puo' calare nonostante l'alta frequenza.",
+    commonError: "Pensare che 'piu' velocita' = piu' sangue': vero solo entro un range. Oltre un certo limite domina la riduzione del riempimento.",
+    deepdive: "Per questo nelle tachicardie patologiche (es. fibrillazione ventricolare) la pompa diventa inefficace e si arriva all'arresto circolatorio anche se 'il cuore batte velocemente'.",
+    difficulty: 3,
+    topic: "Ciclo cardiaco"
+  },
+  {
+    text: "I due toni cardiaci ('tum-ta') auscultabili con lo stetoscopio corrispondono a:",
+    type: "multiple",
+    options: [
+      "Apertura delle valvole AV / chiusura delle valvole semilunari",
+      "Contrazione atriale / contrazione ventricolare",
+      "Chiusura delle valvole AV / chiusura delle valvole semilunari",
+      "Apertura della aorta / chiusura della tricuspide"
+    ],
+    answer: 2,
+    explanation: "1° tono ('tum') = chiusura delle valvole AV all'inizio della sistole ventricolare. 2° tono ('ta') = chiusura delle valvole semilunari alla fine della sistole.",
+    commonError: "Pensare che i toni siano dovuti alla contrazione muscolare: in realta' sono prodotti dalla CHIUSURA brusca delle valvole.",
+    deepdive: "L'apertura delle valvole e' silenziosa. Soffi cardiaci patologici nascono spesso da chiusure incomplete (rigurgito) o aperture difficoltose (stenosi).",
+    difficulty: 3,
+    topic: "Ciclo cardiaco"
+  },
+
+  // SISTEMA DI CONDUZIONE (3)
+  {
+    text: "Se il nodo seno-atriale fallisce ma il nodo atrio-ventricolare e' integro, il cuore continuera' a battere a frequenza:",
+    type: "multiple",
+    options: [
+      "Pari a zero (arresto cardiaco completo)",
+      "Piu' bassa (~40-60 bpm), determinata dall'automatismo del nodo AV",
+      "Identica al ritmo normale (~75 bpm)",
+      "Piu' alta del normale (>120 bpm) per compenso"
+    ],
+    answer: 1,
+    explanation: "Anche il nodo AV ha una capacita' di automatismo intrinseco, ma a frequenza inferiore (~40-60 bpm). Quando il nodo SA fallisce, l'AV diventa il pacemaker di ripiego.",
+    commonError: "Pensare che senza nodo SA il cuore si fermi del tutto: in realta' tutta la rete di conduzione ha capacita' automatica, anche se via via piu' lenta.",
+    deepdive: "Anche le fibre di Purkinje hanno automatismo (~20-40 bpm). Esiste una gerarchia: SA (60-100) > AV (40-60) > Purkinje (20-40). Solo se TUTTI falliscono si ha asistolia.",
+    difficulty: 3,
+    topic: "Sistema di conduzione"
+  },
+  {
+    text: "Un blocco completo del fascio di His causa:",
+    type: "multiple",
+    options: [
+      "Bradicardia atriale isolata, senza alterazioni ventricolari",
+      "Tachicardia ventricolare immediata e potenzialmente fatale",
+      "Dissociazione tra contrazione atriale (ritmo SA) e ventricolare (ritmo idioventricolare piu' lento)",
+      "Arresto immediato e definitivo della circolazione"
+    ],
+    answer: 2,
+    explanation: "Se l'impulso non passa dal fascio di His, gli atri continuano a battere al ritmo del nodo SA, mentre i ventricoli battono indipendentemente al loro ritmo intrinseco (Purkinje, ~20-40 bpm). Questa e' la dissociazione AV o blocco di III grado.",
+    commonError: "Confondere blocco di branca (un ventricolo) con blocco completo (entrambi i ventricoli, dissociazione totale).",
+    deepdive: "Il blocco AV completo e' un'urgenza che richiede pacemaker artificiale immediato: a 30 bpm la perfusione cerebrale e' insufficiente.",
+    difficulty: 3,
+    topic: "Sistema di conduzione"
+  },
+  {
+    text: "Le fibre di Purkinje si distinguono dalle altre cellule cardiache per una caratteristica funzionale chiave:",
+    type: "multiple",
+    options: [
+      "Hanno l'automatismo intrinseco piu' veloce di tutto il cuore",
+      "Sono volontariamente controllate dalla corteccia cerebrale",
+      "Producono ormoni a effetto cardio-stimolante",
+      "Hanno la velocita' di conduzione piu' alta del cuore (~2-4 m/s)"
+    ],
+    answer: 3,
+    explanation: "Le fibre di Purkinje conducono molto velocemente (2-4 m/s) rispetto al miocardio comune (~0,5 m/s) e ai nodi SA/AV (0,02 m/s). Cio' garantisce la contrazione quasi simultanea di tutto il ventricolo.",
+    commonError: "Confondere alta velocita' di conduzione (Purkinje) con alta frequenza di automatismo (massima nel nodo SA, non in Purkinje).",
+    deepdive: "La velocita' elevata e' dovuta a giunzioni gap molto efficaci e a un grande diametro cellulare. Senza Purkinje, i ventricoli si contrarrebbero in modo asincrono e meno efficace.",
+    difficulty: 3,
+    topic: "Sistema di conduzione"
+  },
+
+  // PATOLOGIE CARDIOVASCOLARI (3)
+  {
+    text: "Cosa distingue principalmente l'angina pectoris stabile dall'infarto del miocardio?",
+    type: "multiple",
+    options: [
+      "Nell'angina il flusso e' transitoriamente ridotto e reversibile, nell'infarto si ha morte tissutale per ostruzione persistente",
+      "L'angina e' indolore mentre l'infarto e' sempre molto doloroso",
+      "L'angina colpisce gli atri, l'infarto i ventricoli",
+      "L'angina e' di origine genetica, l'infarto e' causato solo dal fumo"
+    ],
+    answer: 0,
+    explanation: "Angina = ischemia transitoria (sforzo o stress) che si risolve con il riposo: il tessuto soffre ma non muore. Infarto = ostruzione persistente → necrosi del tessuto cardiaco.",
+    commonError: "Pensare che siano la stessa cosa: in realta' l'angina e' un campanello d'allarme di malattia coronarica avanzata, non un infarto vero e proprio.",
+    deepdive: "Sequenza tipica: aterosclerosi cronica → angina da sforzo → eventuale rottura della placca → trombosi → infarto. Riconoscere e trattare l'angina puo' prevenire l'infarto.",
+    difficulty: 3,
+    topic: "Patologie cardiovascolari"
+  },
+  {
+    text: "Un ateroma puo' rompersi all'improvviso e formare un trombo. Quale e' la conseguenza piu' acuta di questo evento?",
+    type: "multiple",
+    options: [
+      "Aumento progressivo della pressione arteriosa nel corso degli anni",
+      "Sostituzione progressiva di tessuto sano con grasso colesterolico",
+      "Abbassamento del colesterolo sierico per consumo locale",
+      "Occlusione improvvisa del vaso con ischemia o infarto del tessuto a valle"
+    ],
+    answer: 3,
+    explanation: "La rottura di una placca espone materiale trombogenico al sangue: si forma rapidamente un coagulo che puo' occludere completamente il vaso → infarto acuto.",
+    commonError: "Pensare che le placche siano sempre stabili: in realta' la loro rottura e' la causa principale degli infarti acuti.",
+    deepdive: "Le placche piu' pericolose sono quelle 'instabili' con cappuccio fibroso sottile e core lipidico esteso. La cardioaspirina riduce il rischio inibendo l'aggregazione piastrinica.",
+    difficulty: 3,
+    topic: "Patologie cardiovascolari"
+  },
+  {
+    text: "Lo stent coronarico, posizionato dopo angioplastica, ha la funzione di:",
+    type: "multiple",
+    options: [
+      "Mantenere meccanicamente aperto il lume del vaso ostruito dopo angioplastica",
+      "Rilasciare farmaci anti-aggreganti localmente nel tempo, in modo continuo",
+      "Sostituire la valvola aortica difettosa per via percutanea",
+      "Bloccare la conduzione elettrica anomala dal nodo AV"
+    ],
+    answer: 0,
+    explanation: "Lo stent e' un piccolo cilindro metallico espandibile che dopo l'angioplastica resta dentro al vaso per impedire che si richiuda.",
+    commonError: "Confondere lo stent (meccanico, vascolare) con il pacemaker (elettrico, cardiaco): sono dispositivi diversi.",
+    deepdive: "Esistono stent 'medicati' che rilasciano lentamente farmaci antiproliferativi per ridurre il rischio di ri-occlusione (restenosi). Sono migliorativi rispetto a quelli non medicati.",
+    difficulty: 3,
+    topic: "Patologie cardiovascolari"
+  },
+
+  // VASI SANGUIGNI (2)
+  {
+    text: "Nei capillari, lo spessore della parete e' minimo (un singolo strato di endotelio). Qual e' la ragione fondamentale?",
+    type: "multiple",
+    options: [
+      "Per ridurre il peso complessivo del sistema circolatorio",
+      "Per facilitare al massimo la diffusione di gas e sostanze nutritive",
+      "Per resistere alle alte pressioni del sangue arterioso",
+      "Per evitare la coagulazione spontanea del sangue"
+    ],
+    answer: 1,
+    explanation: "I capillari sono il sito principale di scambio. Pareti sottili = breve distanza di diffusione = scambi efficienti di O2, CO2, nutrienti, ormoni.",
+    commonError: "Pensare che le pareti sottili siano un difetto strutturale: in realta' sono un'ottimizzazione funzionale.",
+    deepdive: "Le pareti sottili comportano fragilita': i capillari si rompono facilmente (lividi, petecchie). Ma pressione e velocita' del sangue sono basse a livello capillare, quindi la struttura e' adeguata.",
+    difficulty: 3,
+    topic: "Vasi sanguigni"
+  },
+  {
+    text: "Lo strato muscolare liscio (tunica media) delle arterie ha la funzione principale di:",
+    type: "multiple",
+    options: [
+      "Generare automaticamente il battito",
+      "Filtrare i prodotti di rifiuto del metabolismo",
+      "Regolare il diametro del vaso e la resistenza al flusso",
+      "Trasportare gli ormoni dalle ghiandole ai tessuti"
+    ],
+    answer: 2,
+    explanation: "La muscolatura liscia arteriosa si contrae (vasocostrizione) o rilassa (vasodilatazione) modulando il diametro e quindi la resistenza periferica e la pressione.",
+    commonError: "Pensare che le arterie siano tubi rigidi: in realta' sono molto attive, regolate da segnali nervosi e ormonali.",
+    deepdive: "La regolazione e' fine: il sistema nervoso simpatico (adrenalina) causa vasocostrizione; il parasimpatico (ossido nitrico, NO) provoca vasodilatazione. Cosi' si controlla la pressione arteriosa.",
+    difficulty: 3,
+    topic: "Vasi sanguigni"
+  },
+
+  // PRESSIONE (2)
+  {
+    text: "La 'pressione differenziale' (o pressione del polso) e' definita come:",
+    type: "multiple",
+    options: [
+      "Pressione arteriosa media nelle 24 ore",
+      "Media tra pressione sistolica e diastolica (es. (120+80)/2 = 100 mmHg)",
+      "Differenza tra pressione sistolica e diastolica (es. 120-80 = 40 mmHg)",
+      "Pressione misurata durante l'inspirazione forzata profonda"
+    ],
+    answer: 2,
+    explanation: "La pressione differenziale o pressione del polso e' la differenza sistolica - diastolica, tipicamente ~40 mmHg. Riflette la 'gittata' di ciascun battito.",
+    commonError: "Confondere pressione differenziale con pressione arteriosa media (PAM): sono due concetti diversi (la PAM e' una media ponderata).",
+    deepdive: "Una pressione differenziale ridotta (bassa gittata) puo' indicare shock o stenosi aortica. Una elevata puo' suggerire rigidita' aortica (anziani) o insufficienza aortica.",
+    difficulty: 3,
+    topic: "Pressione"
+  },
+  {
+    text: "A livello dei capillari, l'equilibrio dinamico tra fuoriuscita e rientro di liquidi dipende da:",
+    type: "multiple",
+    options: [
+      "Solo dalla pressione idrostatica del sangue",
+      "Solo dalla pressione osmotica delle proteine plasmatiche",
+      "Bilancio tra pressione idrostatica (uscita) e pressione osmotica (rientro)",
+      "Solo dalla velocita' di scorrimento del sangue nei capillari"
+    ],
+    answer: 2,
+    explanation: "Il bilancio tra le due pressioni regola lo scambio di acqua: a inizio capillare prevale quella idrostatica (esce H2O), a fine capillare prevale quella osmotica (rientra H2O).",
+    commonError: "Considerare un solo fattore: in realta' la dinamica capillare e' descritta dall'equilibrio di Starling.",
+    deepdive: "Se il bilancio si altera (es. albumine plasmatiche basse → pressione osmotica ridotta), l'acqua non rientra adeguatamente nei capillari → edema (gonfiore tissutale).",
+    difficulty: 3,
+    topic: "Pressione"
+  },
+
+  // SANGUE (2)
+  {
+    text: "Una persona con valori molto bassi di emoglobina (anemia severa) avra' come conseguenza principale:",
+    type: "multiple",
+    options: [
+      "Aumento del trasporto di O2 ai tessuti per compenso",
+      "Riduzione della capacita' di trasporto di O2 con possibile ipossia tissutale",
+      "Aumento delle piastrine per stimolo midollare",
+      "Diminuzione marcata della frequenza cardiaca"
+    ],
+    answer: 1,
+    explanation: "La capacita' di trasportare O2 dipende quasi totalmente dall'emoglobina. Anemia → meno emoglobina → meno O2 ai tessuti → debolezza, dispnea, tachicardia compensatoria.",
+    commonError: "Pensare che l'anemia rallenti il cuore: tipicamente lo VELOCIZZA come compenso (tachicardia anemica).",
+    deepdive: "Cause comuni: carenza di ferro (necessario per il gruppo eme), carenza di B12/folati (per la sintesi del DNA dei precursori eritroidi), perdite di sangue, malattie croniche.",
+    difficulty: 3,
+    topic: "Sangue"
+  },
+  {
+    text: "Durante la coagulazione, cosa diventa il fibrinogeno (proteina plasmatica)?",
+    type: "multiple",
+    options: [
+      "Albumina, proteina di trasporto generica",
+      "Eritropoietina, ormone stimolante",
+      "Globina, parte dell'emoglobina",
+      "Fibrina, struttura filamentosa che intrappola le cellule formando il coagulo"
+    ],
+    answer: 3,
+    explanation: "Sotto l'azione della trombina, il fibrinogeno (solubile) viene convertito in fibrina (insolubile, filamentosa, appiccicosa). La fibrina forma una rete che intrappola globuli rossi e piastrine: e' il coagulo.",
+    commonError: "Confondere fibrinogeno (precursore solubile) con fibrina (prodotto insolubile finale).",
+    deepdive: "Anticoagulanti come l'eparina o il warfarin agiscono inibendo la cascata coagulativa, riducendo la produzione di fibrina. Vengono usati in pazienti a rischio di trombosi.",
+    difficulty: 3,
+    topic: "Sangue"
+  },
+
+  // ANATOMIA RESPIRATORIA (2)
+  {
+    text: "Le pareti degli alveoli polmonari sono costituite da:",
+    type: "multiple",
+    options: [
+      "Tessuto cartilagineo rigido per garantire la pervieta' costante",
+      "Epitelio molto sottile + capillari adiacenti, separati da una membrana di pochi micrometri",
+      "Tessuto muscolare striato che si contrae attivamente per mescolare l'aria",
+      "Tessuto connettivo denso e fibroso ricco di collagene"
+    ],
+    answer: 1,
+    explanation: "Gli alveoli hanno pareti sottilissime (~0,5 μm): un epitelio alveolare semplice + un endotelio capillare. Questa struttura minimizza la distanza di diffusione per i gas.",
+    commonError: "Pensare che gli alveoli siano rigidi: in realta' sono estremamente sottili e fragili, ottimizzati per gli scambi.",
+    deepdive: "Pneumociti di tipo II producono il SURFATTANTE, un fluido che riduce la tensione superficiale e impedisce il collasso degli alveoli durante l'espirazione.",
+    difficulty: 3,
+    topic: "Anatomia respiratoria"
+  },
+  {
+    text: "Gli anelli cartilaginei della trachea sono a forma di 'C' (aperti posteriormente). Perche'?",
+    type: "multiple",
+    options: [
+      "Per consentire la dilatazione dell'esofago durante la deglutizione del cibo",
+      "Per ridurre il peso strutturale delle vie aeree centrali",
+      "Per permettere il passaggio dei nervi vaghi attraverso la trachea",
+      "Per facilitare l'ingresso di aria nei bronchi principali"
+    ],
+    answer: 0,
+    explanation: "L'esofago si trova posteriormente alla trachea. Anelli aperti dietro permettono all'esofago di espandersi durante il passaggio del cibo, senza essere compresso da cartilagine rigida.",
+    commonError: "Pensare che la forma a C sia un caso o un'imperfezione anatomica: in realta' e' un'ottimizzazione funzionale.",
+    deepdive: "Il muscolo tracheale chiude posteriormente la 'C'. Si puo' contrarre per ridurre il diametro tracheale (es. durante la tosse) generando flussi d'aria piu' intensi che espellono i corpi estranei.",
+    difficulty: 3,
+    topic: "Anatomia respiratoria"
+  },
+
+  // VENTILAZIONE (2)
+  {
+    text: "Durante l'esercizio fisico intenso la frequenza respiratoria aumenta drasticamente. Quale e' lo stimolo principale che guida questo aumento?",
+    type: "multiple",
+    options: [
+      "Una decisione volontaria della corteccia cerebrale per accelerare il respiro",
+      "L'aumento della temperatura corporea muscolare durante lo sforzo",
+      "La sensazione di fame stimolata dall'attivita' fisica",
+      "L'aumento di CO2 (e calo di pH) percepito dai chemocettori, non l'O2 basso"
+    ],
+    answer: 3,
+    explanation: "I principali sensori del controllo respiratorio sono i chemocettori centrali e periferici sensibili a CO2 e pH, non a O2. L'aumento di CO2 nei tessuti durante lo sforzo abbassa il pH e stimola la respirazione.",
+    commonError: "Pensare che sia la mancanza di O2 il segnale primario: in realta' la CO2/pH e' molto piu' sensibile e veloce.",
+    deepdive: "Per questo tenere il fiato e' difficile: non perche' manca O2 ma perche' la CO2 si accumula. I subacquei iperventilano prima di immergersi per ridurre artificialmente la CO2 (rischioso!).",
+    difficulty: 3,
+    topic: "Ventilazione"
+  },
+  {
+    text: "Il volume residuo (~1,5 L) che resta nei polmoni dopo un'espirazione massima ha la funzione di:",
+    type: "multiple",
+    options: [
+      "Mantenere costante il pH del sangue arterioso",
+      "Mantenere parzialmente espansi gli alveoli, evitandone il collasso completo",
+      "Trasportare ossigeno alle cellule periferiche",
+      "Filtrare le particelle inquinanti dell'aria inspirata"
+    ],
+    answer: 1,
+    explanation: "Il volume residuo mantiene gli alveoli parzialmente aperti tra un'espirazione e la successiva inspirazione. Senza di esso gli alveoli collasserebbero richiedendo molta piu' energia per riaprirli ad ogni respiro.",
+    commonError: "Pensare che il volume residuo sia 'aria sprecata': in realta' e' fondamentale per la stabilita' alveolare.",
+    deepdive: "Il surfattante prodotto dai pneumociti II abbassa la tensione superficiale degli alveoli, contribuendo a mantenerli aperti. Nei prematuri il surfattante puo' essere insufficiente → distress respiratorio del neonato.",
+    difficulty: 3,
+    topic: "Ventilazione"
+  },
+
+  // SCAMBI GASSOSI (3)
+  {
+    text: "Secondo la legge di Fick, la velocita' di diffusione di un gas attraverso la membrana alveolo-capillare dipende da:",
+    type: "multiple",
+    options: [
+      "Solo dalla differenza di pressione parziale tra alveolo e sangue",
+      "Solo dallo spessore della membrana respiratoria",
+      "Differenza di pressione parziale, area della membrana, solubilita' del gas, inverso dello spessore",
+      "Solo dalla temperatura corporea del soggetto"
+    ],
+    answer: 2,
+    explanation: "La legge di Fick: flusso ∝ (Δpressione × area × solubilita') / spessore. Quindi piu' fattori intervengono: pressione parziale, geometria della membrana e proprieta' del gas.",
+    commonError: "Considerare un solo fattore: in pratica la diffusione dipende dall'interazione di piu' variabili.",
+    deepdive: "Negli sport di alta quota la pO2 atmosferica scende: a parita' di tutto il resto la diffusione di O2 cala. Per questo serve acclimatamento (aumento di emoglobina) o ossigeno supplementare.",
+    difficulty: 3,
+    topic: "Scambi gassosi"
+  },
+  {
+    text: "La CO2 diffonde attraverso la membrana alveolo-capillare circa 20 volte piu' rapidamente dell'O2 nonostante la sua massa molecolare maggiore. Perche'?",
+    type: "multiple",
+    options: [
+      "Perche' la CO2 e' molto piu' solubile in acqua dell'O2",
+      "Perche' la CO2 e' un gas piu' leggero dell'O2",
+      "Perche' la CO2 attraversa solo lo strato endoteliale, evitando l'epitelio alveolare",
+      "Perche' la CO2 viene attivamente trasportata da pompe specifiche"
+    ],
+    answer: 0,
+    explanation: "Anche se la CO2 e' piu' pesante (44 vs 32), e' circa 20 volte piu' solubile in acqua dell'O2. La membrana alveolo-capillare ha una componente acquosa: la solubilita' domina.",
+    commonError: "Pensare che la CO2 sia piu' leggera (e' piu' pesante: 44 g/mol vs 32 dell'O2). La diffusione qui e' regolata dalla solubilita', non dalla massa.",
+    deepdive: "Nella legge di Fick c'e' il fattore 'solubilita''. Per questo problemi di diffusione (es. fibrosi polmonare con membrana ispessita) colpiscono PRIMA l'O2 che la CO2.",
+    difficulty: 3,
+    topic: "Scambi gassosi"
+  },
+  {
+    text: "In un soggetto con polmonite, la membrana alveolo-capillare diventa piu' spessa per via di liquido infiammatorio negli alveoli. Conseguenza emodinamica/respiratoria principale?",
+    type: "multiple",
+    options: [
+      "La CO2 viene espulsa piu' velocemente del normale",
+      "Il sangue diventa piu' viscoso per concentrazione cellulare",
+      "La diffusione dei gas e' ridotta, in particolare quella dell'O2 (ipossiemia)",
+      "Aumenta la frequenza cardiaca solo per stress emotivo del paziente"
+    ],
+    answer: 2,
+    explanation: "Maggiore spessore della membrana = minore diffusione. L'O2 ne soffre piu' della CO2 (per via della solubilita' minore). Risultato: ipossiemia (basso O2 nel sangue) tipica della polmonite.",
+    commonError: "Pensare che entrambi i gas siano colpiti allo stesso modo: in realta' l'O2 ne soffre molto di piu'.",
+    deepdive: "Per questo nelle polmoniti gravi si somministra ossigeno: aumentare la pO2 alveolare aumenta il gradiente e parzialmente compensa il deficit di diffusione.",
+    difficulty: 3,
+    topic: "Scambi gassosi"
+  },
+
+  // EMOGLOBINA (2)
+  {
+    text: "La curva di saturazione dell'emoglobina ha una caratteristica forma sigmoidale (a S). Cosa indica questa forma?",
+    type: "multiple",
+    options: [
+      "Che l'emoglobina lega l'O2 a velocita' costante e indipendente",
+      "Che la mioglobina e l'emoglobina hanno la stessa identica curva",
+      "Che il legame dell'emoglobina con l'O2 e' irreversibile",
+      "Che l'emoglobina lega O2 in modo COOPERATIVO: i 4 siti si influenzano reciprocamente"
+    ],
+    answer: 3,
+    explanation: "Il legame del primo O2 facilita il legame dei successivi (cooperativita' positiva). Risultato: cattura efficiente di O2 nei polmoni (alta pO2) e rilascio efficiente nei tessuti (bassa pO2).",
+    commonError: "Pensare che la cooperativita' sia un dettaglio: in realta' e' la chiave dell'efficienza dell'emoglobina come trasportatore.",
+    deepdive: "La mioglobina ha curva iperbolica (un solo sito, no cooperativita'). E' adatta a immagazzinare O2 nei muscoli, mentre l'emoglobina e' specializzata per il trasporto.",
+    difficulty: 3,
+    topic: "Emoglobina"
+  },
+  {
+    text: "Effetto Bohr: in tessuti acidi (CO2 alta, pH basso) come si comporta l'emoglobina?",
+    type: "multiple",
+    options: [
+      "Lega piu' fortemente l'O2 trattenendolo",
+      "Rilascia piu' facilmente l'O2 ai tessuti che ne hanno bisogno",
+      "Smette completamente di funzionare",
+      "Si rompe nelle 4 catene polipeptidiche"
+    ],
+    answer: 1,
+    explanation: "Effetto Bohr: a pH basso (acido), l'affinita' dell'emoglobina per l'O2 diminuisce. Quindi nei tessuti metabolicamente attivi (alta CO2, basso pH) rilascia piu' O2: dove serve di piu', ne arriva di piu'.",
+    commonError: "Pensare che l'emoglobina si rovini in ambiente acido: in realta' e' un'autoregolazione fisiologica intelligente.",
+    deepdive: "L'effetto Bohr e' una forma di feedback: piu' un tessuto lavora, piu' produce CO2 e acidi, piu' riceve O2. Stesso principio: nei polmoni (basso pH locale per espulsione di CO2) l'emoglobina lega O2.",
+    difficulty: 3,
+    topic: "Emoglobina"
+  },
+
+  // MALATTIE RESPIRATORIE (2)
+  {
+    text: "Differenza principale tra ASMA e BPCO?",
+    type: "multiple",
+    options: [
+      "L'asma e' batterica, la BPCO e' virale",
+      "L'asma colpisce solo gli alveoli, la BPCO solo i bronchi",
+      "L'asma e' tipicamente reversibile (broncospasmo + infiammazione, risponde a broncodilatatori); la BPCO e' progressiva e parzialmente irreversibile",
+      "Sono in realta' sinonimi della stessa patologia"
+    ],
+    answer: 2,
+    explanation: "Asma: ostruzione broncospastica reversibile, spesso allergica, risponde a broncodilatatori. BPCO: danno strutturale progressivo (bronchite cronica + enfisema), parzialmente irreversibile, tipicamente da fumo.",
+    commonError: "Considerarle sinonime: pur essendo entrambe ostruttive, hanno meccanismi e prognosi molto diverse.",
+    deepdive: "I broncodilatatori (salbutamolo) funzionano molto bene nell'asma e meno nella BPCO. Nell'asma agiscono nuove terapie biologiche (anti-IgE, anti-IL5).",
+    difficulty: 3,
+    topic: "Malattie respiratorie"
+  },
+  {
+    text: "Un fumatore di lunga data sviluppa enfisema (componente della BPCO). Cosa avviene strutturalmente nei polmoni?",
+    type: "multiple",
+    options: [
+      "Aumento del numero di alveoli con maggiore produzione di O2",
+      "Distruzione delle pareti alveolari con riduzione della superficie di scambio",
+      "Calcificazione delle vie aeree superiori",
+      "Aumento isolato della produzione di muco senza danni strutturali"
+    ],
+    answer: 1,
+    explanation: "Nell'enfisema le pareti alveolari vengono distrutte: alveoli piu' grandi ma meno numerosi e con superficie totale ridotta. Conseguenza: minor scambio gassoso, dispnea, ipossiemia.",
+    commonError: "Pensare che alveoli piu' grandi siano piu' efficienti: in realta' la superficie totale (e quindi gli scambi) cala drasticamente.",
+    deepdive: "Il fumo provoca infiammazione cronica con rilascio di proteasi che digeriscono l'elastina alveolare. Il danno e' permanente: smettere di fumare ferma la progressione ma non recupera il tessuto perso.",
+    difficulty: 3,
+    topic: "Malattie respiratorie"
+  },
 ];
 
 /* ============================================
