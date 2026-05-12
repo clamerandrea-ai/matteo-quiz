@@ -1,0 +1,3319 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Fisica — Vettori - Allenamento e Verifica</title>
+<style>
+/* ============================================
+   STILI GENERALI
+   ============================================ */
+:root {
+  --primary: #4361ee;
+  --primary-light: #e8ecff;
+  --success: #06d6a0;
+  --success-light: #e6faf4;
+  --danger: #ef476f;
+  --danger-light: #fde8ed;
+  --warning: #ffd166;
+  --dark: #1d3557;
+  --gray: #6c757d;
+  --light: #f8f9fa;
+  --white: #ffffff;
+  --shadow: 0 6px 24px rgba(0,0,0,0.10);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.15);
+  --radius: 14px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(160deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  min-height: 100vh;
+  color: var(--dark);
+  line-height: 1.6;
+}
+
+/* ============================================
+   PROF. PALUDETTO — PERSONAGGIO CARTOON
+   ============================================ */
+.prof-container {
+  display: none;
+  position: relative;
+  margin: 20px auto;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.prof-container.show {
+  display: flex;
+  animation: profAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes profAppear {
+  0% { opacity: 0; transform: translateY(60px) scale(0.5); }
+  60% { transform: translateY(-10px) scale(1.05); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes profBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes profShake {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(-5deg); }
+  30% { transform: rotate(5deg); }
+  45% { transform: rotate(-4deg); }
+  60% { transform: rotate(4deg); }
+  75% { transform: rotate(-2deg); }
+}
+
+.prof-svg-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 0 auto;
+}
+
+.prof-container.correct .prof-svg-container {
+  animation: profBounce 0.8s ease 0.3s;
+  filter: drop-shadow(0 8px 30px rgba(6, 214, 160, 0.35));
+}
+
+.prof-container.wrong .prof-svg-container {
+  animation: profShake 0.6s ease;
+  filter: drop-shadow(0 8px 30px rgba(239, 71, 111, 0.35));
+}
+
+/* Fumetto / Bubble */
+.prof-bubble {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 18px 24px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  font-size: 1.1em;
+  font-weight: 600;
+  line-height: 1.5;
+  max-width: 480px;
+  margin-top: -10px;
+}
+
+.prof-bubble::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+  border-bottom-color: var(--white);
+}
+
+.prof-container.correct .prof-bubble {
+  border: 3px solid var(--success);
+  background: linear-gradient(135deg, #f0fff8, var(--white));
+}
+
+.prof-container.wrong .prof-bubble {
+  border: 3px solid var(--danger);
+  background: linear-gradient(135deg, #fff5f7, var(--white));
+}
+
+.prof-container.correct .prof-bubble::before { border-bottom-color: var(--success); }
+.prof-container.wrong .prof-bubble::before { border-bottom-color: var(--danger); }
+
+.prof-name {
+  font-size: 0.7em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+
+.prof-container.correct .prof-name { color: var(--success); }
+.prof-container.wrong .prof-name { color: var(--danger); }
+
+/* SVG nascosti/mostrati */
+.prof-svg-correct, .prof-svg-wrong { display: none; }
+.prof-container.correct .prof-svg-correct { display: block; }
+.prof-container.wrong .prof-svg-wrong { display: block; }
+
+/* Header start screen - versione piccola */
+.prof-header-container {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 10px;
+}
+
+.container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Sfondo decorativo sottile */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 20%, rgba(67, 97, 238, 0.05) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, rgba(124, 58, 237, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ============================================
+   SCHERMATA INIZIALE
+   ============================================ */
+#start-screen {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  margin-top: 30px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+#start-screen h1 {
+  font-size: 2.1em;
+  color: var(--dark);
+  margin-bottom: 6px;
+}
+
+#start-screen h1 span {
+  background: linear-gradient(135deg, var(--primary), #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#start-screen .subtitle {
+  color: var(--gray);
+  font-size: 1em;
+  margin-bottom: 10px;
+}
+
+.prof-welcome {
+  font-size: 0.9em;
+  color: var(--dark);
+  background: var(--light);
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.topic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.topic-item {
+  background: var(--primary-light);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topic-item input[type="checkbox"] { accent-color: var(--primary); }
+
+.mode-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.btn {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+.btn:active { transform: translateY(0) scale(0.97); }
+
+.btn-primary { background: var(--primary); color: var(--white); }
+.btn-success { background: var(--success); color: var(--white); }
+.btn-warning { background: var(--warning); color: var(--dark); }
+.btn-danger { background: var(--danger); color: var(--white); }
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+}
+
+.btn-ultra {
+  background: linear-gradient(135deg, #ff6a00, #ee0979);
+  color: var(--white);
+  position: relative;
+  overflow: hidden;
+}
+.btn-ultra::after {
+  content: '🔥';
+  margin-left: 6px;
+}
+
+.btn-exam {
+  background: linear-gradient(135deg, #1d3557, #457b9d);
+  color: var(--white);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.btn-demo {
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: var(--white);
+  font-weight: 700;
+}
+
+/* Sezioni menu principale */
+.menu-section {
+  background: var(--light);
+  border: 1px solid #e0e0e0;
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.menu-section-title {
+  font-size: 0.85em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--gray);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.menu-section-title .section-icon {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.section-icon.test { background: var(--primary); }
+.section-icon.study { background: var(--success); }
+
+/* ============================================
+   SEZIONE ESAME
+   ============================================ */
+#exam-screen .exam-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 30px 34px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+
+.exam-header {
+  text-align: center;
+  border-bottom: 2px solid var(--dark);
+  padding-bottom: 14px;
+  margin-bottom: 24px;
+}
+
+.exam-header h2 { font-size: 1.4em; margin-bottom: 4px; letter-spacing: 1px; }
+.exam-header .exam-info {
+  display: flex; justify-content: space-between; font-size: 0.9em; color: var(--gray);
+  margin-top: 8px;
+}
+
+.exam-question {
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #eee;
+}
+
+.exam-question:last-child { border-bottom: none; }
+
+.exam-question .eq-number {
+  font-weight: 700;
+  color: var(--primary);
+  margin-right: 6px;
+}
+
+.exam-question .eq-text {
+  font-size: 1.02em;
+  margin-bottom: 10px;
+  line-height: 1.7;
+}
+
+.exam-options { padding-left: 10px; }
+
+.exam-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 10px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.exam-option:hover { background: var(--light); }
+.exam-option input[type="radio"] { margin-top: 4px; accent-color: var(--primary); }
+.exam-option label { cursor: pointer; line-height: 1.5; }
+
+.exam-option.correct-highlight { background: var(--success-light); }
+.exam-option.wrong-highlight { background: var(--danger-light); }
+
+.exam-open-area {
+  margin-top: 10px;
+}
+
+.exam-open-area textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95em;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.exam-open-area textarea:focus { border-color: var(--primary); }
+
+.exam-section-title {
+  font-size: 1.1em;
+  font-weight: 700;
+  color: var(--dark);
+  margin: 24px 0 14px;
+  padding: 8px 12px;
+  background: var(--light);
+  border-radius: 6px;
+}
+
+.exam-correction {
+  display: none;
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.93em;
+  line-height: 1.6;
+}
+
+.exam-correction.show { display: block; }
+.exam-correction.correct-box { background: var(--success-light); border-left: 4px solid var(--success); }
+.exam-correction.wrong-box { background: var(--danger-light); border-left: 4px solid var(--danger); }
+
+.exam-result-bar {
+  text-align: center;
+  padding: 20px;
+  background: var(--light);
+  border-radius: var(--radius);
+  margin-top: 20px;
+}
+
+.exam-result-bar .exam-grade {
+  font-size: 2.5em;
+  font-weight: 800;
+}
+
+.exam-timer {
+  font-weight: 600;
+  font-size: 1.1em;
+  color: var(--danger);
+}
+
+.prev-stats {
+  margin-top: 25px;
+  padding: 15px;
+  background: var(--light);
+  border-radius: 8px;
+  font-size: 0.9em;
+}
+
+/* ============================================
+   SCHERMATA QUIZ
+   ============================================ */
+#quiz-screen {
+  display: none;
+  margin-top: 20px;
+}
+
+.quiz-header {
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 16px 24px;
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.progress-info { font-weight: 600; color: var(--dark); }
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), #7c3aed, #a855f7);
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+}
+
+.score-display {
+  display: flex;
+  gap: 15px;
+  font-size: 0.9em;
+}
+
+.score-correct { color: var(--success); font-weight: 600; }
+.score-wrong { color: var(--danger); font-weight: 600; }
+
+.question-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 16px;
+  border: 1px solid rgba(0,0,0,0.04);
+  animation: cardAppear 0.4s ease;
+}
+
+@keyframes cardAppear {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.question-meta {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+.badge-topic { background: var(--primary-light); color: var(--primary); }
+.badge-diff-1 { background: #d4edda; color: #155724; }
+.badge-diff-2 { background: #fff3cd; color: #856404; }
+.badge-diff-3 { background: #f8d7da; color: #721c24; }
+.badge-type { background: #e2e3e5; color: #383d41; }
+
+.question-text {
+  font-size: 1.15em;
+  font-weight: 500;
+  margin-bottom: 20px;
+  line-height: 1.7;
+}
+
+/* Opzioni scelta multipla */
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  background: var(--white);
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.option-btn:hover:not(.disabled) {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: translateX(6px);
+  box-shadow: 0 3px 12px rgba(67, 97, 238, 0.15);
+}
+
+.option-btn.selected { border-color: var(--primary); background: var(--primary-light); }
+.option-btn.correct {
+  border-color: var(--success);
+  background: var(--success-light);
+  animation: correctPulse 0.4s ease;
+}
+.option-btn.wrong {
+  border-color: var(--danger);
+  background: var(--danger-light);
+  animation: wrongShake 0.4s ease;
+}
+.option-btn.disabled { cursor: default; opacity: 0.85; }
+
+@keyframes correctPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+@keyframes wrongShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* Input per risposte aperte/numeriche */
+.answer-input-container { margin-top: 10px; }
+
+.answer-input {
+  width: 100%;
+  padding: 14px 18px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1em;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.answer-input:focus { border-color: var(--primary); }
+
+.submit-answer-btn {
+  margin-top: 12px;
+}
+
+/* Feedback */
+.feedback-box {
+  display: none;
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.feedback-correct {
+  background: var(--success-light);
+  border-left: 5px solid var(--success);
+}
+
+.feedback-wrong {
+  background: var(--danger-light);
+  border-left: 5px solid var(--danger);
+}
+
+.feedback-title {
+  font-weight: 700;
+  font-size: 1.1em;
+  margin-bottom: 8px;
+}
+
+.feedback-correct .feedback-title { color: var(--success); }
+.feedback-wrong .feedback-title { color: var(--danger); }
+
+.feedback-text { margin-bottom: 10px; line-height: 1.7; }
+
+/* Approfondimento */
+.deepdive-box {
+  display: none;
+  background: #fff8e1;
+  border-left: 5px solid var(--warning);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  animation: slideIn 0.4s ease;
+}
+
+.deepdive-title {
+  font-weight: 700;
+  color: #e65100;
+  margin-bottom: 8px;
+}
+
+.deepdive-text { line-height: 1.7; }
+
+.next-btn-container {
+  text-align: center;
+  margin: 16px 0;
+}
+
+/* ============================================
+   SCHERMATA RIEPILOGO
+   ============================================ */
+#summary-screen {
+  display: none;
+  margin-top: 20px;
+}
+
+.summary-card {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 34px;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 16px;
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.summary-card h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--dark);
+}
+
+.big-score {
+  text-align: center;
+  font-size: 3em;
+  font-weight: 800;
+  margin: 10px 0;
+}
+
+.big-score.good { color: var(--success); }
+.big-score.medium { color: var(--warning); }
+.big-score.bad { color: var(--danger); }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.stat-box {
+  background: var(--light);
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-number { font-size: 1.8em; font-weight: 700; }
+.stat-label { font-size: 0.85em; color: var(--gray); }
+
+.topic-results { margin: 20px 0; }
+
+.topic-result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.topic-result-item.weak { background: var(--danger-light); }
+.topic-result-item.strong { background: var(--success-light); }
+.topic-result-item.medium-res { background: #fff3cd; }
+
+.topic-bar {
+  width: 100px;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.topic-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.suggestions {
+  background: var(--primary-light);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-top: 15px;
+}
+
+.suggestions h3 { color: var(--primary); margin-bottom: 8px; }
+.suggestions ul { padding-left: 20px; }
+.suggestions li { margin-bottom: 5px; }
+
+.history-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9em;
+}
+
+.history-item .correct-mark { color: var(--success); font-weight: 700; }
+.history-item .wrong-mark { color: var(--danger); font-weight: 700; }
+
+/* ============================================
+   SEZIONE APPUNTI
+   ============================================ */
+.notes-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.notes-nav button {
+  padding: 6px 14px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: var(--light);
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.notes-nav button:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.note-section {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.note-title {
+  padding: 14px 18px;
+  margin: 0;
+  cursor: pointer;
+  background: var(--light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+  user-select: none;
+}
+
+.note-title:hover { background: var(--primary-light); }
+
+.note-toggle { font-size: 0.8em; color: var(--gray); transition: transform 0.3s; }
+
+.note-body {
+  padding: 18px 20px;
+  line-height: 1.8;
+  display: none;
+}
+
+.note-body.open { display: block; }
+
+.note-body h4 {
+  margin: 14px 0 8px;
+  color: var(--primary);
+}
+
+.note-body ul, .note-body ol {
+  padding-left: 22px;
+  margin: 8px 0;
+}
+
+.note-body li { margin-bottom: 4px; }
+
+.formula-box {
+  background: linear-gradient(135deg, #e8ecff, #f0e6ff);
+  border-left: 4px solid var(--primary);
+  padding: 14px 18px;
+  margin: 12px 0;
+  font-size: 1.15em;
+  font-weight: 600;
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  border-radius: 0 8px 8px 0;
+}
+
+.note-tip {
+  background: #fff8e1;
+  border-left: 4px solid var(--warning);
+  padding: 10px 14px;
+  margin: 12px 0;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.95em;
+}
+
+/* Passaggi dimostrazione */
+.demo-step {
+  background: var(--light);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 12px 0;
+  border-left: 4px solid var(--primary);
+  position: relative;
+}
+
+.demo-step .step-num {
+  display: inline-block;
+  background: var(--primary);
+  color: var(--white);
+  font-weight: 700;
+  font-size: 0.8em;
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-right: 8px;
+}
+
+.demo-step .step-label {
+  font-weight: 600;
+  color: var(--dark);
+}
+
+.demo-step p { margin-top: 8px; }
+.demo-step ul { margin-top: 6px; padding-left: 20px; }
+.demo-step li { margin-bottom: 3px; }
+
+/* Infografiche */
+.infographic {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  border: 2px solid #e0e7ff;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 18px;
+  text-align: center;
+  overflow-x: auto;
+}
+
+.infographic svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.info-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 10px 0;
+}
+
+.info-block {
+  background: var(--white);
+  border: 2px solid var(--primary);
+  border-radius: 10px;
+  padding: 10px 16px;
+  min-width: 110px;
+  text-align: center;
+  position: relative;
+}
+
+.info-block.highlight {
+  background: linear-gradient(135deg, #e8ecff, #f0e6ff);
+  border-color: #7c3aed;
+}
+
+.info-block.result {
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
+  border-color: var(--success);
+}
+
+.info-block .ib-title {
+  font-size: 0.75em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gray);
+  margin-bottom: 4px;
+}
+
+.info-block .ib-formula {
+  font-size: 1.1em;
+  font-weight: 700;
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  color: var(--dark);
+}
+
+.info-block .ib-note {
+  font-size: 0.78em;
+  color: var(--gray);
+  margin-top: 3px;
+}
+
+.info-arrow {
+  font-size: 1.5em;
+  color: var(--primary);
+  padding: 0 6px;
+  font-weight: 700;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.info-card {
+  background: var(--white);
+  border-radius: 10px;
+  padding: 12px;
+  border-left: 4px solid var(--primary);
+  text-align: left;
+}
+
+.info-card.green { border-left-color: var(--success); }
+.info-card.red { border-left-color: var(--danger); }
+.info-card.purple { border-left-color: #7c3aed; }
+.info-card.orange { border-left-color: #ff6a00; }
+
+.info-card .ic-title {
+  font-size: 0.8em;
+  font-weight: 700;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-card .ic-content {
+  font-size: 0.95em;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.info-card .ic-formula {
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  font-weight: 700;
+  font-size: 1.05em;
+}
+
+.info-visual {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+
+.info-visual-item {
+  text-align: center;
+}
+
+.info-visual-item .iv-icon {
+  font-size: 2.5em;
+  line-height: 1.2;
+}
+
+.info-visual-item .iv-label {
+  font-size: 0.82em;
+  color: var(--gray);
+  margin-top: 2px;
+}
+
+.info-step-flow {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.info-step-box {
+  background: var(--white);
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  min-width: 100px;
+  max-width: 160px;
+  text-align: center;
+  font-size: 0.88em;
+  line-height: 1.4;
+}
+
+.info-step-box.active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.info-step-box .isb-num {
+  display: inline-block;
+  background: var(--primary);
+  color: var(--white);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 0.8em;
+  font-weight: 700;
+  line-height: 22px;
+  margin-bottom: 4px;
+}
+
+.info-step-box .isb-formula {
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  font-weight: 700;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 600px) {
+  .container { padding: 10px; }
+  #start-screen { padding: 20px; }
+  .question-card { padding: 20px; }
+  .quiz-header { padding: 12px 16px; }
+  #start-screen h1 { font-size: 1.5em; }
+  .prof-svg-container { width: 160px; height: 160px; }
+  .prof-bubble { font-size: 0.95em; padding: 14px 18px; }
+  .info-step-flow { gap: 4px; }
+  .info-arrow { font-size: 1em; padding: 0 2px; }
+  .info-step-box { min-width: 70px; max-width: 110px; font-size: 0.78em; padding: 6px 8px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ============================================
+       SCHERMATA INIZIALE
+       ============================================ -->
+  <div id="start-screen">
+    <div class="prof-header-container" id="prof-header-svg"></div>
+    <h1>Quiz di <span>Vettori</span></h1>
+    <p class="subtitle">Grandezze scalari/vettoriali, somma, prodotto scalare e vettoriale, scomposizione — Liceo Scientifico</p>
+    <div class="prof-welcome">Prof. Paludetto dice: "Vediamo se sai muoverti nel piano cartesiano."</div>
+
+    <!-- SEZIONE 1: TEST E PREPARAZIONE -->
+    <div class="menu-section">
+      <div class="menu-section-title"><span class="section-icon test"></span> Test e Preparazione</div>
+
+      <h3 style="margin-bottom:10px; text-align:left; font-size:0.95em;">Filtra per argomento:</h3>
+      <div class="topic-grid" id="topic-filters"></div>
+
+      <div class="mode-buttons">
+        <button class="btn btn-primary" onclick="startQuiz('all')">Test completo</button>
+        <button class="btn btn-warning" onclick="startQuiz('random')">Modalita casuale</button>
+        <button class="btn btn-danger" onclick="startQuiz('errors')" id="btn-errors" style="display:none;">Ripassa gli errori</button>
+        <button class="btn btn-ultra" onclick="startQuiz('ultra')">Ultra Preparazione</button>
+      </div>
+      <div class="mode-buttons" style="margin-top:10px;">
+        <button class="btn btn-exam" onclick="showExam()">Simulazione Verifica</button>
+        <button class="btn btn-demo" onclick="showDemoExam()">Verifica Dimostrazioni</button>
+      </div>
+    </div>
+
+    <!-- SEZIONE 2: STUDIO -->
+    <div class="menu-section">
+      <div class="menu-section-title"><span class="section-icon study"></span> Studio e Ripasso</div>
+      <div class="mode-buttons">
+        <button class="btn btn-outline" style="border-color:var(--success);color:var(--success);" onclick="showNotes()">Appunti e Teoria</button>
+        <button class="btn btn-outline" style="border-color:#7c3aed;color:#7c3aed;" onclick="showNotes('dimostrazioni')">Dimostrazioni</button>
+      </div>
+    </div>
+
+    <div class="prev-stats" id="prev-stats" style="display:none;">
+      <strong>Sessione precedente:</strong>
+      <span id="prev-stats-text"></span>
+      <br><button class="btn btn-outline" style="margin-top:8px; padding:6px 16px; font-size:0.85em;" onclick="clearProgress()">Cancella progressi</button>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA QUIZ
+       ============================================ -->
+  <div id="quiz-screen">
+    <div class="quiz-header">
+      <div class="progress-info">
+        Domanda <span id="current-q">1</span> di <span id="total-q">0</span>
+      </div>
+      <div class="score-display">
+        <span class="score-correct">Corrette: <span id="score-correct">0</span></span>
+        <span class="score-wrong">Errate: <span id="score-wrong">0</span></span>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="question-card" id="question-card">
+      <div class="question-meta" id="question-meta"></div>
+      <div class="question-text" id="question-text"></div>
+      <div id="answer-area"></div>
+      <div class="submit-answer-btn" id="submit-area" style="display:none;">
+        <button class="btn btn-primary" onclick="checkOpenAnswer()">Verifica risposta</button>
+      </div>
+    </div>
+
+    <!-- Prof. Paludetto — Cartoon -->
+    <div class="prof-container" id="prof-container">
+      <div class="prof-svg-container">
+        <div class="prof-svg-correct" id="prof-svg-happy"></div>
+        <div class="prof-svg-wrong" id="prof-svg-angry"></div>
+      </div>
+      <div class="prof-bubble">
+        <div class="prof-name" id="prof-name">Prof. Paludetto</div>
+        <div id="prof-phrase"></div>
+      </div>
+    </div>
+
+    <div class="feedback-box" id="feedback-box">
+      <div class="feedback-title" id="feedback-title"></div>
+      <div class="feedback-text" id="feedback-text"></div>
+    </div>
+
+    <div class="deepdive-box" id="deepdive-box">
+      <div class="deepdive-title">Approfondimento</div>
+      <div class="deepdive-text" id="deepdive-text"></div>
+    </div>
+
+    <div class="next-btn-container" id="next-btn-container" style="display:none;">
+      <button class="btn btn-primary" onclick="nextQuestion()">Prossima domanda</button>
+      <button class="btn btn-outline" style="margin-left:8px;" onclick="endQuiz()">Termina</button>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA RIEPILOGO
+       ============================================ -->
+  <div id="summary-screen">
+    <div class="summary-card">
+      <h2>Riepilogo della Sessione</h2>
+
+      <!-- Prof nel riepilogo -->
+      <div class="prof-container show" id="prof-summary" style="margin-bottom:16px;">
+        <div class="prof-svg-container" id="prof-summary-svg"></div>
+        <div class="prof-bubble">
+          <div class="prof-name" id="prof-summary-name">Prof. Paludetto</div>
+          <div id="prof-summary-phrase"></div>
+        </div>
+      </div>
+
+      <div class="big-score" id="final-score"></div>
+      <p style="text-align:center;color:var(--gray);" id="final-score-label"></p>
+
+      <div class="stats-grid" id="stats-grid"></div>
+
+      <h3 style="margin:20px 0 10px;">Risultati per argomento</h3>
+      <div class="topic-results" id="topic-results"></div>
+
+      <div class="suggestions" id="suggestions"></div>
+
+      <h3 style="margin:20px 0 10px;">Cronologia risposte</h3>
+      <div class="history-list" id="history-list"></div>
+    </div>
+
+    <div style="text-align:center; margin:20px 0 40px;">
+      <button class="btn btn-primary" onclick="location.reload()">Ricomincia</button>
+      <button class="btn btn-danger" style="margin-left:10px;" onclick="startQuiz('errors')">Ripassa gli errori</button>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA SIMULAZIONE VERIFICA
+       ============================================ -->
+  <div id="exam-screen" style="display:none; margin-top:20px;">
+
+    <div class="exam-card">
+      <div class="exam-header">
+        <h2>VERIFICA DI FISICA — VETTORI</h2>
+        <div class="exam-info">
+          <span>Nome: _______________&nbsp;&nbsp; Cognome: _______________</span>
+          <span>Classe: 4°&nbsp;&nbsp; Data: ___/___/______</span>
+        </div>
+        <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+          <span class="exam-timer" id="exam-timer">Tempo: 50:00</span>
+          <button class="btn btn-outline" style="padding:6px 14px; font-size:0.85em;" onclick="hideExam()">Torna al menu</button>
+        </div>
+      </div>
+
+      <!-- PARTE 1: Scelta multipla (10 domande, 5 opzioni A-E) -->
+      <div class="exam-section-title">PARTE 1 — Domande a risposta multipla (10 domande)</div>
+      <div id="exam-mc-questions"></div>
+
+      <!-- PARTE 2: Domande aperte / dimostrative (3 domande) -->
+      <div class="exam-section-title">PARTE 2 — Domande aperte e dimostrazioni (3 domande)</div>
+      <div id="exam-open-questions"></div>
+
+      <div style="text-align:center; margin-top:24px;">
+        <button class="btn btn-primary" onclick="submitExam()" id="exam-submit-btn" style="padding:14px 40px; font-size:1.05em;">Consegna Verifica</button>
+      </div>
+
+      <div class="exam-result-bar" id="exam-result" style="display:none;">
+        <p style="font-size:1.1em; margin-bottom:8px;">Risultato della verifica:</p>
+        <div class="exam-grade" id="exam-grade"></div>
+        <p id="exam-grade-detail" style="color:var(--gray);margin-top:6px;"></p>
+        <div style="margin-top:16px;">
+          <button class="btn btn-primary" onclick="resetExam()">Ripeti la verifica</button>
+          <button class="btn btn-outline" style="margin-left:8px;" onclick="hideExam()">Torna al menu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA VERIFICA DIMOSTRAZIONI
+       ============================================ -->
+  <div id="demo-exam-screen" style="display:none; margin-top:20px;">
+    <div class="exam-card">
+      <div class="exam-header" style="border-bottom-color:#7c3aed;">
+        <h2 style="color:#7c3aed;">VERIFICA DIMOSTRAZIONI — VETTORI</h2>
+        <p style="font-size:0.9em; color:var(--gray); margin-top:4px;">Riproduci ogni dimostrazione passo per passo, come se fosse un compito in classe.</p>
+        <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+          <span class="exam-timer" id="demo-exam-timer">Tempo: 40:00</span>
+          <button class="btn btn-outline" style="padding:6px 14px; font-size:0.85em;" onclick="hideDemoExam()">Torna al menu</button>
+        </div>
+      </div>
+
+      <div id="demo-exam-questions"></div>
+
+      <div style="text-align:center; margin-top:24px;">
+        <button class="btn btn-demo" onclick="submitDemoExam()" id="demo-exam-submit-btn" style="padding:14px 40px; font-size:1.05em;">Consegna Verifica</button>
+      </div>
+
+      <div class="exam-result-bar" id="demo-exam-result" style="display:none;">
+        <p style="font-size:1.1em; margin-bottom:8px;">Verifica consegnata!</p>
+        <p id="demo-exam-grade-detail" style="color:var(--gray);"></p>
+        <div style="margin-top:16px;">
+          <button class="btn btn-demo" onclick="resetDemoExam()">Ripeti la verifica</button>
+          <button class="btn btn-outline" style="margin-left:8px;" onclick="hideDemoExam()">Torna al menu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA APPUNTI
+       ============================================ -->
+  <div id="notes-screen" style="display:none; margin-top:20px;">
+    <div class="summary-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:20px;">
+        <h2 style="margin:0;">Appunti di Vettori</h2>
+        <button class="btn btn-outline" onclick="hideNotes()" style="padding:8px 18px; font-size:0.9em;">Torna al menu</button>
+      </div>
+
+      <!-- Navigazione argomenti -->
+      <div class="notes-nav" id="notes-nav"></div>
+
+      <!-- Contenuto argomenti -->
+      <div id="notes-content">
+
+        <div class="note-section" id="note-scalari-vettoriali">
+          <h3 class="note-title" onclick="toggleNote('scalari-vettoriali')">1. Grandezze scalari e vettoriali <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-scalari-vettoriali">
+            <div class="infographic">
+              <div style="font-weight:700;color:var(--primary);margin-bottom:12px;font-size:1.05em;">Scalare vs Vettoriale</div>
+              <div class="info-grid">
+                <div class="info-card"><div class="ic-title">Scalari (solo modulo)</div><div class="ic-content">massa, temperatura, tempo, energia, volume</div></div>
+                <div class="info-card purple"><div class="ic-title">Vettoriali (modulo+dir+verso)</div><div class="ic-content">spostamento, velocit&agrave;, accelerazione, forza</div></div>
+              </div>
+            </div>
+            <p>Le <strong>grandezze scalari</strong> sono completamente descritte da un numero e un’unit&agrave; di misura.</p>
+            <p style="margin-top:8px;">Le <strong>grandezze vettoriali</strong> richiedono <em>modulo</em>, <em>direzione</em> e <em>verso</em>.</p>
+            <div class="note-tip">Attenzione: la “celerit&agrave;” (modulo della velocit&agrave;) &egrave; scalare; la “velocit&agrave;” &egrave; vettoriale.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-definizione">
+          <h3 class="note-title" onclick="toggleNote('definizione')">2. Definizione di vettore <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-definizione">
+            <p>Un <strong>vettore</strong> &egrave; un segmento orientato descritto da:</p>
+            <ul>
+              <li><strong>Modulo</strong>: la lunghezza del segmento</li>
+              <li><strong>Direzione</strong>: la retta lungo cui giace</li>
+              <li><strong>Verso</strong>: uno dei due sensi lungo la direzione</li>
+            </ul>
+            <p style="margin-top:8px;">Si indica con una freccia sopra la lettera: <strong>v&#x20D7;</strong>. Due vettori sono uguali se e solo se hanno stesso modulo, stessa direzione e stesso verso (sono <em>vettori liberi</em>).</p>
+            <div class="formula-box">Vettore opposto: &#8722;v&#x20D7; (stesso modulo e direzione, verso contrario)</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-rappresentazione">
+          <h3 class="note-title" onclick="toggleNote('rappresentazione')">3. Rappresentazione grafica e modulo <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-rappresentazione">
+            <p>Nel piano cartesiano: <strong>A&#x20D7; = (A<sub>x</sub>, A<sub>y</sub>)</strong></p>
+            <div class="formula-box">|A&#x20D7;| = &radic;(A<sub>x</sub>&sup2; + A<sub>y</sub>&sup2;) &nbsp;&nbsp;[Teorema di Pitagora]</div>
+            <div class="info-grid">
+              <div class="info-card green"><div class="ic-title">Esempio 1</div><div class="ic-content ic-formula">(3,4) &rarr; modulo = 5</div></div>
+              <div class="info-card orange"><div class="ic-title">Esempio 2</div><div class="ic-content ic-formula">(5,12) &rarr; modulo = 13</div></div>
+              <div class="info-card"><div class="ic-title">Esempio 3</div><div class="ic-content ic-formula">(6,8) &rarr; modulo = 10</div></div>
+            </div>
+            <div class="note-tip">Triple pitagoriche utili: (3,4,5), (5,12,13), (8,15,17), (6,8,10).</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-somma-differenza">
+          <h3 class="note-title" onclick="toggleNote('somma-differenza')">4. Somma e differenza di vettori <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-somma-differenza">
+            <h4>Somma (metodo punta-coda)</h4>
+            <div class="formula-box">A&#x20D7; + B&#x20D7; = (A<sub>x</sub>+B<sub>x</sub>, A<sub>y</sub>+B<sub>y</sub>)</div>
+            <p>Si trasla B in modo che la sua coda coincida con la punta di A. Il risultante va dalla coda di A alla punta di B.</p>
+            <h4>Differenza</h4>
+            <div class="formula-box">A&#x20D7; &#8722; B&#x20D7; = A&#x20D7; + (&#8722;B&#x20D7;) = (A<sub>x</sub>&#8722;B<sub>x</sub>, A<sub>y</sub>&#8722;B<sub>y</sub>)</div>
+            <div class="note-tip">La somma vettoriale &egrave; commutativa (A+B=B+A) e associativa. La differenza: A&#8722;B = A+(&#8722;B).</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-prodotto-scalare-vettore">
+          <h3 class="note-title" onclick="toggleNote('prodotto-scalare-vettore')">5. Prodotto di un vettore per uno scalare <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-prodotto-scalare-vettore">
+            <div class="formula-box">&lambda; &middot; A&#x20D7; = (&lambda;A<sub>x</sub>, &lambda;A<sub>y</sub>)</div>
+            <ul>
+              <li>Se &lambda; &gt; 0: stesso verso, modulo &times; |&lambda;|</li>
+              <li>Se &lambda; &lt; 0: verso <strong>invertito</strong>, modulo &times; |&lambda;|</li>
+              <li>Il modulo diventa |&lambda;| &middot; |A&#x20D7;|</li>
+            </ul>
+            <div class="note-tip">Se &lambda; = &minus;1 si ottiene il vettore opposto &minus;A&#x20D7;.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-scomposizione">
+          <h3 class="note-title" onclick="toggleNote('scomposizione')">6. Scomposizione di un vettore <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-scomposizione">
+            <p>Se &theta; &egrave; l’angolo con l’asse x e il modulo &egrave; A:</p>
+            <div class="formula-box">A<sub>x</sub> = A&middot;cos&theta; &nbsp;&nbsp;&nbsp; A<sub>y</sub> = A&middot;sin&theta;</div>
+            <p>Usando i <strong>versori</strong> &icirc;=(1,0) e &#309;=(0,1) (modulo = 1):</p>
+            <div class="formula-box">A&#x20D7; = A<sub>x</sub>&middot;&icirc; + A<sub>y</sub>&middot;&#309;</div>
+            <div class="note-tip">Mnemonico: coseno &rarr; componente orizzontale (x); seno &rarr; componente verticale (y).</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-prodotto-scalare">
+          <h3 class="note-title" onclick="toggleNote('prodotto-scalare')">7. Prodotto scalare <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-prodotto-scalare">
+            <div class="formula-box">a&#x20D7;&middot;b&#x20D7; = a<sub>x</sub>b<sub>x</sub> + a<sub>y</sub>b<sub>y</sub> = |a||b|&middot;cos&theta;</div>
+            <ul>
+              <li>Il risultato &egrave; un <strong>numero reale</strong> (scalare)</li>
+              <li>&theta; = 90&deg; &rArr; a&#x20D7;&middot;b&#x20D7; = 0 (vettori <strong>perpendicolari</strong>)</li>
+              <li>&theta; = 0&deg; &rArr; a&#x20D7;&middot;b&#x20D7; = |a||b| (massimo)</li>
+              <li>Commutativo: a&#x20D7;&middot;b&#x20D7; = b&#x20D7;&middot;a&#x20D7;</li>
+            </ul>
+            <div class="note-tip">Applicazione: lavoro L = F&#x20D7;&middot;s&#x20D7; = |F||s|cos&theta;.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-prodotto-vettoriale">
+          <h3 class="note-title" onclick="toggleNote('prodotto-vettoriale')">8. Prodotto vettoriale <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-prodotto-vettoriale">
+            <div class="formula-box">z&#x20D7; = x&#x20D7; &times; y&#x20D7; &nbsp;&nbsp; |z| = |x||y|&middot;sin&theta;</div>
+            <ul>
+              <li>Il risultato &egrave; un <strong>vettore perpendicolare</strong> a x&#x20D7; e y&#x20D7;</li>
+              <li>Il modulo = area del parallelogramma con lati x&#x20D7; e y&#x20D7;</li>
+              <li>x&#x20D7;&times;y&#x20D7; paralleli &rArr; |prodotto| = 0 (sin 0&deg; = 0)</li>
+              <li><strong>Anti-commutativo</strong>: x&#x20D7;&times;y&#x20D7; = &minus;(y&#x20D7;&times;x&#x20D7;)</li>
+            </ul>
+            <div class="note-tip">Confronto: scalare usa coseno (perp&rarr;0); vettoriale usa seno (paral&rarr;0).</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-applicazioni">
+          <h3 class="note-title" onclick="toggleNote('applicazioni')">9. Applicazioni fisiche <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-applicazioni">
+            <h4>Spostamento</h4>
+            <div class="formula-box">s&#x20D7; = r&#x20D7;<sub>f</sub> &minus; r&#x20D7;<sub>i</sub></div>
+            <h4>Velocit&agrave; vettoriale</h4>
+            <div class="formula-box">v&#x20D7; = &Delta;s&#x20D7; / &Delta;t</div>
+            <h4>Equilibrio</h4>
+            <div class="formula-box">&Sigma;F&#x20D7; = 0&#x20D7; &nbsp;&nbsp; (tutte le forze si bilanciano)</div>
+            <div class="note-tip">Spostamento &ne; distanza percorsa. Un corpo che torna al punto di partenza ha spostamento nullo ma distanza &gt; 0.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-dim-modulo">
+          <h3 class="note-title" onclick="toggleNote('dim-modulo')">DIM: Modulo di un vettore (Pitagora) <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-dim-modulo">
+            <div class="demo-step"><span class="step-num">1</span><span class="step-label">Setup</span><p>Dato A&#x20D7; = (A<sub>x</sub>, A<sub>y</sub>) nel piano cartesiano. Le componenti sono le proiezioni sugli assi.</p></div>
+            <div class="demo-step"><span class="step-num">2</span><span class="step-label">Osservazione geometrica</span><p>A<sub>x</sub>, A<sub>y</sub> e il vettore A&#x20D7; formano un <strong>triangolo rettangolo</strong>: i cateti sono A<sub>x</sub> e A<sub>y</sub>, l’ipotenusa &egrave; |A&#x20D7;|.</p></div>
+            <div class="demo-step"><span class="step-num">3</span><span class="step-label">Teorema di Pitagora</span><p>|A&#x20D7;|&sup2; = A<sub>x</sub>&sup2; + A<sub>y</sub>&sup2;</p></div>
+            <div class="demo-step"><span class="step-num">4</span><span class="step-label">Risultato</span><p><strong>|A&#x20D7;| = &radic;(A<sub>x</sub>&sup2; + A<sub>y</sub>&sup2;)</strong></p></div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-dim-perp">
+          <h3 class="note-title" onclick="toggleNote('dim-perp')">DIM: Condizione di perpendicolarit&agrave; <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-dim-perp">
+            <div class="demo-step"><span class="step-num">1</span><span class="step-label">Definizione</span><p>Due vettori a&#x20D7; e b&#x20D7; sono perpendicolari se e solo se l’angolo &theta; tra loro &egrave; 90&deg;.</p></div>
+            <div class="demo-step"><span class="step-num">2</span><span class="step-label">Formula prodotto scalare</span><p>a&#x20D7;&middot;b&#x20D7; = |a||b|&middot;cos&theta;. Se &theta;=90&deg;, cos(90&deg;)=0.</p></div>
+            <div class="demo-step"><span class="step-num">3</span><span class="step-label">Conclusione</span><p><strong>a&#x20D7;&perp;b&#x20D7; &hArr; a&#x20D7;&middot;b&#x20D7; = 0 &hArr; a<sub>x</sub>b<sub>x</sub> + a<sub>y</sub>b<sub>y</sub> = 0</strong></p></div>
+            <div class="demo-step"><span class="step-num">4</span><span class="step-label">Esempio</span><p>a=(3,4), b=(4,-3): a&middot;b = 12-12 = 0. Sono perpendicolari!</p></div>
+          </div>
+        </div>
+
+      </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================
+   BANCA DATI DOMANDE
+   Ogni domanda ha: text, type, options (se multipla),
+   answer, explanation, commonError, deepdive,
+   difficulty (1-3), topic
+   ============================================ */
+
+const QUESTIONS = [
+
+  // ─── GRANDEZZE SCALARI E VETTORIALI ───────────────────────────────────────
+  {
+    text: "Quale delle seguenti e' una grandezza vettoriale?",
+    type: "multiple",
+    options: ["Massa", "Temperatura", "Forza", "Energia"],
+    answer: 2,
+    explanation: "La forza e' vettoriale: modulo, direzione e verso. Massa, temperatura ed energia sono scalari.",
+    commonError: "Confondere grandezze scalari e vettoriali.",
+    deepdive: "Altre vettoriali: spostamento, velocita', accelerazione. Scalari: tempo, volume, potenziale.",
+    difficulty: 1, topic: "Grandezze scalari e vettoriali"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "La massa e' una grandezza scalare.",
+    answer: true,
+    explanation: "La massa e' completamente descritta da un numero e un'unita' di misura (es. 5 kg).",
+    commonError: "Pensare che la massa abbia una direzione.",
+    deepdive: "Scalari: massa, temperatura, tempo, energia, volume.",
+    difficulty: 1, topic: "Grandezze scalari e vettoriali"
+  },
+  {
+    text: "Quali sono le caratteristiche che descrivono completamente una grandezza scalare?",
+    type: "multiple",
+    options: ["Modulo e unita' di misura", "Modulo, direzione e verso", "Solo la direzione", "Direzione e verso"],
+    answer: 0,
+    explanation: "Una grandezza scalare e' completamente descritta da un numero (modulo) e un'unita' di misura.",
+    commonError: "Confondere con la grandezza vettoriale che richiede anche direzione e verso.",
+    deepdive: "Es: T=37 gradi C, m=70 kg, t=5 s. Un solo numero e' sufficiente.",
+    difficulty: 1, topic: "Grandezze scalari e vettoriali"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "L'accelerazione e' una grandezza scalare.",
+    answer: false,
+    explanation: "Falso. L'accelerazione e' vettoriale: ha modulo, direzione e verso.",
+    commonError: "Confondere il modulo dell'accelerazione (scalare) con l'accelerazione vettoriale.",
+    deepdive: "Il 'valore' di una vettoriale e' scalare, ma la grandezza completa include direzione e verso.",
+    difficulty: 1, topic: "Grandezze scalari e vettoriali"
+  },
+  {
+    text: "Quale coppia e' formata SOLO da grandezze scalari?",
+    type: "multiple",
+    options: ["Forza e velocita'", "Spostamento e accelerazione", "Velocita' e forza", "Massa ed energia"],
+    answer: 3,
+    explanation: "Massa ed energia sono scalari. Forza, velocita', spostamento e accelerazione sono vettoriali.",
+    commonError: "Dimenticare che spostamento, velocita', accelerazione e forza sono tutti vettoriali.",
+    deepdive: "La celerita' (modulo della velocita') e' scalare, ma la velocita' e' vettoriale.",
+    difficulty: 2, topic: "Grandezze scalari e vettoriali"
+  },
+  {
+    text: "Lo spostamento di un corpo e':",
+    type: "multiple",
+    options: ["Una grandezza scalare pari alla distanza percorsa", "Una grandezza vettoriale che collega posizione iniziale e finale", "Il tempo impiegato a percorrere un tratto", "Una grandezza scalare senza direzione"],
+    answer: 1,
+    explanation: "Lo spostamento e' vettoriale: collega la posizione iniziale con quella finale, con modulo, direzione e verso.",
+    commonError: "Confondere spostamento (vettoriale) con distanza percorsa (scalare).",
+    deepdive: "Un corpo che percorre un cerchio completo ha distanza 2piR ma spostamento nullo!",
+    difficulty: 1, topic: "Grandezze scalari e vettoriali"
+  },
+  {
+    text: "Quante informazioni sono necessarie per descrivere completamente un vettore?",
+    type: "multiple",
+    options: ["Una sola (il modulo)", "Due (modulo e direzione)", "Tre (modulo, direzione e verso)", "Quattro (compresa l'unita' di misura)"],
+    answer: 2,
+    explanation: "Un vettore e' descritto da tre elementi: modulo, direzione e verso.",
+    commonError: "Dimenticare il verso, o confondere direzione (retta) con verso (senso lungo la retta).",
+    deepdive: "In 3D un vettore puo' anche essere specificato dalle tre componenti cartesiane (x, y, z).",
+    difficulty: 2, topic: "Grandezze scalari e vettoriali"
+  },
+
+  // ─── DEFINIZIONE DI VETTORE ────────────────────────────────────────────────
+  {
+    text: "Il modulo di un vettore corrisponde a:",
+    type: "multiple",
+    options: ["La sua direzione", "Il suo verso", "La lunghezza del segmento orientato che lo rappresenta", "Il suo angolo con l'asse x"],
+    answer: 2,
+    explanation: "Il modulo e' la 'lunghezza' del vettore, cioe' la lunghezza del segmento orientato.",
+    commonError: "Confondere modulo (lunghezza) con direzione (retta) o verso (senso).",
+    deepdive: "Il modulo e' sempre positivo o nullo. Si indica con |v| oppure v in corsivo.",
+    difficulty: 1, topic: "Definizione di vettore"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Due vettori con lo stesso modulo, la stessa direzione e lo stesso verso sono uguali.",
+    answer: true,
+    explanation: "Esatto. Due vettori sono uguali se e solo se hanno stesso modulo, stessa direzione e stesso verso.",
+    commonError: "Pensare che due vettori paralleli identici siano diversi perche' spostati nel piano.",
+    deepdive: "I vettori sono 'liberi': possono essere traslati liberamente nel piano.",
+    difficulty: 1, topic: "Definizione di vettore"
+  },
+  {
+    text: "Due vettori sono uguali se e solo se hanno:",
+    type: "multiple",
+    options: ["Stesso modulo, stessa direzione e stesso verso", "Solo lo stesso modulo", "Solo la stessa direzione", "Stesso verso e direzione diversa"],
+    answer: 0,
+    explanation: "Tutte e tre le caratteristiche devono coincidere: modulo, direzione e verso.",
+    commonError: "Considerare uguali due vettori con solo il modulo uguale ma verso opposto.",
+    deepdive: "Il vettore opposto di v ha stesso modulo e stessa direzione ma verso contrario.",
+    difficulty: 1, topic: "Definizione di vettore"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Due vettori con stesso modulo ma verso opposto sono uguali.",
+    answer: false,
+    explanation: "Falso. Verso opposto significa che sono vettori opposti, non uguali.",
+    commonError: "Guardare solo il modulo e non considerare il verso.",
+    deepdive: "Il vettore opposto -v ha stesso modulo ma verso contrario. Serve per la differenza A-B=A+(-B).",
+    difficulty: 2, topic: "Definizione di vettore"
+  },
+  {
+    text: "Come si rappresenta graficamente un vettore?",
+    type: "multiple",
+    options: ["Con un cerchio di raggio pari al modulo", "Con una curva che indica la traiettoria", "Con un punto che indica la posizione", "Con un segmento orientato (freccia)"],
+    answer: 3,
+    explanation: "Un vettore si rappresenta con una freccia: lunghezza = modulo, retta = direzione, punta = verso.",
+    commonError: "Confondere la rappresentazione grafica del vettore con altri oggetti geometrici.",
+    deepdive: "Per i calcoli si usano le componenti; la freccia e' utile per la visualizzazione.",
+    difficulty: 1, topic: "Definizione di vettore"
+  },
+  {
+    text: "La 'direzione' di un vettore si riferisce a:",
+    type: "multiple",
+    options: ["Al verso (in quale senso punta)", "Alla retta lungo cui giace il vettore", "Al suo modulo", "All'angolo con l'asse y"],
+    answer: 1,
+    explanation: "La direzione e' la retta su cui giace. Il verso indica quale dei due sensi lungo quella retta.",
+    commonError: "Confondere direzione e verso: la direzione e' una retta, il verso e' uno dei suoi due 'lati'.",
+    deepdive: "Due vettori con stessa direzione (es. orizzontale) possono avere verso opposto.",
+    difficulty: 1, topic: "Definizione di vettore"
+  },
+
+  // ─── RAPPRESENTAZIONE GRAFICA ──────────────────────────────────────────────
+  {
+    text: "Se un vettore A ha componenti Ax e Ay, il suo modulo vale:",
+    type: "multiple",
+    options: ["Ax + Ay", "|Ax - Ay|", "sqrt(Ax^2 + Ay^2)", "Ax * Ay"],
+    answer: 2,
+    explanation: "Il modulo si calcola con Pitagora: |A| = sqrt(Ax^2 + Ay^2).",
+    commonError: "Sommare direttamente Ax e Ay senza elevare al quadrato e prendere la radice.",
+    deepdive: "Se Ax=3 e Ay=4, il modulo e' sqrt(9+16)=sqrt(25)=5.",
+    difficulty: 1, topic: "Rappresentazione grafica"
+  },
+  {
+    text: "Un vettore ha componenti Ax = 3 e Ay = 4. Qual e' il suo modulo?",
+    type: "numeric",
+    answer: 5,
+    tolerance: 0.1,
+    explanation: "|A| = sqrt(3^2 + 4^2) = sqrt(9+16) = sqrt(25) = 5.",
+    commonError: "Calcolare Ax+Ay=7 invece di usare il teorema di Pitagora.",
+    deepdive: "La terna (3,4,5) e' la tripla pitagorica piu' nota. Altre: (5,12,13), (8,15,17).",
+    difficulty: 2, topic: "Rappresentazione grafica"
+  },
+  {
+    text: "Un vettore A = (5, 12) ha modulo:",
+    type: "multiple",
+    options: ["13", "17", "60", "7"],
+    answer: 0,
+    explanation: "|A| = sqrt(25+144) = sqrt(169) = 13. Tripla pitagorica 5-12-13.",
+    commonError: "Sommare 5+12=17. Il modulo usa la somma dei quadrati, non la somma semplice.",
+    deepdive: "5^2 + 12^2 = 25 + 144 = 169 = 13^2. E' la tripla pitagorica (5,12,13).",
+    difficulty: 2, topic: "Rappresentazione grafica"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Il modulo di un vettore si calcola applicando il teorema di Pitagora alle sue componenti.",
+    answer: true,
+    explanation: "Esatto. |A| = sqrt(Ax^2+Ay^2). Il vettore e' l'ipotenusa, le componenti i cateti.",
+    commonError: "Pensare che il modulo sia la somma delle componenti.",
+    deepdive: "In 3D il modulo diventa sqrt(Ax^2+Ay^2+Az^2), ancora per Pitagora generalizzato.",
+    difficulty: 1, topic: "Rappresentazione grafica"
+  },
+  {
+    text: "Un vettore ha componenti Ax = 6 e Ay = 8. Qual e' il suo modulo?",
+    type: "numeric",
+    answer: 10,
+    tolerance: 0.1,
+    explanation: "|A| = sqrt(36+64) = sqrt(100) = 10. Tripla pitagorica 6-8-10.",
+    commonError: "Sommare 6+8=14 invece di applicare Pitagora.",
+    deepdive: "La terna (6,8,10) e' un multiplo di (3,4,5). In generale (3k,4k,5k) sono triple pitagoriche.",
+    difficulty: 2, topic: "Rappresentazione grafica"
+  },
+  {
+    text: "Le componenti Ax e Ay di un vettore rappresentano:",
+    type: "multiple",
+    options: ["L'angolo e il modulo", "Il verso e la direzione", "Il modulo e il versore", "Le proiezioni del vettore sugli assi cartesiani"],
+    answer: 3,
+    explanation: "Ax e Ay sono le proiezioni del vettore sugli assi x e y rispettivamente.",
+    commonError: "Confondere le componenti con il modulo.",
+    deepdive: "Se il vettore forma un angolo theta con l'asse x: Ax=|A|cos(theta), Ay=|A|sin(theta).",
+    difficulty: 2, topic: "Rappresentazione grafica"
+  },
+  {
+    text: "Un vettore A = (0, 5) ha modulo:",
+    type: "multiple",
+    options: ["0", "5", "25", "sqrt(5)"],
+    answer: 1,
+    explanation: "|A| = sqrt(0^2+5^2) = sqrt(25) = 5. Il vettore punta verso l'alto con modulo 5.",
+    commonError: "Calcolare sqrt(0+5)=sqrt(5) invece di sqrt(0^2+5^2)=5.",
+    deepdive: "Un vettore con Ax=0 e' puramente lungo l'asse y; il suo modulo e' |Ay|.",
+    difficulty: 2, topic: "Rappresentazione grafica"
+  },
+
+  // ─── SOMMA E DIFFERENZA ────────────────────────────────────────────────────
+  {
+    text: "Il metodo grafico per sommare due vettori si chiama:",
+    type: "multiple",
+    options: ["Metodo parallelo", "Metodo punta-coda", "Metodo coda-coda", "Metodo punta-punta"],
+    answer: 1,
+    explanation: "Metodo punta-coda: si trasla il secondo vettore in modo che la sua coda coincida con la punta del primo.",
+    commonError: "Confondere punta-coda con coda-coda (usato per la regola del parallelogramma).",
+    deepdive: "Esiste anche il metodo del parallelogramma (coda-coda): la diagonale e' la somma.",
+    difficulty: 1, topic: "Somma e differenza"
+  },
+  {
+    text: "Dati A = (2,3) e B = (1,4), le componenti di A+B sono:",
+    type: "multiple",
+    options: ["(1,-1)", "(2,12)", "(3,0)", "(3,7)"],
+    answer: 3,
+    explanation: "A+B = (2+1, 3+4) = (3,7). La somma si calcola componente per componente.",
+    commonError: "Sommare i moduli invece delle componenti.",
+    deepdive: "La somma per componenti vale in qualsiasi dimensione.",
+    difficulty: 2, topic: "Somma e differenza"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "La somma vettoriale e' commutativa: A+B = B+A.",
+    answer: true,
+    explanation: "Esatto. (Ax+Bx, Ay+By) = (Bx+Ax, By+Ay). Anche graficamente il parallelogramma ha la stessa diagonale.",
+    commonError: "Pensare che la somma vettoriale non sia commutativa.",
+    deepdive: "Il prodotto vettoriale invece NON e' commutativo: AxB = -(BxA).",
+    difficulty: 1, topic: "Somma e differenza"
+  },
+  {
+    text: "Il vettore opposto di B = (3, -5) e':",
+    type: "multiple",
+    options: ["(-3, 5)", "(3, 5)", "(-3,-5)", "(5,-3)"],
+    answer: 0,
+    explanation: "Il vettore opposto -B = (-3, 5). Si cambiano i segni di tutte le componenti.",
+    commonError: "Invertire solo una componente invece di entrambe.",
+    deepdive: "Il vettore opposto ha stesso modulo e direzione ma verso contrario. Serve per A-B=A+(-B).",
+    difficulty: 2, topic: "Somma e differenza"
+  },
+  {
+    text: "La differenza A-B tra due vettori si calcola come:",
+    type: "multiple",
+    options: ["Il vettore da punta di B a punta di A", "Sottraendo solo i moduli", "A + (-B), ovvero la somma con il vettore opposto di B", "-A + B"],
+    answer: 2,
+    explanation: "A-B = A+(-B). In componenti: (Ax-Bx, Ay-By).",
+    commonError: "Pensare di sottrarre solo i moduli senza considerare le componenti.",
+    deepdive: "Geometricamente A-B collega la punta di B con la punta di A (con le code all'origine).",
+    difficulty: 1, topic: "Somma e differenza"
+  },
+  {
+    text: "A = (4,1) e B = (-2,3). Qual e' la componente y del vettore A+B?",
+    type: "numeric",
+    answer: 4,
+    tolerance: 0.1,
+    explanation: "(A+B)_y = Ay+By = 1+3 = 4.",
+    commonError: "Sommare le componenti x invece di y.",
+    deepdive: "A+B = (4+(-2), 1+3) = (2, 4). Modulo = sqrt(4+16) = sqrt(20) = 2*sqrt(5).",
+    difficulty: 2, topic: "Somma e differenza"
+  },
+  {
+    text: "Dati A = (5,-2) e B = (-3,6), le componenti di A-B sono:",
+    type: "multiple",
+    options: ["(2, 4)", "(8, -8)", "(-8, 8)", "(2, -4)"],
+    answer: 1,
+    explanation: "A-B = (5-(-3), -2-6) = (5+3, -2-6) = (8,-8).",
+    commonError: "Dimenticare di cambiare segno alle componenti di B.",
+    deepdive: "Il modulo di A-B=(8,-8) e' sqrt(64+64)=sqrt(128)=8*sqrt(2)~11.3.",
+    difficulty: 3, topic: "Somma e differenza"
+  },
+
+  // ─── PRODOTTO PER UNO SCALARE ──────────────────────────────────────────────
+  {
+    text: "Se si moltiplica un vettore A per lambda < 0:",
+    type: "multiple",
+    options: ["Il verso rimane invariato e il modulo aumenta", "Il vettore diventa nullo", "Il verso si inverte", "La direzione cambia diventando perpendicolare"],
+    answer: 2,
+    explanation: "Con lambda<0 il verso si inverte. Il modulo diventa |lambda|*|A|.",
+    commonError: "Pensare che lambda negativo annulli il vettore.",
+    deepdive: "Se lambda=-1 si ottiene il vettore opposto (-A). Se lambda=-2 il verso e' opposto e il modulo e' doppio.",
+    difficulty: 1, topic: "Prodotto per uno scalare"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Moltiplicare un vettore per lo scalare 3 triplica il suo modulo.",
+    answer: true,
+    explanation: "Esatto. Se lambda=3>0, il modulo diventa |lambda|*|A| = 3|A|. Il verso rimane invariato.",
+    commonError: "Pensare che il modulo rimanga invariato o che cambi solo la direzione.",
+    deepdive: "Il prodotto scalare-vettore e' distributivo: lambda*(A+B) = lambda*A + lambda*B.",
+    difficulty: 1, topic: "Prodotto per uno scalare"
+  },
+  {
+    text: "Se A = (3,6) e lambda = 2, le componenti di lambda*A sono:",
+    type: "multiple",
+    options: ["(6, 12)", "(9, 18)", "(1, 3)", "(3, 6)"],
+    answer: 0,
+    explanation: "2*A = 2*(3,6) = (6,12). Ogni componente viene moltiplicata per lo scalare.",
+    commonError: "Moltiplicare solo una componente o dividere per lo scalare.",
+    deepdive: "In generale lambda*(Ax,Ay) = (lambda*Ax, lambda*Ay).",
+    difficulty: 2, topic: "Prodotto per uno scalare"
+  },
+  {
+    text: "Se lambda > 0, il vettore lambda*A:",
+    type: "multiple",
+    options: ["Ha verso opposto ad A", "Ha modulo dimezzato", "Ha direzione perpendicolare ad A", "Ha stesso verso di A e modulo |lambda|*|A|"],
+    answer: 3,
+    explanation: "Con lambda>0 il verso rimane uguale e il modulo diventa |lambda|*|A|.",
+    commonError: "Pensare che lambda>0 non cambi niente.",
+    deepdive: "lambda=1/|A| darebbe un versore (modulo 1) nella stessa direzione di A.",
+    difficulty: 1, topic: "Prodotto per uno scalare"
+  },
+  {
+    text: "Il modulo del vettore lambda*A e' uguale a:",
+    type: "multiple",
+    options: ["lambda + |A|", "|lambda| * |A|", "lambda - |A|", "|A| / |lambda|"],
+    answer: 1,
+    explanation: "|lambda*A| = |lambda|*|A|. Il valore assoluto garantisce che il modulo sia positivo anche per lambda<0.",
+    commonError: "Usare lambda invece di |lambda|, dimenticando il valore assoluto.",
+    deepdive: "Anche moltiplicando per -3 il modulo e' 3*|A|: il segno agisce sul verso, non sul modulo.",
+    difficulty: 2, topic: "Prodotto per uno scalare"
+  },
+
+  // ─── SCOMPOSIZIONE ─────────────────────────────────────────────────────────
+  {
+    text: "Se theta e' l'angolo con l'asse x, la componente orizzontale di un vettore di modulo A e':",
+    type: "multiple",
+    options: ["A*cos(theta)", "A*sin(theta)", "A*tan(theta)", "A/cos(theta)"],
+    answer: 0,
+    explanation: "La componente orizzontale e' Ax = A*cos(theta). E' la proiezione sull'asse x.",
+    commonError: "Confondere seno e coseno. Coseno per la componente orizzontale.",
+    deepdive: "Mnemonico: cos -> componente orizzontale (x), sin -> componente verticale (y).",
+    difficulty: 1, topic: "Scomposizione"
+  },
+  {
+    text: "La componente verticale Ay di un vettore di modulo A con angolo theta rispetto all'asse x vale:",
+    type: "multiple",
+    options: ["A*cos(theta)", "A/sin(theta)", "A*tan(theta)", "A*sin(theta)"],
+    answer: 3,
+    explanation: "Ay = A*sin(theta). Il seno va con la componente perpendicolare all'asse di riferimento.",
+    commonError: "Usare cos invece di sin. Ricorda: cos -> x; sin -> y.",
+    deepdive: "Verifica: se theta=90 (vettore verticale), Ax=A*cos(90)=0, Ay=A*sin(90)=A. Corretto!",
+    difficulty: 1, topic: "Scomposizione"
+  },
+  {
+    text: "Un vettore ha modulo 10 e forma un angolo di 60 gradi con l'asse x. Qual e' la componente Ax?",
+    type: "numeric",
+    answer: 5,
+    tolerance: 0.1,
+    explanation: "Ax = A*cos(60 gradi) = 10*0.5 = 5.",
+    commonError: "Usare sin(60)=sqrt(3)/2~0.866 invece di cos(60)=0.5.",
+    deepdive: "La componente Ay = 10*sin(60) = 10*(sqrt(3)/2) ~ 8.66.",
+    difficulty: 2, topic: "Scomposizione"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "I versori i-cappello e j-cappello hanno entrambi modulo uguale a 1.",
+    answer: true,
+    explanation: "Esatto. I versori (vettori unitari) i=(1,0) e j=(0,1) hanno per definizione modulo 1.",
+    commonError: "Pensare che i versori abbiano modulo diverso a seconda degli assi.",
+    deepdive: "I versori permettono di scrivere qualsiasi vettore come A = Ax*i + Ay*j.",
+    difficulty: 1, topic: "Scomposizione"
+  },
+  {
+    text: "I versori i-cappello=(1,0) e j-cappello=(0,1) si chiamano:",
+    type: "multiple",
+    options: ["Vettori unitari di lunghezza variabile", "Vettori paralleli", "Versori degli assi cartesiani", "Vettori opposti"],
+    answer: 2,
+    explanation: "Sono i versori degli assi cartesiani x e y. Hanno modulo 1 e puntano nelle direzioni positive degli assi.",
+    commonError: "Chiamarli vettori normali o generici. Il termine corretto e' 'versori'.",
+    deepdive: "In 3D si aggiunge k-cappello=(0,0,1) per l'asse z. Insieme {i,j,k} formano la base standard.",
+    difficulty: 2, topic: "Scomposizione"
+  },
+  {
+    text: "Un vettore A nel piano cartesiano si scrive con i versori come:",
+    type: "multiple",
+    options: ["A = Ax + j*Ay", "A = Ax*i + Ay*j", "A = i + j", "A = Ax*j + Ay*i"],
+    answer: 1,
+    explanation: "A = Ax*i + Ay*j. La componente x moltiplica i (asse x), la componente y moltiplica j (asse y).",
+    commonError: "Invertire i e j: Ax moltiplica i, non j.",
+    deepdive: "Questa notazione permette calcoli algebrici. Sommare due vettori = sommare i coefficienti di i e j separatamente.",
+    difficulty: 2, topic: "Scomposizione"
+  },
+  {
+    text: "Un vettore ha modulo 8 e forma un angolo di 30 gradi con l'asse x. Qual e' la componente Ay?",
+    type: "numeric",
+    answer: 4,
+    tolerance: 0.1,
+    explanation: "Ay = A*sin(30 gradi) = 8*0.5 = 4.",
+    commonError: "Usare cos(30) invece di sin(30) per la componente verticale.",
+    deepdive: "sin(30)=0.5 esattamente. La componente Ax = 8*cos(30) = 8*(sqrt(3)/2) ~ 6.93.",
+    difficulty: 2, topic: "Scomposizione"
+  },
+
+  // ─── PRODOTTO SCALARE ──────────────────────────────────────────────────────
+  {
+    text: "Il prodotto scalare di due vettori a*b e':",
+    type: "multiple",
+    options: ["Un vettore perpendicolare ad a e b", "Un numero reale", "Un versore", "Una matrice 2x2"],
+    answer: 1,
+    explanation: "Il prodotto scalare ('dot product') restituisce un numero reale, non un vettore.",
+    commonError: "Confondere prodotto scalare (risultato: numero) con prodotto vettoriale (risultato: vettore).",
+    deepdive: "Il nome 'scalare' serve proprio per distinguerlo dal prodotto vettoriale.",
+    difficulty: 1, topic: "Prodotto scalare"
+  },
+  {
+    text: "Due vettori sono perpendicolari se e solo se il loro prodotto scalare e':",
+    type: "multiple",
+    options: ["Massimo possibile", "Uguale a 1", "Negativo", "Nullo (uguale a 0)"],
+    answer: 3,
+    explanation: "a*b = |a||b|cos(theta). Se theta=90 gradi, cos(90)=0, quindi a*b=0.",
+    commonError: "Pensare che vettori perpendicolari abbiano prodotto scalare negativo.",
+    deepdive: "a*b<0 significa angolo ottuso (theta>90); a*b>0 significa angolo acuto (theta<90).",
+    difficulty: 1, topic: "Prodotto scalare"
+  },
+  {
+    text: "Dati a = (3,4) e b = (1,2), calcola il prodotto scalare a*b.",
+    type: "numeric",
+    answer: 11,
+    tolerance: 0.1,
+    explanation: "a*b = 3*1 + 4*2 = 3 + 8 = 11.",
+    commonError: "Moltiplicare i moduli invece di sommare i prodotti delle componenti.",
+    deepdive: "|a|=5, |b|=sqrt(5), cos(theta)=11/(5*sqrt(5))~0.984, theta~10.3 gradi.",
+    difficulty: 2, topic: "Prodotto scalare"
+  },
+  {
+    text: "Con theta = 90 gradi tra due vettori, la formula a*b = |a||b|*cos(theta) vale:",
+    type: "multiple",
+    options: ["0", "|a||b|", "-|a||b|", "1"],
+    answer: 0,
+    explanation: "a*b = |a||b|*cos(90) = |a||b|*0 = 0. Vettori perpendicolari hanno prodotto scalare nullo.",
+    commonError: "Scrivere cos(90)=1 invece di 0. Ricorda: cos(0)=1, cos(90)=0.",
+    deepdive: "Verifica: i*j = (1,0)*(0,1) = 1*0+0*1 = 0. Conforme, visto che i e j sono perpendicolari.",
+    difficulty: 2, topic: "Prodotto scalare"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Il prodotto scalare e' commutativo: a*b = b*a.",
+    answer: true,
+    explanation: "Esatto. a*b = ax*bx+ay*by = bx*ax+by*ay = b*a. Segue dalla commutatività dei reali.",
+    commonError: "Confondere con il prodotto vettoriale, che NON e' commutativo.",
+    deepdive: "A differenza del prodotto vettoriale, il prodotto scalare e' commutativo e associativo.",
+    difficulty: 2, topic: "Prodotto scalare"
+  },
+  {
+    text: "Dati a = (2,-1) e b = (3,6), il prodotto scalare a*b vale:",
+    type: "multiple",
+    options: ["12", "-6", "0", "6"],
+    answer: 2,
+    explanation: "a*b = 2*3 + (-1)*6 = 6-6 = 0. I due vettori sono perpendicolari!",
+    commonError: "Calcolare 2*3+1*6=12, dimenticando il segno negativo di ay=-1.",
+    deepdive: "a*b=0 significa theta=90: i vettori (2,-1) e (3,6) sono perpendicolari.",
+    difficulty: 3, topic: "Prodotto scalare"
+  },
+  {
+    text: "Con theta = 0 gradi tra due vettori di moduli a e b, il prodotto scalare vale:",
+    type: "multiple",
+    options: ["0", "-ab", "Dipende dalla direzione specifica", "ab (valore massimo)"],
+    answer: 3,
+    explanation: "a*b = |a||b|*cos(0) = |a||b|*1 = ab. E' il valore massimo del prodotto scalare.",
+    commonError: "Pensare che theta=0 dia prodotto nullo. E' theta=90 che annulla il prodotto scalare.",
+    deepdive: "Il massimo si ha con vettori paralleli concordi. Il minimo (negativo) con theta=180.",
+    difficulty: 2, topic: "Prodotto scalare"
+  },
+
+  // ─── PRODOTTO VETTORIALE ───────────────────────────────────────────────────
+  {
+    text: "Il risultato del prodotto vettoriale x cross y e':",
+    type: "multiple",
+    options: ["Un numero reale (scalare)", "Un vettore parallelo a x o y", "Un vettore perpendicolare sia a x che a y", "Il modulo del parallelogramma"],
+    answer: 2,
+    explanation: "z = x cross y e' un vettore perpendicolare al piano contenente x e y.",
+    commonError: "Confondere il risultato: il prodotto vettoriale e' un vettore, non uno scalare.",
+    deepdive: "In 3D la perpendicolarita' e' rispetto al piano dei due vettori. In 2D il vettore 'esce' dal foglio.",
+    difficulty: 1, topic: "Prodotto vettoriale"
+  },
+  {
+    text: "Il modulo del prodotto vettoriale |x cross y| vale:",
+    type: "multiple",
+    options: ["|x||y|*sin(theta)", "|x||y|*cos(theta)", "|x||y|*tan(theta)", "|x|+|y|"],
+    answer: 0,
+    explanation: "|x cross y| = |x||y|*sin(theta). Corrisponde all'area del parallelogramma.",
+    commonError: "Usare cos(theta) invece di sin(theta). Ricorda: scalare->cos, vettoriale->sin.",
+    deepdive: "Mnemonico SC-VS: Scalare usa Coseno, Vettoriale usa Seno.",
+    difficulty: 1, topic: "Prodotto vettoriale"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Se due vettori sono paralleli, il modulo del loro prodotto vettoriale e' zero.",
+    answer: true,
+    explanation: "Esatto. Vettori paralleli: theta=0 o 180, sin(theta)=0, quindi |x cross y|=0.",
+    commonError: "Pensare che vettori paralleli abbiano prodotto vettoriale massimo.",
+    deepdive: "Il massimo del prodotto vettoriale si ha con theta=90 (vettori perpendicolari).",
+    difficulty: 2, topic: "Prodotto vettoriale"
+  },
+  {
+    text: "Il modulo |x cross y| corrisponde geometricamente a:",
+    type: "multiple",
+    options: ["Il perimetro del triangolo formato dai vettori", "La lunghezza della diagonale del rettangolo", "Il prodotto dei moduli diviso 2", "L'area del parallelogramma formato dai due vettori"],
+    answer: 3,
+    explanation: "|x cross y| = |x||y|*sin(theta) = area del parallelogramma con lati x e y.",
+    commonError: "Confondere con l'area del triangolo (che sarebbe la meta').",
+    deepdive: "L'area del triangolo con lati x e y e' (1/2)|x cross y|. Modo elegante per calcolare aree in coordinate.",
+    difficulty: 2, topic: "Prodotto vettoriale"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Il prodotto vettoriale e' commutativo: x cross y = y cross x.",
+    answer: false,
+    explanation: "Falso. Il prodotto vettoriale e' ANTI-commutativo: x cross y = -(y cross x).",
+    commonError: "Confondere con il prodotto scalare, che e' commutativo.",
+    deepdive: "x cross y = -(y cross x) si verifica con la regola della mano destra.",
+    difficulty: 2, topic: "Prodotto vettoriale"
+  },
+  {
+    text: "Se |x|=4 e |y|=5 e l'angolo tra essi e' 90 gradi, |x cross y| vale:",
+    type: "multiple",
+    options: ["0", "20", "10", "40"],
+    answer: 1,
+    explanation: "|x cross y| = 4*5*sin(90) = 4*5*1 = 20.",
+    commonError: "Usare cos(90)=0 invece di sin(90)=1. Per theta=90 il prodotto vettoriale e' MASSIMO.",
+    deepdive: "theta=90: il parallelogramma diventa un rettangolo, area massima per dati moduli dei lati.",
+    difficulty: 3, topic: "Prodotto vettoriale"
+  },
+
+  // ─── APPLICAZIONI FISICHE ──────────────────────────────────────────────────
+  {
+    text: "Il vettore spostamento e' definito come:",
+    type: "multiple",
+    options: ["La distanza percorsa dal corpo", "La somma delle posizioni iniziale e finale", "Il vettore rf - ri (posizione finale meno iniziale)", "Il prodotto di velocita' e tempo"],
+    answer: 2,
+    explanation: "s = rf - ri. Lo spostamento collega la posizione iniziale con quella finale.",
+    commonError: "Confondere spostamento (vettoriale) con distanza percorsa (scalare).",
+    deepdive: "Un corpo che torna al punto di partenza ha spostamento nullo ma distanza percorsa > 0.",
+    difficulty: 1, topic: "Applicazioni fisiche"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "La forza e' una grandezza vettoriale.",
+    answer: true,
+    explanation: "Esatto. La forza ha modulo, direzione e verso. La seconda legge di Newton F=ma richiede F vettoriale.",
+    commonError: "Pensare alla forza come alla sua intensita' (scalare).",
+    deepdive: "Per calcolare l'effetto di piu' forze si usa la somma vettoriale (risultante).",
+    difficulty: 1, topic: "Applicazioni fisiche"
+  },
+  {
+    text: "Un corpo e' in equilibrio quando:",
+    type: "multiple",
+    options: ["La somma vettoriale di tutte le forze e' nulla", "La velocita' e' massima", "La forza risultante e' massima", "L'accelerazione e' costante e diversa da zero"],
+    answer: 0,
+    explanation: "Condizione di equilibrio: somma_F = 0. Per Newton: F=ma, quindi se F=0 allora a=0.",
+    commonError: "Pensare che equilibrio significhi 'velocita' nulla'. Il moto uniforme e' equilibrio dinamico.",
+    deepdive: "L'equilibrio statico (v=0) e' un caso particolare. L'equilibrio dinamico: v=costante!=0.",
+    difficulty: 1, topic: "Applicazioni fisiche"
+  },
+  {
+    text: "La velocita' vettoriale e' definita come:",
+    type: "multiple",
+    options: ["v = delta(t) / delta(s)", "v = |delta(s)| * delta(t)", "v = delta(s) (senza dividere per t)", "v = delta(s) / delta(t)"],
+    answer: 3,
+    explanation: "v = delta(s)/delta(t). E' lo spostamento diviso per il tempo. Indica direzione e modulo del moto.",
+    commonError: "Invertire numeratore e denominatore.",
+    deepdive: "La celerita' (velocita' scalare) e' il modulo della velocita' vettoriale: |v| = |delta(s)|/delta(t).",
+    difficulty: 2, topic: "Applicazioni fisiche"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Se piu' forze agiscono su un corpo, per trovare la forza risultante esse si sommano vettorialmente.",
+    answer: true,
+    explanation: "Esatto. La somma vettoriale di tutte le forze da' la risultante F_tot = m*a.",
+    commonError: "Pensare di sommare solo i moduli delle forze.",
+    deepdive: "Due forze uguali e opposte si annullano (risultante=0) pur avendo moduli diversi da zero.",
+    difficulty: 2, topic: "Applicazioni fisiche"
+  },
+  {
+    text: "Una particella va da A=(2,5) a B=(-3,8). Le componenti del vettore spostamento sono:",
+    type: "multiple",
+    options: ["(5,-3)", "(-5,3)", "(1,13)", "(-1,3)"],
+    answer: 1,
+    explanation: "delta_r = B - A = (-3-2, 8-5) = (-5, 3).",
+    commonError: "Calcolare A-B invece di B-A. Lo spostamento e' finale meno iniziale: B-A.",
+    deepdive: "Il modulo e' sqrt(25+9)=sqrt(34)~5.83. L'angolo e' arctan(3/(-5)) nel secondo quadrante.",
+    difficulty: 2, topic: "Applicazioni fisiche"
+  },
+  {
+    text: "Se F1=(10,5) N e F2=(-3,4) N e il corpo e' in equilibrio, F3 vale:",
+    type: "multiple",
+    options: ["(13, 9) N", "(-7, 9) N", "(-7, -9) N", "(7, 9) N"],
+    answer: 2,
+    explanation: "In equilibrio: F1+F2+F3=0. F3 = -(F1+F2) = -(7,9) = (-7,-9) N.",
+    commonError: "Non invertire i segni: F3 = -(F1+F2), non +(F1+F2).",
+    deepdive: "Passo per passo: F1+F2=(10-3, 5+4)=(7,9). Quindi F3=-(7,9)=(-7,-9) N.",
+    difficulty: 3, topic: "Applicazioni fisiche"
+  }
+];
+/* ============================================
+   ULTRA PREPARAZIONE - 5 domande da 10
+   Esercizi avanzati con ragionamento multi-step
+   ============================================ */
+const ULTRA_QUESTIONS = [
+  {
+    text: "Dati a=(3,4) e b=(4,-3), calcola il prodotto scalare a*b. Qual e' il risultato?",
+    type: "numeric",
+    answer: 0,
+    tolerance: 0.1,
+    explanation: "a*b = 3*4 + 4*(-3) = 12 - 12 = 0. I vettori sono perpendicolari!",
+    commonError: "Calcolare 3*4+4*3=24, dimenticando il segno negativo di by=-3.",
+    deepdive: "Il risultato zero significa theta=90 gradi. Il modulo di a e' 5, il modulo di b e' 5 anch'esso: sono ruotati di 90 l'uno dall'altro.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Un vettore A=(6,8). Calcola l'angolo che esso forma con l'asse x (in gradi, arrotondato all'unita').",
+    type: "numeric",
+    answer: 53,
+    tolerance: 1,
+    explanation: "theta = arctan(Ay/Ax) = arctan(8/6) = arctan(4/3) ~ 53.13 gradi.",
+    commonError: "Usare arctan(Ax/Ay) invece di arctan(Ay/Ax), invertendo i cateti.",
+    deepdive: "|A|=10, Ax=6=10*cos(53), Ay=8=10*sin(53). La terna 6-8-10 e' multiplo di 3-4-5.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Un vettore di modulo 10 forma un angolo di 45 gradi con l'asse x. Calcola Ax arrotondato a due decimali.",
+    type: "numeric",
+    answer: 7.07,
+    tolerance: 0.05,
+    explanation: "Ax = 10*cos(45) = 10*sqrt(2)/2 = 5*sqrt(2) ~ 7.07.",
+    commonError: "Usare sin(45) invece di cos(45). Per 45 gradi valgono entrambi 0.707, ma e' importante conoscere il perche'.",
+    deepdive: "Per theta=45: Ax=Ay=7.07. Il vettore e' sulla bisettrice del primo quadrante.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "A=(5,0) e B=(0,5). Calcola il modulo di A+B arrotondato a due decimali.",
+    type: "numeric",
+    answer: 7.07,
+    tolerance: 0.05,
+    explanation: "A+B=(5,5). |A+B|=sqrt(25+25)=sqrt(50)=5*sqrt(2)~7.07.",
+    commonError: "Calcolare |A|+|B|=5+5=10 invece di |A+B|. Il modulo della somma != somma dei moduli!",
+    deepdive: "Disuguaglianza triangolare: |A+B| <= |A|+|B|. L'uguaglianza vale solo se A e B sono paralleli e concordi.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Dati a=(1,1.73) e b=(0,2), calcola l'angolo tra i vettori usando il prodotto scalare (in gradi, arrotondato all'unita'). Usa |a|~2, |b|=2.",
+    type: "numeric",
+    answer: 30,
+    tolerance: 1,
+    explanation: "a*b = 1*0+1.73*2=3.46. |a|~2, |b|=2. cos(theta)=3.46/(2*2)=3.46/4=0.866=cos(30). Theta=30 gradi.",
+    commonError: "Dimenticare di dividere per il prodotto dei moduli: cos(theta)=a*b/(|a||b|), non solo a*b.",
+    deepdive: "1.73~sqrt(3). La coppia (1,sqrt(3)) ha modulo 2 esatto e forma 60 gradi con x. Il vettore (0,2) e' sull'asse y (90 gradi con x). La differenza e' 90-60=30 gradi.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Una forza F=(15,20) N agisce per uno spostamento s=(4,-2) m. Calcola il lavoro L=F*s (in Joule).",
+    type: "numeric",
+    answer: 20,
+    tolerance: 0.5,
+    explanation: "L = F*s = 15*4 + 20*(-2) = 60 - 40 = 20 J.",
+    commonError: "Sommare i moduli |F|*|s| invece di usare il prodotto scalare componente per componente.",
+    deepdive: "|F|=25 N, |s|=sqrt(20)~4.47 m. L=|F||s|cos(theta)=20, quindi cos(theta)=20/(25*4.47)~0.179, theta~79.7 gradi.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Dati A=(2,0) e B=(0,3), il modulo del vettore 2A+B vale:",
+    type: "multiple",
+    options: ["5", "7", "sqrt(7)", "sqrt(20)"],
+    answer: 0,
+    explanation: "2A=(4,0). 2A+B=(4,3). |2A+B|=sqrt(16+9)=sqrt(25)=5.",
+    commonError: "Calcolare 2|A|+|B|=4+3=7. Il modulo della somma != somma dei moduli.",
+    deepdive: "Risulta la terna pitagorica (4,3,5). Nonostante i vettori di partenza fossero semplici, la combinazione lineare produce una terna nota.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Dati u=(2,1) e v=(4,2), calcola il modulo del prodotto vettoriale in 2D: |ux*vy - uy*vx|.",
+    type: "numeric",
+    answer: 0,
+    tolerance: 0.1,
+    explanation: "|2*2 - 1*4| = |4-4| = 0. I vettori sono paralleli: v = 2*u.",
+    commonError: "Calcolare 2*2+1*4=8. La formula del prodotto vettoriale 2D e' ux*vy - uy*vx.",
+    deepdive: "Risultato zero conferma che u e v sono paralleli (v=2u). Vettori paralleli hanno prodotto vettoriale nullo.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Il vettore v=(8,6) ha modulo 10. Scomposto lungo una direzione a 30 gradi da se stesso, la componente parallela vale (due decimali).",
+    type: "numeric",
+    answer: 8.66,
+    tolerance: 0.05,
+    explanation: "v_parallel = |v|*cos(30) = 10*(sqrt(3)/2) = 5*sqrt(3) ~ 8.66.",
+    commonError: "Usare sin(30)=0.5 invece di cos(30)=sqrt(3)/2~0.866.",
+    deepdive: "La componente perpendicolare sarebbe v_perp=10*sin(30)=5.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Dati a=(4,-3) e b=(-3,-4), calcola il prodotto scalare a*b.",
+    type: "numeric",
+    answer: 0,
+    tolerance: 0.1,
+    explanation: "a*b = 4*(-3) + (-3)*(-4) = -12 + 12 = 0. Sono perpendicolari!",
+    commonError: "Sbagliare i segni: 4*(-3)=-12 e (-3)*(-4)=+12.",
+    deepdive: "Verifica: |a|=5, |b|=5. Un quadrato ruotato di 90 gradi mantiene i lati perpendicolari.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  }
+];
+/* ============================================
+   VARIABILI DI STATO
+   ============================================ */
+let currentQuestions = [];  // domande della sessione corrente
+let currentIndex = 0;       // indice domanda corrente
+let correctCount = 0;       // risposte corrette
+let wrongCount = 0;         // risposte errate
+let history = [];           // cronologia risposte
+let topicStats = {};        // statistiche per argomento
+let errorQuestionIds = [];  // indici domande sbagliate (per ripasso)
+let answered = false;       // se la domanda corrente ha ricevuto risposta
+
+/* ============================================
+   INIZIALIZZAZIONE
+   ============================================ */
+(function init() {
+  // Popola i filtri per argomento
+  const topics = [...new Set(QUESTIONS.map(q => q.topic))];
+  const grid = document.getElementById('topic-filters');
+  topics.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'topic-item';
+    div.innerHTML = `<input type="checkbox" checked value="${t}" class="topic-cb"> ${t}`;
+    grid.appendChild(div);
+  });
+
+  // Mostra statistiche precedenti da localStorage
+  loadPreviousStats();
+})();
+
+/* Carica statistiche salvate */
+function loadPreviousStats() {
+  const saved = localStorage.getItem('vettori_stats');
+  if (saved) {
+    const data = JSON.parse(saved);
+    document.getElementById('prev-stats').style.display = 'block';
+    document.getElementById('prev-stats-text').textContent =
+      `${data.correct}/${data.total} corrette (${data.percentage}%) - ${data.date}`;
+    // Mostra pulsante "ripassa errori" se ci sono errori salvati
+    const savedErrors = localStorage.getItem('vettori_errors');
+    if (savedErrors && JSON.parse(savedErrors).length > 0) {
+      document.getElementById('btn-errors').style.display = 'inline-block';
+    }
+  }
+}
+
+/* Cancella progressi */
+function clearProgress() {
+  localStorage.removeItem('vettori_stats');
+  localStorage.removeItem('vettori_errors');
+  document.getElementById('prev-stats').style.display = 'none';
+  document.getElementById('btn-errors').style.display = 'none';
+}
+
+/* ============================================
+   AVVIO QUIZ
+   ============================================ */
+function startQuiz(mode) {
+  // Reset stato
+  currentIndex = 0;
+  correctCount = 0;
+  wrongCount = 0;
+  history = [];
+  topicStats = {};
+  errorQuestionIds = [];
+  answered = false;
+
+  // Seleziona domande in base alla modalita'
+  const selectedTopics = [...document.querySelectorAll('.topic-cb:checked')].map(cb => cb.value);
+
+  if (mode === 'ultra') {
+    currentQuestions = [...ULTRA_QUESTIONS];
+  } else if (mode === 'errors') {
+    const savedErrors = localStorage.getItem('vettori_errors');
+    if (savedErrors) {
+      const errorIds = JSON.parse(savedErrors);
+      currentQuestions = errorIds.map(id => QUESTIONS[id]).filter(q => q);
+    }
+    if (currentQuestions.length === 0) {
+      alert('Non ci sono errori salvati da ripassare!');
+      return;
+    }
+  } else {
+    currentQuestions = QUESTIONS.filter(q => selectedTopics.includes(q.topic));
+    if (currentQuestions.length === 0) {
+      alert('Seleziona almeno un argomento!');
+      return;
+    }
+  }
+
+  if (mode === 'random') {
+    shuffleArray(currentQuestions);
+  } else if (mode === 'all') {
+    // Ordina per difficolta' crescente
+    currentQuestions.sort((a, b) => a.difficulty - b.difficulty);
+  }
+
+  // Inizializza statistiche per argomento
+  const topics = [...new Set(currentQuestions.map(q => q.topic))];
+  topics.forEach(t => { topicStats[t] = { correct: 0, wrong: 0, total: 0 }; });
+
+  // Mostra schermata quiz
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('total-q').textContent = currentQuestions.length;
+
+  showQuestion();
+}
+
+/* Mescola array (Fisher-Yates) */
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+/* ============================================
+   MOSTRA DOMANDA
+   ============================================ */
+function showQuestion() {
+  answered = false;
+  const q = currentQuestions[currentIndex];
+
+  // Aggiorna header
+  document.getElementById('current-q').textContent = currentIndex + 1;
+  document.getElementById('score-correct').textContent = correctCount;
+  document.getElementById('score-wrong').textContent = wrongCount;
+  const pct = ((currentIndex) / currentQuestions.length) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+
+  // Meta (argomento, difficolta', tipo)
+  const meta = document.getElementById('question-meta');
+  const diffLabels = ['Facile', 'Media', 'Difficile'];
+  const typeLabels = { multiple: 'Scelta multipla', truefalse: 'Vero/Falso', numeric: 'Esercizio numerico', completion: 'Completamento' };
+  meta.innerHTML = `
+    <span class="badge badge-topic">${q.topic}</span>
+    <span class="badge badge-diff-${q.difficulty}">${diffLabels[q.difficulty - 1]}</span>
+    <span class="badge badge-type">${typeLabels[q.type]}</span>
+  `;
+
+  // Testo domanda
+  document.getElementById('question-text').textContent = q.text;
+
+  // Area risposta
+  const area = document.getElementById('answer-area');
+  area.innerHTML = '';
+  document.getElementById('submit-area').style.display = 'none';
+
+  if (q.type === 'multiple') {
+    // Crea array di indici e mescolali per randomizzare l'ordine delle opzioni
+    const indices = q.options.map((_, i) => i);
+    shuffleArray(indices);
+    q._shuffledIndices = indices; // salva la mappatura per la correzione
+
+    const container = document.createElement('div');
+    container.className = 'options-container';
+    indices.forEach((origIdx, displayIdx) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = q.options[origIdx];
+      btn.onclick = () => handleMultipleChoice(displayIdx);
+      btn.id = 'opt-' + displayIdx;
+      btn.dataset.origIdx = origIdx;
+      container.appendChild(btn);
+    });
+    area.appendChild(container);
+  } else if (q.type === 'truefalse') {
+    // Mostra l'affermazione
+    const stmt = document.createElement('p');
+    stmt.style.cssText = 'font-style:italic; margin-bottom:15px; padding:12px; background:#f0f0f0; border-radius:8px;';
+    stmt.textContent = '\"' + q.statement + '\"';
+    area.appendChild(stmt);
+
+    const container = document.createElement('div');
+    container.className = 'options-container';
+    ['Vero', 'Falso'].forEach((label, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = label;
+      btn.onclick = () => handleTrueFalse(i === 0);
+      btn.id = 'tf-' + i;
+      container.appendChild(btn);
+    });
+    area.appendChild(container);
+  } else if (q.type === 'numeric') {
+    const container = document.createElement('div');
+    container.className = 'answer-input-container';
+    container.innerHTML = `<input type="text" class="answer-input" id="numeric-input" placeholder="Scrivi il valore numerico..." onkeydown="if(event.key==='Enter')checkOpenAnswer()">`;
+    area.appendChild(container);
+    document.getElementById('submit-area').style.display = 'block';
+  } else if (q.type === 'completion') {
+    const container = document.createElement('div');
+    container.className = 'answer-input-container';
+    container.innerHTML = `
+      <input type="text" class="answer-input" id="completion-input-0" placeholder="Prima parola mancante..." style="margin-bottom:8px;" onkeydown="if(event.key==='Enter')document.getElementById('completion-input-1').focus()">
+      <input type="text" class="answer-input" id="completion-input-1" placeholder="Seconda parola mancante..." onkeydown="if(event.key==='Enter')checkOpenAnswer()">
+    `;
+    area.appendChild(container);
+    document.getElementById('submit-area').style.display = 'block';
+  }
+
+  // Nascondi feedback, professore e pulsante next
+  document.getElementById('feedback-box').style.display = 'none';
+  document.getElementById('deepdive-box').style.display = 'none';
+  document.getElementById('next-btn-container').style.display = 'none';
+  document.getElementById('prof-container').className = 'prof-container';
+}
+
+/* ============================================
+   GESTIONE RISPOSTE
+   ============================================ */
+
+/* Scelta multipla */
+function handleMultipleChoice(displayIdx) {
+  if (answered) return;
+  answered = true;
+
+  const q = currentQuestions[currentIndex];
+  // Ricava l'indice originale dalla mappatura mescolata
+  const origSelected = q._shuffledIndices[displayIdx];
+  const isCorrect = origSelected === q.answer;
+
+  // Evidenzia opzioni usando l'indice originale salvato in data-origIdx
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    const origIdx = parseInt(btn.dataset.origIdx);
+    if (origIdx === q.answer) btn.classList.add('correct');
+    if (i === displayIdx && !isCorrect) btn.classList.add('wrong');
+  });
+
+  processAnswer(isCorrect, q);
+}
+
+/* Vero/Falso */
+function handleTrueFalse(selected) {
+  if (answered) return;
+  answered = true;
+
+  const q = currentQuestions[currentIndex];
+  const isCorrect = selected === q.answer;
+
+  const correctIdx = q.answer ? 0 : 1;
+  const selectedIdx = selected ? 0 : 1;
+
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (i === correctIdx) btn.classList.add('correct');
+    if (i === selectedIdx && !isCorrect) btn.classList.add('wrong');
+  });
+
+  processAnswer(isCorrect, q);
+}
+
+/* Risposta aperta (numerica o completamento) */
+function checkOpenAnswer() {
+  if (answered) return;
+  answered = true;
+
+  const q = currentQuestions[currentIndex];
+  let isCorrect = false;
+
+  if (q.type === 'numeric') {
+    const input = document.getElementById('numeric-input');
+    const val = parseFloat(input.value.replace(',', '.'));
+    isCorrect = !isNaN(val) && Math.abs(val - q.answer) <= q.tolerance;
+    input.style.borderColor = isCorrect ? 'var(--success)' : 'var(--danger)';
+    input.style.background = isCorrect ? 'var(--success-light)' : 'var(--danger-light)';
+  } else if (q.type === 'completion') {
+    const inputs = [
+      document.getElementById('completion-input-0').value.trim().toLowerCase(),
+      document.getElementById('completion-input-1').value.trim().toLowerCase()
+    ];
+    const answers = q.answer.map(a => a.toLowerCase());
+    isCorrect = inputs[0].includes(answers[0]) && inputs[1].includes(answers[1]);
+
+    [0, 1].forEach(i => {
+      const el = document.getElementById('completion-input-' + i);
+      const ok = inputs[i].includes(answers[i]);
+      el.style.borderColor = ok ? 'var(--success)' : 'var(--danger)';
+      el.style.background = ok ? 'var(--success-light)' : 'var(--danger-light)';
+    });
+  }
+
+  processAnswer(isCorrect, q);
+}
+
+/* Logica comune di elaborazione risposta */
+function processAnswer(isCorrect, q) {
+  // Aggiorna contatori
+  if (isCorrect) {
+    correctCount++;
+    topicStats[q.topic].correct++;
+  } else {
+    wrongCount++;
+    topicStats[q.topic].wrong++;
+    // Salva indice per ripasso
+    const globalIdx = QUESTIONS.indexOf(q);
+    if (globalIdx !== -1) errorQuestionIds.push(globalIdx);
+  }
+  topicStats[q.topic].total++;
+
+  // Cronologia
+  history.push({
+    question: q.text,
+    topic: q.topic,
+    correct: isCorrect,
+    difficulty: q.difficulty
+  });
+
+  // Mostra feedback
+  showFeedback(isCorrect, q);
+
+  // Aggiorna punteggio
+  document.getElementById('score-correct').textContent = correctCount;
+  document.getElementById('score-wrong').textContent = wrongCount;
+}
+
+/* ============================================
+   FEEDBACK E APPROFONDIMENTI
+   ============================================ */
+/* ============================================
+   PROF. PALUDETTO — SVG CARTOON
+   Ispirato alla foto: capelli ricci scuri, barba,
+   occhiali, espressione autorevole
+   ============================================ */
+
+// SVG del prof felice/approvazione
+const PROF_SVG_HAPPY = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sfondo glow verde -->
+  <defs>
+    <radialGradient id="glowG" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#06d6a0;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#06d6a0;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowG)"/>
+  <!-- Corpo/giacca -->
+  <path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+  <path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#1e40af" stroke="none"/>
+  <!-- Collo -->
+  <rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/>
+  <!-- Testa -->
+  <ellipse cx="110" cy="105" rx="48" ry="52" fill="#deb887"/>
+  <!-- Capelli ricci scuri -->
+  <path d="M62 95 Q58 55 80 42 Q95 33 110 32 Q125 33 140 42 Q162 55 158 95" fill="#2c1810" stroke="#1a0f0a" stroke-width="1"/>
+  <circle cx="68" cy="82" r="8" fill="#2c1810"/><circle cx="72" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="152" cy="82" r="8" fill="#2c1810"/><circle cx="148" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="78" cy="90" r="6" fill="#2c1810"/><circle cx="142" cy="90" r="6" fill="#2c1810"/>
+  <circle cx="85" cy="65" r="6" fill="#2c1810"/><circle cx="135" cy="65" r="6" fill="#2c1810"/>
+  <circle cx="95" cy="50" r="7" fill="#2c1810"/><circle cx="125" cy="50" r="7" fill="#2c1810"/>
+  <circle cx="110" cy="45" r="8" fill="#2c1810"/>
+  <circle cx="100" cy="55" r="5" fill="#2c1810"/><circle cx="120" cy="55" r="5" fill="#2c1810"/>
+  <!-- Barba -->
+  <path d="M78 118 Q80 145 110 152 Q140 145 142 118 Q142 130 130 140 Q110 150 90 140 Q78 130 78 118Z" fill="#3d2914" stroke="#2c1810" stroke-width="1"/>
+  <path d="M75 108 Q72 125 78 118" fill="#3d2914"/><path d="M145 108 Q148 125 142 118" fill="#3d2914"/>
+  <!-- Occhiali -->
+  <rect x="76" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <rect x="116" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <line x1="104" y1="102" x2="116" y2="102" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="76" y1="100" x2="66" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="144" y1="100" x2="154" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <!-- Occhi felici (archi sorridenti) -->
+  <path d="M84 102 Q90 96 96 102" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M124 102 Q130 96 136 102" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Sopracciglia alzate (contento) -->
+  <path d="M78 86 Q90 80 100 84" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M120 84 Q130 80 142 86" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Bocca sorridente (nella barba) -->
+  <path d="M96 132 Q110 142 124 132" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Pollice su -->
+  <g transform="translate(165,140) rotate(-15)">
+    <rect x="0" y="12" width="18" height="26" rx="5" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/>
+    <rect x="4" y="-8" width="12" height="24" rx="6" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/>
+  </g>
+  <!-- Badge check -->
+  <circle cx="180" cy="45" r="18" fill="#06d6a0"/>
+  <path d="M171 45 L177 51 L189 39" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+// SVG del prof arrabbiato/disapprovazione
+const PROF_SVG_ANGRY = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sfondo glow rosso -->
+  <defs>
+    <radialGradient id="glowR" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ef476f;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#ef476f;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowR)"/>
+  <!-- Corpo/giacca -->
+  <path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+  <path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#1e40af" stroke="none"/>
+  <!-- Collo -->
+  <rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/>
+  <!-- Testa -->
+  <ellipse cx="110" cy="105" rx="48" ry="52" fill="#deb887"/>
+  <!-- Capelli ricci scuri -->
+  <path d="M62 95 Q58 55 80 42 Q95 33 110 32 Q125 33 140 42 Q162 55 158 95" fill="#2c1810" stroke="#1a0f0a" stroke-width="1"/>
+  <circle cx="68" cy="82" r="8" fill="#2c1810"/><circle cx="72" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="152" cy="82" r="8" fill="#2c1810"/><circle cx="148" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="78" cy="90" r="6" fill="#2c1810"/><circle cx="142" cy="90" r="6" fill="#2c1810"/>
+  <circle cx="85" cy="65" r="6" fill="#2c1810"/><circle cx="135" cy="65" r="6" fill="#2c1810"/>
+  <circle cx="95" cy="50" r="7" fill="#2c1810"/><circle cx="125" cy="50" r="7" fill="#2c1810"/>
+  <circle cx="110" cy="45" r="8" fill="#2c1810"/>
+  <circle cx="100" cy="55" r="5" fill="#2c1810"/><circle cx="120" cy="55" r="5" fill="#2c1810"/>
+  <!-- Barba -->
+  <path d="M78 118 Q80 145 110 152 Q140 145 142 118 Q142 130 130 140 Q110 150 90 140 Q78 130 78 118Z" fill="#3d2914" stroke="#2c1810" stroke-width="1"/>
+  <path d="M75 108 Q72 125 78 118" fill="#3d2914"/><path d="M145 108 Q148 125 142 118" fill="#3d2914"/>
+  <!-- Occhiali -->
+  <rect x="76" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <rect x="116" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <line x1="104" y1="102" x2="116" y2="102" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="76" y1="100" x2="66" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="144" y1="100" x2="154" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <!-- Occhi arrabbiati (puntini intensi) -->
+  <circle cx="90" cy="101" r="3.5" fill="#1a1a2e"/>
+  <circle cx="130" cy="101" r="3.5" fill="#1a1a2e"/>
+  <!-- Sopracciglia aggrottate -->
+  <path d="M78 88 Q88 82 100 88" fill="none" stroke="#2c1810" stroke-width="3" stroke-linecap="round" transform="rotate(8, 89, 85)"/>
+  <path d="M120 88 Q132 82 142 88" fill="none" stroke="#2c1810" stroke-width="3" stroke-linecap="round" transform="rotate(-8, 131, 85)"/>
+  <!-- Bocca contrariata -->
+  <path d="M96 135 Q110 128 124 135" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Mano facepalm -->
+  <g transform="translate(152,120) rotate(10)">
+    <rect x="0" y="0" width="22" height="14" rx="5" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/>
+    <rect x="3" y="-6" width="5" height="10" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/>
+    <rect x="9" y="-8" width="5" height="12" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/>
+    <rect x="15" y="-6" width="5" height="10" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/>
+  </g>
+  <!-- Badge X -->
+  <circle cx="180" cy="45" r="18" fill="#ef476f"/>
+  <path d="M173 38 L187 52 M187 38 L173 52" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Vena frustrazione -->
+  <g transform="translate(55,55)">
+    <path d="M0 5 L5 0 L10 5 L5 10 Z" fill="none" stroke="#ef476f" stroke-width="2"/>
+  </g>
+</svg>`;
+
+// SVG versione neutra per header
+const PROF_SVG_NEUTRAL = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glowN" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#4361ee;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#4361ee;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowN)"/>
+  <path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+  <path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#1e40af" stroke="none"/>
+  <rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/>
+  <ellipse cx="110" cy="105" rx="48" ry="52" fill="#deb887"/>
+  <path d="M62 95 Q58 55 80 42 Q95 33 110 32 Q125 33 140 42 Q162 55 158 95" fill="#2c1810" stroke="#1a0f0a" stroke-width="1"/>
+  <circle cx="68" cy="82" r="8" fill="#2c1810"/><circle cx="72" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="152" cy="82" r="8" fill="#2c1810"/><circle cx="148" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="78" cy="90" r="6" fill="#2c1810"/><circle cx="142" cy="90" r="6" fill="#2c1810"/>
+  <circle cx="85" cy="65" r="6" fill="#2c1810"/><circle cx="135" cy="65" r="6" fill="#2c1810"/>
+  <circle cx="95" cy="50" r="7" fill="#2c1810"/><circle cx="125" cy="50" r="7" fill="#2c1810"/>
+  <circle cx="110" cy="45" r="8" fill="#2c1810"/>
+  <circle cx="100" cy="55" r="5" fill="#2c1810"/><circle cx="120" cy="55" r="5" fill="#2c1810"/>
+  <path d="M78 118 Q80 145 110 152 Q140 145 142 118 Q142 130 130 140 Q110 150 90 140 Q78 130 78 118Z" fill="#3d2914" stroke="#2c1810" stroke-width="1"/>
+  <path d="M75 108 Q72 125 78 118" fill="#3d2914"/><path d="M145 108 Q148 125 142 118" fill="#3d2914"/>
+  <rect x="76" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <rect x="116" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <line x1="104" y1="102" x2="116" y2="102" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="76" y1="100" x2="66" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="144" y1="100" x2="154" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <circle cx="90" cy="101" r="3" fill="#1a1a2e"/>
+  <circle cx="130" cy="101" r="3" fill="#1a1a2e"/>
+  <path d="M80 86 Q90 82 100 85" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M120 85 Q130 82 140 86" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M100 134 L120 134" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+</svg>`;
+
+// Inietta SVG nei container
+(function initProfSVG() {
+  document.getElementById('prof-svg-happy').innerHTML = PROF_SVG_HAPPY;
+  document.getElementById('prof-svg-angry').innerHTML = PROF_SVG_ANGRY;
+  document.getElementById('prof-header-svg').innerHTML = PROF_SVG_NEUTRAL;
+})();
+
+/* Frasi del Prof. Paludetto */
+const PROF_CORRECT_PHRASES = [
+  "Bene. Questa e' fisica fatta con criterio.",
+  "Corretto. Finalmente una risposta degna.",
+  "Ottimo. Qui il campo elettrico non ti spaventa.",
+  "Bravo. Coulomb sarebbe soddisfatto.",
+  "Si', ci siamo. Ragionamento pulito.",
+  "Esatto. Vedo che qualcuno ha studiato.",
+  "Risposta corretta. Continua cosi' e il 10 e' tuo.",
+  "Perfetto. Gauss approva dal paradiso dei fisici.",
+  "Bene bene. Questo lo metto sul registro con il segno piu'.",
+  "Corretto. Non ti servira' neanche il ripasso.",
+  "Giusto. Hai la stoffa del fisico.",
+  "Ok, non male. Forse c'e' speranza per questa classe."
+];
+
+const PROF_WRONG_PHRASES = [
+  "No. Cosi' non va.",
+  "Attenzione: qui hai confuso i concetti.",
+  "Errore. Rivedi bene il ragionamento.",
+  "Questa risposta non regge. Riprova.",
+  "Fermati un attimo: qui c'e' da ripassare.",
+  "No, no, no. Torna sugli appunti.",
+  "Sbagliato. Ma almeno ci hai provato.",
+  "Questo errore lo vedo ogni anno. Leggi la spiegazione.",
+  "Coulomb si sta rivoltando. Concentrati.",
+  "Errore grave. Apri il quaderno e rileggi.",
+  "Non ci siamo. Ma il bello della fisica e' che si puo' rimediare.",
+  "Risposta sbagliata. Ti do un'altra possibilita' dopo."
+];
+
+function showFeedback(isCorrect, q) {
+  const fb = document.getElementById('feedback-box');
+  const dd = document.getElementById('deepdive-box');
+  const prof = document.getElementById('prof-container');
+
+  // --- Prof. Paludetto ---
+  prof.className = 'prof-container show ' + (isCorrect ? 'correct' : 'wrong');
+  const phrases = isCorrect ? PROF_CORRECT_PHRASES : PROF_WRONG_PHRASES;
+  document.getElementById('prof-phrase').textContent = phrases[Math.floor(Math.random() * phrases.length)];
+  document.getElementById('prof-name').textContent = 'Prof. Paludetto';
+
+  // --- Feedback ---
+  fb.style.display = 'block';
+  fb.className = 'feedback-box ' + (isCorrect ? 'feedback-correct' : 'feedback-wrong');
+
+  if (isCorrect) {
+    document.getElementById('feedback-title').textContent = 'Risposta corretta!';
+    document.getElementById('feedback-text').textContent = q.explanation;
+    dd.style.display = 'none';
+  } else {
+    document.getElementById('feedback-title').textContent = 'Risposta sbagliata';
+    document.getElementById('feedback-text').innerHTML =
+      `<strong>Errore comune:</strong> ${q.commonError}<br><br><strong>Spiegazione:</strong> ${q.explanation}`;
+
+    // Mostra approfondimento
+    dd.style.display = 'block';
+    document.getElementById('deepdive-text').textContent = q.deepdive;
+  }
+
+  document.getElementById('next-btn-container').style.display = 'block';
+
+  // Scroll al professore (che e' sopra il feedback)
+  prof.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/* ============================================
+   NAVIGAZIONE
+   ============================================ */
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= currentQuestions.length) {
+    endQuiz();
+  } else {
+    showQuestion();
+    document.getElementById('question-card').scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+/* ============================================
+   FINE QUIZ E RIEPILOGO
+   ============================================ */
+function endQuiz() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'block';
+
+  const total = correctCount + wrongCount;
+  const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+
+  // Punteggio grande
+  const scoreEl = document.getElementById('final-score');
+  scoreEl.textContent = pct + '%';
+  scoreEl.className = 'big-score ' + (pct >= 70 ? 'good' : pct >= 50 ? 'medium' : 'bad');
+  document.getElementById('final-score-label').textContent =
+    `${correctCount} corrette su ${total} domande`;
+
+  // Commento del Prof nel riepilogo
+  const profSummary = document.getElementById('prof-summary');
+  let summaryPhrase, summaryClass;
+  if (pct >= 90) {
+    summaryPhrase = "Eccellente. Risultato da primo della classe. Quasi quasi ti metto 10.";
+    summaryClass = 'correct';
+  } else if (pct >= 70) {
+    summaryPhrase = "Bene, risultato solido. Ma non adagiarti: c'e' ancora margine di miglioramento.";
+    summaryClass = 'correct';
+  } else if (pct >= 50) {
+    summaryPhrase = "Sufficiente, ma di poco. Hai le basi, pero' devi ripassare. Sul serio.";
+    summaryClass = 'wrong';
+  } else {
+    summaryPhrase = "Insufficiente. Ci vediamo all'interrogazione di recupero. Studia.";
+    summaryClass = 'wrong';
+  }
+  profSummary.className = 'prof-container show ' + summaryClass;
+  document.getElementById('prof-summary-svg').innerHTML = pct >= 70 ? PROF_SVG_HAPPY : PROF_SVG_ANGRY;
+  document.getElementById('prof-summary-phrase').textContent = summaryPhrase;
+  document.getElementById('prof-summary-name').textContent = 'Prof. Paludetto';
+
+  // Griglia statistiche
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-box"><div class="stat-number">${total}</div><div class="stat-label">Domande totali</div></div>
+    <div class="stat-box"><div class="stat-number" style="color:var(--success)">${correctCount}</div><div class="stat-label">Corrette</div></div>
+    <div class="stat-box"><div class="stat-number" style="color:var(--danger)">${wrongCount}</div><div class="stat-label">Errate</div></div>
+    <div class="stat-box"><div class="stat-number">${pct}%</div><div class="stat-label">Percentuale</div></div>
+  `;
+
+  // Risultati per argomento
+  const topicDiv = document.getElementById('topic-results');
+  topicDiv.innerHTML = '';
+  const weakTopics = [];
+
+  for (const [topic, stats] of Object.entries(topicStats)) {
+    if (stats.total === 0) continue;
+    const topicPct = Math.round((stats.correct / stats.total) * 100);
+    const cls = topicPct >= 70 ? 'strong' : topicPct >= 50 ? 'medium-res' : 'weak';
+    const barColor = topicPct >= 70 ? 'var(--success)' : topicPct >= 50 ? 'var(--warning)' : 'var(--danger)';
+
+    if (topicPct < 70) weakTopics.push(topic);
+
+    topicDiv.innerHTML += `
+      <div class="topic-result-item ${cls}">
+        <span><strong>${topic}</strong> — ${stats.correct}/${stats.total} (${topicPct}%)</span>
+        <div class="topic-bar"><div class="topic-bar-fill" style="width:${topicPct}%;background:${barColor}"></div></div>
+      </div>
+    `;
+  }
+
+  // Suggerimenti
+  const sugDiv = document.getElementById('suggestions');
+  if (weakTopics.length > 0) {
+    sugDiv.innerHTML = `
+      <h3>Suggerimenti per il ripasso</h3>
+      <p>Dovresti concentrarti su questi argomenti:</p>
+      <ul>${weakTopics.map(t => `<li><strong>${t}</strong> — rileggi gli appunti e rifai gli esercizi su questo tema</li>`).join('')}</ul>
+      <p style="margin-top:8px;">Usa il pulsante "Ripassa gli errori" per rifare solo le domande sbagliate.</p>
+    `;
+  } else {
+    sugDiv.innerHTML = `
+      <h3>Ottimo lavoro!</h3>
+      <p>Hai risposto bene su tutti gli argomenti. Continua cosi'! Prova la modalita' casuale per consolidare.</p>
+    `;
+  }
+
+  // Cronologia
+  const histDiv = document.getElementById('history-list');
+  histDiv.innerHTML = '';
+  history.forEach((h, i) => {
+    histDiv.innerHTML += `
+      <div class="history-item">
+        <span>${i + 1}. ${h.question.substring(0, 60)}${h.question.length > 60 ? '...' : ''}</span>
+        <span class="${h.correct ? 'correct-mark' : 'wrong-mark'}">${h.correct ? 'Corretta' : 'Errata'}</span>
+      </div>
+    `;
+  });
+
+  // Salva in localStorage
+  localStorage.setItem('vettori_stats', JSON.stringify({
+    total, correct: correctCount, wrong: wrongCount, percentage: pct,
+    date: new Date().toLocaleDateString('it-IT')
+  }));
+  localStorage.setItem('vettori_errors', JSON.stringify(errorQuestionIds));
+}
+
+/* ============================================
+   SEZIONE APPUNTI
+   ============================================ */
+const noteIds = ['scalari-vettoriali','definizione','rappresentazione','somma-differenza','prodotto-scalare-vettore','scomposizione','prodotto-scalare','prodotto-vettoriale','applicazioni','dim-modulo','dim-perp'];
+const noteLabels = ['Scalari e Vettoriali','Definizione vettore','Rappresentazione grafica','Somma e differenza','Prodotto per scalare','Scomposizione','Prodotto scalare','Prodotto vettoriale','Applicazioni fisiche','DIM: Modulo','DIM: Perpendicolarita\''];
+
+// Popola navigazione rapida appunti
+(function initNotes() {
+  const nav = document.getElementById('notes-nav');
+  if (!nav) return;
+  noteIds.forEach((id, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = noteLabels[i];
+    btn.onclick = () => {
+      // Apri la sezione e scrolla
+      const body = document.getElementById('body-' + id);
+      if (!body.classList.contains('open')) toggleNote(id);
+      document.getElementById('note-' + id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    nav.appendChild(btn);
+  });
+})();
+
+function showNotes(section) {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'block';
+
+  // Se richiesto, scrolla direttamente alle dimostrazioni
+  if (section === 'dimostrazioni') {
+    setTimeout(() => {
+      const el = document.getElementById('note-dim-modulo');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+}
+
+function hideNotes() {
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+
+function toggleNote(id) {
+  const body = document.getElementById('body-' + id);
+  const toggle = body.previousElementSibling.querySelector('.note-toggle');
+  body.classList.toggle('open');
+  toggle.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+/* ============================================
+   SIMULAZIONE VERIFICA
+   Struttura identica alla verifica del prof:
+   - Parte 1: 10 domande scelta multipla (A-E)
+   - Parte 2: 3 domande aperte/dimostrative
+   ============================================ */
+
+const EXAM_MC = [
+  {
+    text: "Quale delle seguenti e' una grandezza scalare?",
+    options: ["Velocita'", "Forza", "Spostamento", "Energia potenziale", "Accelerazione"],
+    answer: 3,
+    explanation: "L'energia potenziale e' scalare. Velocita', forza, spostamento e accelerazione sono vettoriali."
+  },
+  {
+    text: "Il modulo del vettore A=(5,12) vale:",
+    options: ["17", "7", "60", "sqrt(17)", "13"],
+    answer: 4,
+    explanation: "sqrt(25+144)=sqrt(169)=13. Tripla pitagorica 5-12-13."
+  },
+  {
+    text: "Il metodo grafico per sommare due vettori si chiama:",
+    options: ["punta-punta", "coda-coda", "punta-coda", "metodo parallelo", "metodo delle componenti"],
+    answer: 2,
+    explanation: "Il metodo punta-coda trasla il secondo vettore in modo che la sua coda coincida con la punta del primo."
+  },
+  {
+    text: "Se theta=90 gradi, il prodotto scalare a*b vale:",
+    options: ["|a||b|", "-|a||b|", "0", "2|a||b|", "1"],
+    answer: 2,
+    explanation: "a*b = |a||b|*cos(90)=0. Vettori perpendicolari hanno prodotto scalare nullo."
+  },
+  {
+    text: "Dati A=(1,2) e B=(3,1), le componenti di A+B sono:",
+    options: ["(2,-1)", "(4,3)", "(3,2)", "(1,3)", "(2,3)"],
+    answer: 1,
+    explanation: "A+B=(1+3, 2+1)=(4,3)."
+  },
+  {
+    text: "La componente orizzontale Ax di un vettore di modulo A con angolo theta con l'asse x e':",
+    options: ["A*sin(theta)", "A*tan(theta)", "A/sin(theta)", "A*cos(theta)", "A/tan(theta)"],
+    answer: 3,
+    explanation: "Ax = A*cos(theta). Coseno per la componente orizzontale."
+  },
+  {
+    text: "Due vettori con lo stesso modulo ma verso opposto sono:",
+    options: ["Uguali", "Ortogonali", "Paralleli e concordi", "Opposti", "Proporzionali"],
+    answer: 3,
+    explanation: "Sono vettori opposti: stesso modulo e direzione ma verso contrario."
+  },
+  {
+    text: "Il prodotto vettoriale x cross y e':",
+    options: ["Uno scalare", "Un vettore parallelo a x", "Un vettore perpendicolare a x e y", "L'area del rettangolo", "Il modulo del parallelogramma"],
+    answer: 2,
+    explanation: "Il prodotto vettoriale e' un vettore perpendicolare al piano di x e y."
+  },
+  {
+    text: "Un corpo e' in equilibrio quando:",
+    options: ["Accelera uniformemente", "La velocita' e' massima", "La somma vettoriale delle forze e' nulla", "Ha modulo unitario", "La forza e' massima"],
+    answer: 2,
+    explanation: "Equilibrio: somma_F=0. Per Newton: F=ma, se F=0 allora a=0."
+  },
+  {
+    text: "Il prodotto scalare a*b = ax*bx + ay*by equivale a:",
+    options: ["|a||b|*sin(theta)", "|a|+|b|", "|a||b|*cos(theta)", "|a|-|b|", "|a||b|*tan(theta)"],
+    answer: 2,
+    explanation: "a*b = |a||b|*cos(theta). Questa e' la definizione geometrica del prodotto scalare."
+  }
+];
+const EXAM_OPEN = [
+  {
+    title: "Scomposizione di un vettore",
+    text: "Un vettore v ha modulo 10 e forma un angolo di 60 gradi con l'asse x. Calcola le componenti cartesiane vx e vy, specificando le formule usate."
+  },
+  {
+    title: "Vettore spostamento ed equilibrio",
+    text: "Una particella si sposta da A(2,5) a B(-3,8). (a) Calcola il vettore spostamento delta_r. (b) Una seconda forza F1=(4,-2) N agisce sulla particella. Determina la forza F2 necessaria per l'equilibrio."
+  },
+  {
+    title: "Prodotto scalare e perpendicolarita'",
+    text: "Dati i vettori a=(3,4) e b=(4,-3): (a) calcola il prodotto scalare a*b; (b) i vettori sono perpendicolari? Giustifica usando la definizione; (c) calcola l'angolo che a forma con l'asse x."
+  }
+];
+let examTimer = null;
+let examSeconds = 3000; // 50 minuti
+let examSubmitted = false;
+
+function showExam() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'block';
+
+  examSubmitted = false;
+  document.getElementById('exam-submit-btn').style.display = 'inline-block';
+  document.getElementById('exam-result').style.display = 'none';
+
+  renderExamMC();
+  renderExamOpen();
+  startExamTimer();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function hideExam() {
+  clearInterval(examTimer);
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+
+function resetExam() {
+  examSeconds = 3000;
+  showExam();
+}
+
+/* Renderizza domande a scelta multipla con opzioni mescolate */
+function renderExamMC() {
+  const container = document.getElementById('exam-mc-questions');
+  container.innerHTML = '';
+
+  EXAM_MC.forEach((q, qi) => {
+    // Mescola opzioni
+    const indices = q.options.map((_, i) => i);
+    shuffleArray(indices);
+    q._shuffled = indices;
+
+    const letters = ['A', 'B', 'C', 'D', 'E'];
+    let html = `<div class="exam-question" id="exam-q-${qi}">
+      <div class="eq-text"><span class="eq-number">${qi + 1}.</span> ${q.text}</div>
+      <div class="exam-options">`;
+
+    indices.forEach((origIdx, dispIdx) => {
+      html += `
+        <div class="exam-option" id="exam-opt-${qi}-${dispIdx}">
+          <input type="radio" name="exam-q-${qi}" id="exam-radio-${qi}-${dispIdx}" value="${origIdx}">
+          <label for="exam-radio-${qi}-${dispIdx}">${letters[dispIdx]}. ${q.options[origIdx]}</label>
+        </div>`;
+    });
+
+    html += `</div>
+      <div class="exam-correction" id="exam-corr-${qi}"></div>
+    </div>`;
+    container.innerHTML += html;
+  });
+}
+
+/* Renderizza domande aperte */
+function renderExamOpen() {
+  const container = document.getElementById('exam-open-questions');
+  container.innerHTML = '';
+
+  EXAM_OPEN.forEach((q, qi) => {
+    const num = EXAM_MC.length + qi + 1;
+    container.innerHTML += `
+      <div class="exam-question" id="exam-open-${qi}">
+        <div class="eq-text"><span class="eq-number">${num}.</span> ${q.text}</div>
+        <div class="exam-open-area">
+          <textarea id="exam-textarea-${qi}" placeholder="Scrivi qui la tua risposta..."></textarea>
+        </div>
+        <div class="exam-correction" id="exam-open-corr-${qi}"></div>
+      </div>`;
+  });
+}
+
+/* Timer */
+function startExamTimer() {
+  examSeconds = 3000;
+  clearInterval(examTimer);
+  updateTimerDisplay();
+  examTimer = setInterval(() => {
+    examSeconds--;
+    updateTimerDisplay();
+    if (examSeconds <= 0) {
+      clearInterval(examTimer);
+      if (!examSubmitted) submitExam();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(examSeconds / 60);
+  const s = examSeconds % 60;
+  const el = document.getElementById('exam-timer');
+  el.textContent = `Tempo: ${m}:${s.toString().padStart(2, '0')}`;
+  el.style.color = examSeconds < 300 ? 'var(--danger)' : 'var(--dark)';
+}
+
+/* Consegna verifica */
+function submitExam() {
+  if (examSubmitted) return;
+  if (!confirm('Sei sicuro di voler consegnare la verifica?')) return;
+
+  examSubmitted = true;
+  clearInterval(examTimer);
+
+  let correctMC = 0;
+
+  // Correggi scelta multipla
+  EXAM_MC.forEach((q, qi) => {
+    const selected = document.querySelector(`input[name="exam-q-${qi}"]:checked`);
+    const corrDiv = document.getElementById('exam-corr-' + qi);
+    const selectedVal = selected ? parseInt(selected.value) : -1;
+    const isCorrect = selectedVal === q.answer;
+
+    if (isCorrect) {
+      correctMC++;
+      corrDiv.className = 'exam-correction show correct-box';
+      corrDiv.innerHTML = `<strong>Corretta!</strong> ${q.explanation}`;
+    } else {
+      corrDiv.className = 'exam-correction show wrong-box';
+      corrDiv.innerHTML = `<strong>Sbagliata.</strong> ${q.explanation}`;
+    }
+
+    // Evidenzia opzioni
+    q._shuffled.forEach((origIdx, dispIdx) => {
+      const optEl = document.getElementById(`exam-opt-${qi}-${dispIdx}`);
+      if (origIdx === q.answer) optEl.classList.add('correct-highlight');
+      if (dispIdx === getDisplayIdx(qi, selectedVal) && !isCorrect) optEl.classList.add('wrong-highlight');
+    });
+
+    // Disabilita radio
+    document.querySelectorAll(`input[name="exam-q-${qi}"]`).forEach(r => r.disabled = true);
+  });
+
+  // Mostra soluzioni aperte
+  EXAM_OPEN.forEach((q, qi) => {
+    const corrDiv = document.getElementById('exam-open-corr-' + qi);
+    corrDiv.className = 'exam-correction show correct-box';
+    corrDiv.innerHTML = `<strong>Soluzione completa:</strong><pre style="white-space:pre-wrap;font-family:inherit;margin-top:8px;">${q.solution}</pre>`;
+  });
+
+  // Calcolo voto: 10 MC (0.6 punti ciascuna = 6 pt) + 3 aperte (valutazione manuale suggerita)
+  const mcPoints = correctMC * 0.6;
+  const grade = Math.min(10, mcPoints + 4); // mc da 0 a 6 + max 4 per aperte (autovalutazione)
+  const mcGrade = (mcPoints / 6 * 10).toFixed(1);
+
+  document.getElementById('exam-submit-btn').style.display = 'none';
+  const resultDiv = document.getElementById('exam-result');
+  resultDiv.style.display = 'block';
+
+  const gradeEl = document.getElementById('exam-grade');
+  gradeEl.textContent = `${correctMC}/10 risposte multiple corrette`;
+  gradeEl.style.color = correctMC >= 7 ? 'var(--success)' : correctMC >= 5 ? 'var(--warning)' : 'var(--danger)';
+
+  document.getElementById('exam-grade-detail').innerHTML =
+    `Parte 1 (scelta multipla): <strong>${correctMC}/10</strong> — Voto stimato parte 1: <strong>${mcGrade}/10</strong><br>
+     Parte 2 (domande aperte): confronta le tue risposte con le soluzioni mostrate sopra.`;
+
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function getDisplayIdx(qi, origVal) {
+  const shuffled = EXAM_MC[qi]._shuffled;
+  return shuffled.indexOf(origVal);
+}
+
+/* ============================================
+   VERIFICA DIMOSTRAZIONI
+   6 domande aperte: riproduci la dimostrazione
+   ============================================ */
+
+const DEMO_EXAM = [
+  {
+    title: "Modulo di un vettore (teorema di Pitagora)",
+    text: "Dimostra, partendo dalla geometria del piano cartesiano, che il modulo di un vettore A=(Ax,Ay) e' dato da |A|=sqrt(Ax^2+Ay^2). Disegna il triangolo rettangolo corrispondente.",
+    solution: "1. Dato il vettore A=(Ax,Ay) nel piano cartesiano, possiamo tracciare il triangolo rettangolo con:\n   - cateto orizzontale = Ax (proiezione sull'asse x)\n   - cateto verticale = Ay (proiezione sull'asse y)\n   - ipotenusa = il vettore A stesso\n\n2. Per il teorema di Pitagora applicato a un triangolo rettangolo:\n   ipotenusa^2 = cateto1^2 + cateto2^2\n   |A|^2 = Ax^2 + Ay^2\n\n3. Estraendo la radice quadrata (il modulo e' sempre positivo):\n   |A| = sqrt(Ax^2 + Ay^2)\n\nEsempio: A=(3,4) -> |A| = sqrt(9+16) = sqrt(25) = 5"
+  },
+  {
+    title: "Condizione di perpendicolarita'",
+    text: "Dimostra che due vettori a e b sono perpendicolari (theta=90 gradi) se e solo se il loro prodotto scalare e' nullo. Verifica con l'esempio a=(3,4) e b=(4,-3).",
+    solution: "1. Definizione: due vettori sono perpendicolari se l'angolo theta tra essi e' 90 gradi.\n\n2. La formula del prodotto scalare:\n   a*b = |a|*|b|*cos(theta)\n\n3. Se theta=90 gradi:\n   cos(90) = 0\n   -> a*b = |a|*|b|*0 = 0\n\n4. Viceversa, se a*b=0:\n   |a|*|b|*cos(theta) = 0\n   Se |a|!=0 e |b|!=0, allora cos(theta)=0\n   -> theta = 90 gradi\n\n5. Conclusione: a perp b <=> a*b = 0 <=> ax*bx + ay*by = 0\n\n6. Verifica con a=(3,4) e b=(4,-3):\n   a*b = 3*4 + 4*(-3) = 12 - 12 = 0 ✓\n   Quindi i vettori sono effettivamente perpendicolari.\n   (Si puo' anche notare che b si ottiene ruotando a di 90 gradi: (x,y) -> (y,-x) o (-y,x))"
+  },
+  {
+    title: "Scomposizione con seno e coseno",
+    text: "Partendo dalla definizione geometrica di seno e coseno in un triangolo rettangolo, dimostra che le componenti di un vettore di modulo A che forma un angolo theta con l'asse x sono Ax=A*cos(theta) e Ay=A*sin(theta).",
+    solution: "1. Dato il vettore A con modulo |A|=A e angolo theta con l'asse x positivo.\n\n2. Tracciamo il triangolo rettangolo con:\n   - ipotenusa = A (il vettore)\n   - angolo theta in basso a sinistra (tra ipotenusa e cateto orizzontale)\n   - cateto orizzontale = Ax\n   - cateto verticale = Ay\n\n3. Per definizione di coseno in un triangolo rettangolo:\n   cos(theta) = cateto adiacente / ipotenusa = Ax / A\n   -> Ax = A * cos(theta)\n\n4. Per definizione di seno:\n   sin(theta) = cateto opposto / ipotenusa = Ay / A\n   -> Ay = A * sin(theta)\n\n5. Verifica di coerenza:\n   sqrt(Ax^2+Ay^2) = sqrt((A*cos)^2+(A*sin)^2) = A*sqrt(cos^2+sin^2) = A*1 = A ✓\n   (usando l'identita' fondamentale sin^2+cos^2=1)\n\nEsempio: A=10, theta=60 gradi\n   Ax = 10*cos(60) = 10*0.5 = 5\n   Ay = 10*sin(60) = 10*0.866 = 8.66"
+  }
+];
+let demoExamTimer = null;
+let demoExamSeconds = 2400;
+let demoExamSubmitted = false;
+
+function showDemoExam() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'block';
+
+  demoExamSubmitted = false;
+  document.getElementById('demo-exam-submit-btn').style.display = 'inline-block';
+  document.getElementById('demo-exam-result').style.display = 'none';
+
+  renderDemoExamQuestions();
+  startDemoExamTimer();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function hideDemoExam() {
+  clearInterval(demoExamTimer);
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+
+function resetDemoExam() {
+  demoExamSeconds = 2400;
+  showDemoExam();
+}
+
+function renderDemoExamQuestions() {
+  const container = document.getElementById('demo-exam-questions');
+  container.innerHTML = '';
+
+  DEMO_EXAM.forEach((q, qi) => {
+    container.innerHTML += `
+      <div class="exam-question" id="demo-q-${qi}">
+        <div class="eq-text">
+          <span class="eq-number">${qi + 1}.</span>
+          <strong style="color:#7c3aed;">[${q.title}]</strong><br>
+          ${q.text}
+        </div>
+        <div class="exam-open-area">
+          <textarea id="demo-textarea-${qi}" placeholder="Scrivi qui la dimostrazione passo per passo..."></textarea>
+        </div>
+        <div class="exam-correction" id="demo-corr-${qi}"></div>
+      </div>`;
+  });
+}
+
+function startDemoExamTimer() {
+  demoExamSeconds = 2400;
+  clearInterval(demoExamTimer);
+  updateDemoTimerDisplay();
+  demoExamTimer = setInterval(() => {
+    demoExamSeconds--;
+    updateDemoTimerDisplay();
+    if (demoExamSeconds <= 0) {
+      clearInterval(demoExamTimer);
+      if (!demoExamSubmitted) submitDemoExam();
+    }
+  }, 1000);
+}
+
+function updateDemoTimerDisplay() {
+  const m = Math.floor(demoExamSeconds / 60);
+  const s = demoExamSeconds % 60;
+  const el = document.getElementById('demo-exam-timer');
+  el.textContent = `Tempo: ${m}:${s.toString().padStart(2, '0')}`;
+  el.style.color = demoExamSeconds < 300 ? 'var(--danger)' : 'var(--dark)';
+}
+
+function submitDemoExam() {
+  if (demoExamSubmitted) return;
+  if (!confirm('Sei sicuro di voler consegnare la verifica sulle dimostrazioni?')) return;
+
+  demoExamSubmitted = true;
+  clearInterval(demoExamTimer);
+
+  // Mostra le soluzioni per ogni dimostrazione
+  DEMO_EXAM.forEach((q, qi) => {
+    const corrDiv = document.getElementById('demo-corr-' + qi);
+    const textarea = document.getElementById('demo-textarea-' + qi);
+    const userAnswer = textarea.value.trim();
+
+    corrDiv.className = 'exam-correction show correct-box';
+    corrDiv.innerHTML = `
+      <strong>Soluzione completa — ${q.title}:</strong>
+      <pre style="white-space:pre-wrap; font-family:inherit; margin-top:8px; line-height:1.7;">${q.solution}</pre>
+      ${userAnswer.length < 10 ? '<p style="color:var(--danger); margin-top:8px;"><strong>Non hai scritto una risposta per questa domanda.</strong></p>' : '<p style="color:var(--primary); margin-top:8px;"><strong>Confronta la tua risposta con la soluzione qui sopra.</strong></p>'}
+    `;
+    textarea.disabled = true;
+    textarea.style.opacity = '0.7';
+  });
+
+  document.getElementById('demo-exam-submit-btn').style.display = 'none';
+  const resultDiv = document.getElementById('demo-exam-result');
+  resultDiv.style.display = 'block';
+  document.getElementById('demo-exam-grade-detail').innerHTML =
+    'Le dimostrazioni richiedono valutazione manuale. Confronta attentamente ogni tua risposta con la soluzione mostrata sopra.<br>Controlla: hai incluso tutti i passaggi? Le semplificazioni sono corrette? Hai spiegato il significato fisico?';
+
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+</script>
+
+</body>
+</html>
