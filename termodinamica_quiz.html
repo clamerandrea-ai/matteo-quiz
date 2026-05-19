@@ -1,0 +1,3423 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Fisica — Termodinamica: Primo e Secondo Principio</title>
+<style>
+/* ============================================
+   STILI GENERALI
+   ============================================ */
+:root {
+  --primary: #4361ee;
+  --primary-light: #e8ecff;
+  --success: #06d6a0;
+  --success-light: #e6faf4;
+  --danger: #ef476f;
+  --danger-light: #fde8ed;
+  --warning: #ffd166;
+  --dark: #1d3557;
+  --gray: #6c757d;
+  --light: #f8f9fa;
+  --white: #ffffff;
+  --shadow: 0 6px 24px rgba(0,0,0,0.10);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.15);
+  --radius: 14px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(160deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  min-height: 100vh;
+  color: var(--dark);
+  line-height: 1.6;
+}
+
+/* ============================================
+   PROF. PALUDETTO — PERSONAGGIO CARTOON
+   ============================================ */
+.prof-container {
+  display: none;
+  position: relative;
+  margin: 20px auto;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.prof-container.show {
+  display: flex;
+  animation: profAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes profAppear {
+  0% { opacity: 0; transform: translateY(60px) scale(0.5); }
+  60% { transform: translateY(-10px) scale(1.05); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes profBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes profShake {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(-5deg); }
+  30% { transform: rotate(5deg); }
+  45% { transform: rotate(-4deg); }
+  60% { transform: rotate(4deg); }
+  75% { transform: rotate(-2deg); }
+}
+
+.prof-svg-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 0 auto;
+}
+
+.prof-container.correct .prof-svg-container {
+  animation: profBounce 0.8s ease 0.3s;
+  filter: drop-shadow(0 8px 30px rgba(6, 214, 160, 0.35));
+}
+
+.prof-container.wrong .prof-svg-container {
+  animation: profShake 0.6s ease;
+  filter: drop-shadow(0 8px 30px rgba(239, 71, 111, 0.35));
+}
+
+/* Fumetto / Bubble */
+.prof-bubble {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 18px 24px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  font-size: 1.1em;
+  font-weight: 600;
+  line-height: 1.5;
+  max-width: 480px;
+  margin-top: -10px;
+}
+
+.prof-bubble::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+  border-bottom-color: var(--white);
+}
+
+.prof-container.correct .prof-bubble {
+  border: 3px solid var(--success);
+  background: linear-gradient(135deg, #f0fff8, var(--white));
+}
+
+.prof-container.wrong .prof-bubble {
+  border: 3px solid var(--danger);
+  background: linear-gradient(135deg, #fff5f7, var(--white));
+}
+
+.prof-container.correct .prof-bubble::before { border-bottom-color: var(--success); }
+.prof-container.wrong .prof-bubble::before { border-bottom-color: var(--danger); }
+
+.prof-name {
+  font-size: 0.7em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+
+.prof-container.correct .prof-name { color: var(--success); }
+.prof-container.wrong .prof-name { color: var(--danger); }
+
+/* SVG nascosti/mostrati */
+.prof-svg-correct, .prof-svg-wrong { display: none; }
+.prof-container.correct .prof-svg-correct { display: block; }
+.prof-container.wrong .prof-svg-wrong { display: block; }
+
+/* Header start screen - versione piccola */
+.prof-header-container {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 10px;
+}
+
+.container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Sfondo decorativo sottile */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 20%, rgba(67, 97, 238, 0.05) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, rgba(124, 58, 237, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ============================================
+   SCHERMATA INIZIALE
+   ============================================ */
+#start-screen {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  margin-top: 30px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+#start-screen h1 {
+  font-size: 2.1em;
+  color: var(--dark);
+  margin-bottom: 6px;
+}
+
+#start-screen h1 span {
+  background: linear-gradient(135deg, var(--primary), #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#start-screen .subtitle {
+  color: var(--gray);
+  font-size: 1em;
+  margin-bottom: 10px;
+}
+
+.prof-welcome {
+  font-size: 0.9em;
+  color: var(--dark);
+  background: var(--light);
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.topic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.topic-item {
+  background: var(--primary-light);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topic-item input[type="checkbox"] { accent-color: var(--primary); }
+
+.mode-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.btn {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+.btn:active { transform: translateY(0) scale(0.97); }
+
+.btn-primary { background: var(--primary); color: var(--white); }
+.btn-success { background: var(--success); color: var(--white); }
+.btn-warning { background: var(--warning); color: var(--dark); }
+.btn-danger { background: var(--danger); color: var(--white); }
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+}
+
+.btn-ultra {
+  background: linear-gradient(135deg, #ff6a00, #ee0979);
+  color: var(--white);
+  position: relative;
+  overflow: hidden;
+}
+.btn-ultra::after {
+  content: '🔥';
+  margin-left: 6px;
+}
+
+.btn-exam {
+  background: linear-gradient(135deg, #1d3557, #457b9d);
+  color: var(--white);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.btn-demo {
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: var(--white);
+  font-weight: 700;
+}
+
+/* Sezioni menu principale */
+.menu-section {
+  background: var(--light);
+  border: 1px solid #e0e0e0;
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.menu-section-title {
+  font-size: 0.85em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--gray);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.menu-section-title .section-icon {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.section-icon.test { background: var(--primary); }
+.section-icon.study { background: var(--success); }
+
+/* ============================================
+   SEZIONE ESAME
+   ============================================ */
+#exam-screen .exam-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 30px 34px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+
+.exam-header {
+  text-align: center;
+  border-bottom: 2px solid var(--dark);
+  padding-bottom: 14px;
+  margin-bottom: 24px;
+}
+
+.exam-header h2 { font-size: 1.4em; margin-bottom: 4px; letter-spacing: 1px; }
+.exam-header .exam-info {
+  display: flex; justify-content: space-between; font-size: 0.9em; color: var(--gray);
+  margin-top: 8px;
+}
+
+.exam-question {
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #eee;
+}
+
+.exam-question:last-child { border-bottom: none; }
+
+.exam-question .eq-number {
+  font-weight: 700;
+  color: var(--primary);
+  margin-right: 6px;
+}
+
+.exam-question .eq-text {
+  font-size: 1.02em;
+  margin-bottom: 10px;
+  line-height: 1.7;
+}
+
+.exam-options { padding-left: 10px; }
+
+.exam-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 10px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.exam-option:hover { background: var(--light); }
+.exam-option input[type="radio"] { margin-top: 4px; accent-color: var(--primary); }
+.exam-option label { cursor: pointer; line-height: 1.5; }
+
+.exam-option.correct-highlight { background: var(--success-light); }
+.exam-option.wrong-highlight { background: var(--danger-light); }
+
+.exam-open-area {
+  margin-top: 10px;
+}
+
+.exam-open-area textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95em;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.exam-open-area textarea:focus { border-color: var(--primary); }
+
+.exam-section-title {
+  font-size: 1.1em;
+  font-weight: 700;
+  color: var(--dark);
+  margin: 24px 0 14px;
+  padding: 8px 12px;
+  background: var(--light);
+  border-radius: 6px;
+}
+
+.exam-correction {
+  display: none;
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.93em;
+  line-height: 1.6;
+}
+
+.exam-correction.show { display: block; }
+.exam-correction.correct-box { background: var(--success-light); border-left: 4px solid var(--success); }
+.exam-correction.wrong-box { background: var(--danger-light); border-left: 4px solid var(--danger); }
+
+.exam-result-bar {
+  text-align: center;
+  padding: 20px;
+  background: var(--light);
+  border-radius: var(--radius);
+  margin-top: 20px;
+}
+
+.exam-result-bar .exam-grade {
+  font-size: 2.5em;
+  font-weight: 800;
+}
+
+.exam-timer {
+  font-weight: 600;
+  font-size: 1.1em;
+  color: var(--danger);
+}
+
+.prev-stats {
+  margin-top: 25px;
+  padding: 15px;
+  background: var(--light);
+  border-radius: 8px;
+  font-size: 0.9em;
+}
+
+/* ============================================
+   SCHERMATA QUIZ
+   ============================================ */
+#quiz-screen {
+  display: none;
+  margin-top: 20px;
+}
+
+.quiz-header {
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 16px 24px;
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.progress-info { font-weight: 600; color: var(--dark); }
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), #7c3aed, #a855f7);
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+}
+
+.score-display {
+  display: flex;
+  gap: 15px;
+  font-size: 0.9em;
+}
+
+.score-correct { color: var(--success); font-weight: 600; }
+.score-wrong { color: var(--danger); font-weight: 600; }
+
+.question-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 16px;
+  border: 1px solid rgba(0,0,0,0.04);
+  animation: cardAppear 0.4s ease;
+}
+
+@keyframes cardAppear {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.question-meta {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+.badge-topic { background: var(--primary-light); color: var(--primary); }
+.badge-diff-1 { background: #d4edda; color: #155724; }
+.badge-diff-2 { background: #fff3cd; color: #856404; }
+.badge-diff-3 { background: #f8d7da; color: #721c24; }
+.badge-type { background: #e2e3e5; color: #383d41; }
+
+.question-text {
+  font-size: 1.15em;
+  font-weight: 500;
+  margin-bottom: 20px;
+  line-height: 1.7;
+}
+
+/* Opzioni scelta multipla */
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  background: var(--white);
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.option-btn:hover:not(.disabled) {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: translateX(6px);
+  box-shadow: 0 3px 12px rgba(67, 97, 238, 0.15);
+}
+
+.option-btn.selected { border-color: var(--primary); background: var(--primary-light); }
+.option-btn.correct {
+  border-color: var(--success);
+  background: var(--success-light);
+  animation: correctPulse 0.4s ease;
+}
+.option-btn.wrong {
+  border-color: var(--danger);
+  background: var(--danger-light);
+  animation: wrongShake 0.4s ease;
+}
+.option-btn.disabled { cursor: default; opacity: 0.85; }
+
+@keyframes correctPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+@keyframes wrongShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* Input per risposte aperte/numeriche */
+.answer-input-container { margin-top: 10px; }
+
+.answer-input {
+  width: 100%;
+  padding: 14px 18px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1em;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.answer-input:focus { border-color: var(--primary); }
+
+.submit-answer-btn {
+  margin-top: 12px;
+}
+
+/* Feedback */
+.feedback-box {
+  display: none;
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.feedback-correct {
+  background: var(--success-light);
+  border-left: 5px solid var(--success);
+}
+
+.feedback-wrong {
+  background: var(--danger-light);
+  border-left: 5px solid var(--danger);
+}
+
+.feedback-title {
+  font-weight: 700;
+  font-size: 1.1em;
+  margin-bottom: 8px;
+}
+
+.feedback-correct .feedback-title { color: var(--success); }
+.feedback-wrong .feedback-title { color: var(--danger); }
+
+.feedback-text { margin-bottom: 10px; line-height: 1.7; }
+
+/* Approfondimento */
+.deepdive-box {
+  display: none;
+  background: #fff8e1;
+  border-left: 5px solid var(--warning);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  animation: slideIn 0.4s ease;
+}
+
+.deepdive-title {
+  font-weight: 700;
+  color: #e65100;
+  margin-bottom: 8px;
+}
+
+.deepdive-text { line-height: 1.7; }
+
+.next-btn-container {
+  text-align: center;
+  margin: 16px 0;
+}
+
+/* ============================================
+   SCHERMATA RIEPILOGO
+   ============================================ */
+#summary-screen {
+  display: none;
+  margin-top: 20px;
+}
+
+.summary-card {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 34px;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 16px;
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.summary-card h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--dark);
+}
+
+.big-score {
+  text-align: center;
+  font-size: 3em;
+  font-weight: 800;
+  margin: 10px 0;
+}
+
+.big-score.good { color: var(--success); }
+.big-score.medium { color: var(--warning); }
+.big-score.bad { color: var(--danger); }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.stat-box {
+  background: var(--light);
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-number { font-size: 1.8em; font-weight: 700; }
+.stat-label { font-size: 0.85em; color: var(--gray); }
+
+.topic-results { margin: 20px 0; }
+
+.topic-result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.topic-result-item.weak { background: var(--danger-light); }
+.topic-result-item.strong { background: var(--success-light); }
+.topic-result-item.medium-res { background: #fff3cd; }
+
+.topic-bar {
+  width: 100px;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.topic-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.suggestions {
+  background: var(--primary-light);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-top: 15px;
+}
+
+.suggestions h3 { color: var(--primary); margin-bottom: 8px; }
+.suggestions ul { padding-left: 20px; }
+.suggestions li { margin-bottom: 5px; }
+
+.history-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9em;
+}
+
+.history-item .correct-mark { color: var(--success); font-weight: 700; }
+.history-item .wrong-mark { color: var(--danger); font-weight: 700; }
+
+/* ============================================
+   SEZIONE APPUNTI
+   ============================================ */
+.notes-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.notes-nav button {
+  padding: 6px 14px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: var(--light);
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.notes-nav button:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.note-section {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.note-title {
+  padding: 14px 18px;
+  margin: 0;
+  cursor: pointer;
+  background: var(--light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+  user-select: none;
+}
+
+.note-title:hover { background: var(--primary-light); }
+
+.note-toggle { font-size: 0.8em; color: var(--gray); transition: transform 0.3s; }
+
+.note-body {
+  padding: 18px 20px;
+  line-height: 1.8;
+  display: none;
+}
+
+.note-body.open { display: block; }
+
+.note-body h4 {
+  margin: 14px 0 8px;
+  color: var(--primary);
+}
+
+.note-body ul, .note-body ol {
+  padding-left: 22px;
+  margin: 8px 0;
+}
+
+.note-body li { margin-bottom: 4px; }
+
+.formula-box {
+  background: linear-gradient(135deg, #e8ecff, #f0e6ff);
+  border-left: 4px solid var(--primary);
+  padding: 14px 18px;
+  margin: 12px 0;
+  font-size: 1.15em;
+  font-weight: 600;
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  border-radius: 0 8px 8px 0;
+}
+
+.note-tip {
+  background: #fff8e1;
+  border-left: 4px solid var(--warning);
+  padding: 10px 14px;
+  margin: 12px 0;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.95em;
+}
+
+/* Passaggi dimostrazione */
+.demo-step {
+  background: var(--light);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 12px 0;
+  border-left: 4px solid var(--primary);
+  position: relative;
+}
+
+.demo-step .step-num {
+  display: inline-block;
+  background: var(--primary);
+  color: var(--white);
+  font-weight: 700;
+  font-size: 0.8em;
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-right: 8px;
+}
+
+.demo-step .step-label {
+  font-weight: 600;
+  color: var(--dark);
+}
+
+.demo-step p { margin-top: 8px; }
+.demo-step ul { margin-top: 6px; padding-left: 20px; }
+.demo-step li { margin-bottom: 3px; }
+
+/* Infografiche */
+.infographic {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  border: 2px solid #e0e7ff;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 18px;
+  text-align: center;
+  overflow-x: auto;
+}
+
+.infographic svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.info-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 10px 0;
+}
+
+.info-block {
+  background: var(--white);
+  border: 2px solid var(--primary);
+  border-radius: 10px;
+  padding: 10px 16px;
+  min-width: 110px;
+  text-align: center;
+  position: relative;
+}
+
+.info-block.highlight {
+  background: linear-gradient(135deg, #e8ecff, #f0e6ff);
+  border-color: #7c3aed;
+}
+
+.info-block.result {
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
+  border-color: var(--success);
+}
+
+.info-block .ib-title {
+  font-size: 0.75em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gray);
+  margin-bottom: 4px;
+}
+
+.info-block .ib-formula {
+  font-size: 1.1em;
+  font-weight: 700;
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  color: var(--dark);
+}
+
+.info-block .ib-note {
+  font-size: 0.78em;
+  color: var(--gray);
+  margin-top: 3px;
+}
+
+.info-arrow {
+  font-size: 1.5em;
+  color: var(--primary);
+  padding: 0 6px;
+  font-weight: 700;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.info-card {
+  background: var(--white);
+  border-radius: 10px;
+  padding: 12px;
+  border-left: 4px solid var(--primary);
+  text-align: left;
+}
+
+.info-card.green { border-left-color: var(--success); }
+.info-card.red { border-left-color: var(--danger); }
+.info-card.purple { border-left-color: #7c3aed; }
+.info-card.orange { border-left-color: #ff6a00; }
+
+.info-card .ic-title {
+  font-size: 0.8em;
+  font-weight: 700;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-card .ic-content {
+  font-size: 0.95em;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.info-card .ic-formula {
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  font-weight: 700;
+  font-size: 1.05em;
+}
+
+.info-visual {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+
+.info-visual-item {
+  text-align: center;
+}
+
+.info-visual-item .iv-icon {
+  font-size: 2.5em;
+  line-height: 1.2;
+}
+
+.info-visual-item .iv-label {
+  font-size: 0.82em;
+  color: var(--gray);
+  margin-top: 2px;
+}
+
+.info-step-flow {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.info-step-box {
+  background: var(--white);
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  min-width: 100px;
+  max-width: 160px;
+  text-align: center;
+  font-size: 0.88em;
+  line-height: 1.4;
+}
+
+.info-step-box.active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.info-step-box .isb-num {
+  display: inline-block;
+  background: var(--primary);
+  color: var(--white);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 0.8em;
+  font-weight: 700;
+  line-height: 22px;
+  margin-bottom: 4px;
+}
+
+.info-step-box .isb-formula {
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  font-weight: 700;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 600px) {
+  .container { padding: 10px; }
+  #start-screen { padding: 20px; }
+  .question-card { padding: 20px; }
+  .quiz-header { padding: 12px 16px; }
+  #start-screen h1 { font-size: 1.5em; }
+  .prof-svg-container { width: 160px; height: 160px; }
+  .prof-bubble { font-size: 0.95em; padding: 14px 18px; }
+  .info-step-flow { gap: 4px; }
+  .info-arrow { font-size: 1em; padding: 0 2px; }
+  .info-step-box { min-width: 70px; max-width: 110px; font-size: 0.78em; padding: 6px 8px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ============================================
+       SCHERMATA INIZIALE
+       ============================================ -->
+  <div id="start-screen">
+    <div class="prof-header-container" id="prof-header-svg"></div>
+    <h1>Quiz di <span>Termodinamica</span></h1>
+    <p class="subtitle">Trasformazioni, primo principio, calori specifici, macchine termiche, entropia — Liceo Scientifico</p>
+    <div class="prof-welcome">Prof. Paludetto dice: "Vediamo se hai capito calore, lavoro ed entropia."</div>
+
+    <!-- SEZIONE 1: TEST E PREPARAZIONE -->
+    <div class="menu-section">
+      <div class="menu-section-title"><span class="section-icon test"></span> Test e Preparazione</div>
+
+      <h3 style="margin-bottom:10px; text-align:left; font-size:0.95em;">Filtra per argomento:</h3>
+      <div class="topic-grid" id="topic-filters"></div>
+
+      <div class="mode-buttons">
+        <button class="btn btn-primary" onclick="startQuiz('all')">Test completo</button>
+        <button class="btn btn-warning" onclick="startQuiz('random')">Modalita casuale</button>
+        <button class="btn btn-danger" onclick="startQuiz('errors')" id="btn-errors" style="display:none;">Ripassa gli errori</button>
+        <button class="btn btn-ultra" onclick="startQuiz('ultra')">Ultra Preparazione</button>
+      </div>
+      <div class="mode-buttons" style="margin-top:10px;">
+        <button class="btn btn-exam" onclick="showExam()">Simulazione Verifica</button>
+        <button class="btn btn-demo" onclick="showDemoExam()">Verifica Dimostrazioni</button>
+      </div>
+    </div>
+
+    <!-- SEZIONE 2: STUDIO -->
+    <div class="menu-section">
+      <div class="menu-section-title"><span class="section-icon study"></span> Studio e Ripasso</div>
+      <div class="mode-buttons">
+        <button class="btn btn-outline" style="border-color:var(--success);color:var(--success);" onclick="showNotes()">Appunti e Teoria</button>
+        <button class="btn btn-outline" style="border-color:#7c3aed;color:#7c3aed;" onclick="showNotes('dimostrazioni')">Dimostrazioni</button>
+      </div>
+    </div>
+
+    <div class="prev-stats" id="prev-stats" style="display:none;">
+      <strong>Sessione precedente:</strong>
+      <span id="prev-stats-text"></span>
+      <br><button class="btn btn-outline" style="margin-top:8px; padding:6px 16px; font-size:0.85em;" onclick="clearProgress()">Cancella progressi</button>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA QUIZ
+       ============================================ -->
+  <div id="quiz-screen">
+    <div class="quiz-header">
+      <div class="progress-info">
+        Domanda <span id="current-q">1</span> di <span id="total-q">0</span>
+      </div>
+      <div class="score-display">
+        <span class="score-correct">Corrette: <span id="score-correct">0</span></span>
+        <span class="score-wrong">Errate: <span id="score-wrong">0</span></span>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="question-card" id="question-card">
+      <div class="question-meta" id="question-meta"></div>
+      <div class="question-text" id="question-text"></div>
+      <div id="answer-area"></div>
+      <div class="submit-answer-btn" id="submit-area" style="display:none;">
+        <button class="btn btn-primary" onclick="checkOpenAnswer()">Verifica risposta</button>
+      </div>
+    </div>
+
+    <!-- Prof. Paludetto — Cartoon -->
+    <div class="prof-container" id="prof-container">
+      <div class="prof-svg-container">
+        <div class="prof-svg-correct" id="prof-svg-happy"></div>
+        <div class="prof-svg-wrong" id="prof-svg-angry"></div>
+      </div>
+      <div class="prof-bubble">
+        <div class="prof-name" id="prof-name">Prof. Paludetto</div>
+        <div id="prof-phrase"></div>
+      </div>
+    </div>
+
+    <div class="feedback-box" id="feedback-box">
+      <div class="feedback-title" id="feedback-title"></div>
+      <div class="feedback-text" id="feedback-text"></div>
+    </div>
+
+    <div class="deepdive-box" id="deepdive-box">
+      <div class="deepdive-title">Approfondimento</div>
+      <div class="deepdive-text" id="deepdive-text"></div>
+    </div>
+
+    <div class="next-btn-container" id="next-btn-container" style="display:none;">
+      <button class="btn btn-primary" onclick="nextQuestion()">Prossima domanda</button>
+      <button class="btn btn-outline" style="margin-left:8px;" onclick="endQuiz()">Termina</button>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA RIEPILOGO
+       ============================================ -->
+  <div id="summary-screen">
+    <div class="summary-card">
+      <h2>Riepilogo della Sessione</h2>
+
+      <!-- Prof nel riepilogo -->
+      <div class="prof-container show" id="prof-summary" style="margin-bottom:16px;">
+        <div class="prof-svg-container" id="prof-summary-svg"></div>
+        <div class="prof-bubble">
+          <div class="prof-name" id="prof-summary-name">Prof. Paludetto</div>
+          <div id="prof-summary-phrase"></div>
+        </div>
+      </div>
+
+      <div class="big-score" id="final-score"></div>
+      <p style="text-align:center;color:var(--gray);" id="final-score-label"></p>
+
+      <div class="stats-grid" id="stats-grid"></div>
+
+      <h3 style="margin:20px 0 10px;">Risultati per argomento</h3>
+      <div class="topic-results" id="topic-results"></div>
+
+      <div class="suggestions" id="suggestions"></div>
+
+      <h3 style="margin:20px 0 10px;">Cronologia risposte</h3>
+      <div class="history-list" id="history-list"></div>
+    </div>
+
+    <div style="text-align:center; margin:20px 0 40px;">
+      <button class="btn btn-primary" onclick="location.reload()">Ricomincia</button>
+      <button class="btn btn-danger" style="margin-left:10px;" onclick="startQuiz('errors')">Ripassa gli errori</button>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA SIMULAZIONE VERIFICA
+       ============================================ -->
+  <div id="exam-screen" style="display:none; margin-top:20px;">
+
+    <div class="exam-card">
+      <div class="exam-header">
+        <h2>VERIFICA DI FISICA — TERMODINAMICA</h2>
+        <div class="exam-info">
+          <span>Nome: _______________&nbsp;&nbsp; Cognome: _______________</span>
+          <span>Classe: 4°&nbsp;&nbsp; Data: ___/___/______</span>
+        </div>
+        <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+          <span class="exam-timer" id="exam-timer">Tempo: 50:00</span>
+          <button class="btn btn-outline" style="padding:6px 14px; font-size:0.85em;" onclick="hideExam()">Torna al menu</button>
+        </div>
+      </div>
+
+      <!-- PARTE 1: Scelta multipla (10 domande, 5 opzioni A-E) -->
+      <div class="exam-section-title">PARTE 1 — Domande a risposta multipla (10 domande)</div>
+      <div id="exam-mc-questions"></div>
+
+      <!-- PARTE 2: Domande aperte / dimostrative (3 domande) -->
+      <div class="exam-section-title">PARTE 2 — Domande aperte e dimostrazioni (3 domande)</div>
+      <div id="exam-open-questions"></div>
+
+      <div style="text-align:center; margin-top:24px;">
+        <button class="btn btn-primary" onclick="submitExam()" id="exam-submit-btn" style="padding:14px 40px; font-size:1.05em;">Consegna Verifica</button>
+      </div>
+
+      <div class="exam-result-bar" id="exam-result" style="display:none;">
+        <p style="font-size:1.1em; margin-bottom:8px;">Risultato della verifica:</p>
+        <div class="exam-grade" id="exam-grade"></div>
+        <p id="exam-grade-detail" style="color:var(--gray);margin-top:6px;"></p>
+        <div style="margin-top:16px;">
+          <button class="btn btn-primary" onclick="resetExam()">Ripeti la verifica</button>
+          <button class="btn btn-outline" style="margin-left:8px;" onclick="hideExam()">Torna al menu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA VERIFICA DIMOSTRAZIONI
+       ============================================ -->
+  <div id="demo-exam-screen" style="display:none; margin-top:20px;">
+    <div class="exam-card">
+      <div class="exam-header" style="border-bottom-color:#7c3aed;">
+        <h2 style="color:#7c3aed;">VERIFICA DIMOSTRAZIONI — TERMODINAMICA</h2>
+        <p style="font-size:0.9em; color:var(--gray); margin-top:4px;">Riproduci ogni dimostrazione passo per passo, come se fosse un compito in classe.</p>
+        <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+          <span class="exam-timer" id="demo-exam-timer">Tempo: 40:00</span>
+          <button class="btn btn-outline" style="padding:6px 14px; font-size:0.85em;" onclick="hideDemoExam()">Torna al menu</button>
+        </div>
+      </div>
+
+      <div id="demo-exam-questions"></div>
+
+      <div style="text-align:center; margin-top:24px;">
+        <button class="btn btn-demo" onclick="submitDemoExam()" id="demo-exam-submit-btn" style="padding:14px 40px; font-size:1.05em;">Consegna Verifica</button>
+      </div>
+
+      <div class="exam-result-bar" id="demo-exam-result" style="display:none;">
+        <p style="font-size:1.1em; margin-bottom:8px;">Verifica consegnata!</p>
+        <p id="demo-exam-grade-detail" style="color:var(--gray);"></p>
+        <div style="margin-top:16px;">
+          <button class="btn btn-demo" onclick="resetDemoExam()">Ripeti la verifica</button>
+          <button class="btn btn-outline" style="margin-left:8px;" onclick="hideDemoExam()">Torna al menu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA APPUNTI
+       ============================================ -->
+  <div id="notes-screen" style="display:none; margin-top:20px;">
+    <div class="summary-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:20px;">
+        <h2 style="margin:0;">Appunti di Termodinamica</h2>
+        <button class="btn btn-outline" onclick="hideNotes()" style="padding:8px 18px; font-size:0.9em;">Torna al menu</button>
+      </div>
+
+      <!-- Navigazione argomenti -->
+      <div class="notes-nav" id="notes-nav"></div>
+
+      <!-- Contenuto argomenti -->
+      <div id="notes-content">
+
+        <div class="note-section" id="note-sistemi-trasf">
+          <h3 class="note-title" onclick="toggleNote('sistemi-trasf')">1. Sistemi e trasformazioni termodinamiche <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-sistemi-trasf">
+            <p>La <strong>termodinamica</strong> studia gli scambi di calore e lavoro tra sistemi.</p>
+            <p style="margin-top:8px;"><strong>Principio zero</strong>: due sistemi in equilibrio termico con un terzo sono in equilibrio tra loro &rarr; hanno la stessa temperatura.</p>
+            <div class="info-grid" style="margin-top:12px;">
+              <div class="info-card"><div class="ic-title">Isobara</div><div class="ic-content">p = costante &mdash; segmento orizzontale nel piano p-V</div></div>
+              <div class="info-card green"><div class="ic-title">Isocora</div><div class="ic-content">V = costante &mdash; segmento verticale nel piano p-V</div></div>
+              <div class="info-card orange"><div class="ic-title">Isoterma</div><div class="ic-content">T = costante &mdash; iperbole equilatera nel piano p-V</div></div>
+              <div class="info-card purple"><div class="ic-title">Adiabatica</div><div class="ic-content">Q = 0 &mdash; curva pi&ugrave; ripida delle isoterme nel piano p-V</div></div>
+            </div>
+            <div class="note-tip">Una trasformazione &egrave; <strong>quasi-statica</strong> se avviene cos&igrave; lentamente da passare sempre attraverso stati di equilibrio. <strong>Reversibile</strong>: sistema e ambiente tornano esattamente allo stato iniziale.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-lavoro">
+          <h3 class="note-title" onclick="toggleNote('lavoro')">2. Lavoro termodinamico <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-lavoro">
+            <div class="formula-box">Isobara: L = p&Delta;V = p(V<sub>f</sub> &minus; V<sub>i</sub>)</div>
+            <div class="formula-box">Isoterma: L = nRT ln(V<sub>f</sub>/V<sub>i</sub>)</div>
+            <p>Il lavoro &egrave; numericamente uguale all&rsquo;area sottesa al grafico nel piano p-V.</p>
+            <ul>
+              <li>L &gt; 0: espansione (sistema cede energia)</li>
+              <li>L &lt; 0: compressione (ambiente compie lavoro sul sistema)</li>
+              <li>L = 0: trasformazione isocora</li>
+              <li>Ciclo: L = area racchiusa dalla curva chiusa</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-primo-principio">
+          <h3 class="note-title" onclick="toggleNote('primo-principio')">3. Primo principio della termodinamica <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-primo-principio">
+            <div class="formula-box">&Delta;U = Q &minus; L &nbsp;&nbsp; (U<sub>f</sub> &minus; U<sub>i</sub> = Q &minus; L)</div>
+            <p><strong>Convenzioni segni:</strong></p>
+            <ul>
+              <li>Q &gt; 0: calore entra nel sistema &nbsp;|&nbsp; Q &lt; 0: calore esce</li>
+              <li>L &gt; 0: lavoro fatto <em>dal</em> sistema &nbsp;|&nbsp; L &lt; 0: lavoro fatto <em>sul</em> sistema</li>
+            </ul>
+            <div class="info-grid" style="margin-top:10px;">
+              <div class="info-card"><div class="ic-title">Isocora (L=0)</div><div class="ic-content ic-formula">&Delta;U = Q</div></div>
+              <div class="info-card green"><div class="ic-title">Isoterma (&Delta;U=0)</div><div class="ic-content ic-formula">Q = L</div></div>
+              <div class="info-card orange"><div class="ic-title">Adiabatica (Q=0)</div><div class="ic-content ic-formula">&Delta;U = &minus;L</div></div>
+              <div class="info-card purple"><div class="ic-title">Ciclica (&Delta;U=0)</div><div class="ic-content ic-formula">Q = L</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-energia-interna">
+          <h3 class="note-title" onclick="toggleNote('energia-interna')">4. Energia interna del gas perfetto <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-energia-interna">
+            <div class="formula-box">U = &frac12; f n R T &nbsp;&nbsp;&nbsp; &Delta;U = &frac12; f n R (T<sub>f</sub> &minus; T<sub>i</sub>)</div>
+            <ul>
+              <li>f = 3 per gas <strong>monoatomico</strong></li>
+              <li>f = 5 per gas <strong>biatomico</strong></li>
+              <li>R = 8,314 J/(mol&middot;K)</li>
+            </ul>
+            <p style="margin-top:8px;">U dipende <strong>solo dalla temperatura</strong> (non da p o V).</p>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-calori-specifici">
+          <h3 class="note-title" onclick="toggleNote('calori-specifici')">5. Calori specifici del gas perfetto <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-calori-specifici">
+            <div class="formula-box">Q = c<sub>m</sub> n &Delta;T &nbsp;&nbsp;(c<sub>m</sub> in J/mol&middot;K)</div>
+            <div class="info-grid" style="margin-top:10px;">
+              <div class="info-card"><div class="ic-title">Monoatomico</div><div class="ic-content ic-formula">c<sub>v</sub> = &frac32;R &nbsp; c<sub>p</sub> = &frac52;R</div></div>
+              <div class="info-card green"><div class="ic-title">Biatomico</div><div class="ic-content ic-formula">c<sub>v</sub> = &frac52;R &nbsp; c<sub>p</sub> = &frac72;R</div></div>
+              <div class="info-card orange"><div class="ic-title">Relaz. di Mayer</div><div class="ic-content ic-formula">c<sub>p</sub> = c<sub>v</sub> + R</div></div>
+              <div class="info-card purple"><div class="ic-title">&gamma; = c<sub>p</sub>/c<sub>v</sub></div><div class="ic-content">monot: 5/3 &nbsp; biat: 7/5</div></div>
+            </div>
+            <div class="note-tip">c<sub>p</sub> &gt; c<sub>v</sub> perch&eacute; a pressione costante il gas si espande e compie lavoro: serve pi&ugrave; calore per la stessa &Delta;T.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-adiabatica">
+          <h3 class="note-title" onclick="toggleNote('adiabatica')">6. Trasformazione adiabatica <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-adiabatica">
+            <div class="formula-box">p<sub>i</sub>V<sub>i</sub><sup>&gamma;</sup> = p<sub>f</sub>V<sub>f</sub><sup>&gamma;</sup> &nbsp;&nbsp;&nbsp; (&gamma; = c<sub>p</sub>/c<sub>v</sub>)</div>
+            <div class="formula-box">T<sub>i</sub>V<sub>i</sub><sup>&gamma;&minus;1</sup> = T<sub>f</sub>V<sub>f</sub><sup>&gamma;&minus;1</sup></div>
+            <ul>
+              <li>Espansione adiabatica: il gas compie lavoro, si <strong>raffredda</strong> (&Delta;U &lt; 0)</li>
+              <li>Compressione adiabatica: lavoro sul gas, si <strong>scalda</strong> (&Delta;U &gt; 0)</li>
+              <li>Nel piano p-V la curva adiabatica &egrave; pi&ugrave; ripida dell&rsquo;isoterma</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-macchine">
+          <h3 class="note-title" onclick="toggleNote('macchine')">7. Macchine termiche <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-macchine">
+            <div class="formula-box">L = Q<sub>c</sub> &minus; |Q<sub>f</sub>| &nbsp;&nbsp;&nbsp; &eta; = L/Q<sub>c</sub> = 1 &minus; |Q<sub>f</sub>|/Q<sub>c</sub></div>
+            <p>La macchina assorbe Q<sub>c</sub> dal serbatoio caldo, produce lavoro L, cede |Q<sub>f</sub>| al serbatoio freddo.</p>
+            <div class="info-grid" style="margin-top:10px;">
+              <div class="info-card"><div class="ic-title">Ciclo Otto (benzina)</div><div class="ic-content">2 adiabatiche + 2 isocore</div></div>
+              <div class="info-card green"><div class="ic-title">Ciclo Diesel</div><div class="ic-content">2 adiabatiche + 1 isobara + 1 isocora</div></div>
+            </div>
+            <div class="note-tip">&eta; &lt; 1 sempre. Una macchina reale deve operare con <strong>due serbatoi</strong> a temperature diverse.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-secondo-principio">
+          <h3 class="note-title" onclick="toggleNote('secondo-principio')">8. Secondo principio della termodinamica <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-secondo-principio">
+            <p><strong>Enunciato di Kelvin</strong>: &egrave; impossibile costruire una macchina il cui unico risultato sia la conversione di tutto il calore assorbito da una sorgente in lavoro.</p>
+            <p style="margin-top:8px;"><strong>Enunciato di Clausius</strong>: &egrave; impossibile realizzare una trasformazione il cui unico risultato sia il passaggio di calore da un corpo pi&ugrave; freddo a uno pi&ugrave; caldo.</p>
+            <div class="note-tip">I due enunciati sono <strong>equivalenti</strong>: negare uno implica negare l&rsquo;altro.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-carnot">
+          <h3 class="note-title" onclick="toggleNote('carnot')">9. Macchina di Carnot e teorema di Carnot <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-carnot">
+            <p><strong>Teorema di Carnot</strong>: nessuna macchina termica reale che operi tra due serbatoi a T<sub>c</sub> e T<sub>f</sub> pu&ograve; avere rendimento maggiore di una macchina reversibile tra le stesse temperature.</p>
+            <div class="formula-box">&eta;<sub>Carnot</sub> = 1 &minus; T<sub>f</sub>/T<sub>c</sub> &nbsp;&nbsp; (temperature in Kelvin!)</div>
+            <div class="formula-box">|Q<sub>f</sub>|/Q<sub>c</sub> = T<sub>f</sub>/T<sub>c</sub></div>
+            <p>Il ciclo di Carnot: espansione isoterma &rarr; espansione adiabatica &rarr; compressione isoterma &rarr; compressione adiabatica.</p>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-entropia">
+          <h3 class="note-title" onclick="toggleNote('entropia')">10. Entropia <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-entropia">
+            <div class="formula-box">&Delta;S = &sum;(&Delta;Q<sub>i</sub>/T<sub>i</sub>) &nbsp; (trasformazioni reversibili)</div>
+            <p>L&rsquo;entropia &egrave; una <strong>funzione di stato</strong>. Unit&agrave;: J/K.</p>
+            <div class="info-grid" style="margin-top:10px;">
+              <div class="info-card"><div class="ic-title">Isoterma</div><div class="ic-content ic-formula">&Delta;S = Q/T</div></div>
+              <div class="info-card green"><div class="ic-title">Adiabatica rev.</div><div class="ic-content ic-formula">&Delta;S = 0</div></div>
+              <div class="info-card orange"><div class="ic-title">Passaggio di stato</div><div class="ic-content ic-formula">&Delta;S = mL/T</div></div>
+            </div>
+            <div class="formula-box">Processo reversibile: &Delta;S<sub>univ</sub> = 0 &nbsp;&nbsp; Processo irreversibile: &Delta;S<sub>univ</sub> &gt; 0</div>
+            <div class="note-tip">L&rsquo;entropia dell&rsquo;universo <strong>non diminuisce mai</strong>. Nei processi reali (irreversibili) aumenta sempre.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-terzo-principio">
+          <h3 class="note-title" onclick="toggleNote('terzo-principio')">11. Terzo principio della termodinamica <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-terzo-principio">
+            <div class="formula-box">&Egrave; impossibile raggiungere T = 0 K mediante un numero finito di trasformazioni.</div>
+            <p>Il terzo principio (Nernst, 1906) stabilisce l&rsquo;impossibilit&agrave; di raggiungere lo zero assoluto, ma non impedisce di avvicinarsi: tecniche criogeniche hanno raggiunto 10<sup>&minus;12</sup> K.</p>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-dim-carnot">
+          <h3 class="note-title" onclick="toggleNote('dim-carnot')">DIM: Rendimento macchina di Carnot &eta; = 1 &minus; T<sub>f</sub>/T<sub>c</sub> <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-dim-carnot">
+            <div class="demo-step"><span class="step-num">1</span><span class="step-label">Ciclo di Carnot</span><p>Il ciclo &egrave; composto da: espansione isoterma a T<sub>c</sub> (AB), espansione adiabatica (BC), compressione isoterma a T<sub>f</sub> (CD), compressione adiabatica (DA).</p></div>
+            <div class="demo-step"><span class="step-num">2</span><span class="step-label">Calore scambiato nelle isoterme</span><p>Espansione AB: Q<sub>c</sub> = nRT<sub>c</sub> ln(V<sub>B</sub>/V<sub>A</sub>) &gt; 0 &nbsp;|&nbsp; Compressione CD: Q<sub>f</sub> = nRT<sub>f</sub> ln(V<sub>D</sub>/V<sub>C</sub>) &lt; 0</p></div>
+            <div class="demo-step"><span class="step-num">3</span><span class="step-label">Relazione dalle adiabatiche</span><p>Dalle due adiabatiche: T<sub>c</sub>V<sub>B</sub><sup>&gamma;&minus;1</sup>=T<sub>f</sub>V<sub>C</sub><sup>&gamma;&minus;1</sup> e T<sub>c</sub>V<sub>A</sub><sup>&gamma;&minus;1</sup>=T<sub>f</sub>V<sub>D</sub><sup>&gamma;&minus;1</sup> &rarr; V<sub>B</sub>/V<sub>A</sub> = V<sub>C</sub>/V<sub>D</sub></p></div>
+            <div class="demo-step"><span class="step-num">4</span><span class="step-label">Rapporto dei calori</span><p>|Q<sub>f</sub>|/Q<sub>c</sub> = T<sub>f</sub> ln(V<sub>C</sub>/V<sub>D</sub>) / [T<sub>c</sub> ln(V<sub>B</sub>/V<sub>A</sub>)] = T<sub>f</sub>/T<sub>c</sub></p></div>
+            <div class="demo-step"><span class="step-num">5</span><span class="step-label">Rendimento</span><p><strong>&eta; = 1 &minus; |Q<sub>f</sub>|/Q<sub>c</sub> = 1 &minus; T<sub>f</sub>/T<sub>c</sub></strong></p></div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-dim-mayer">
+          <h3 class="note-title" onclick="toggleNote('dim-mayer')">DIM: Relazione di Mayer c<sub>p</sub> = c<sub>v</sub> + R <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-dim-mayer">
+            <div class="demo-step"><span class="step-num">1</span><span class="step-label">Isocora</span><p>A volume costante: L=0, quindi Q<sub>isocora</sub> = &Delta;U = nc<sub>v</sub>&Delta;T</p></div>
+            <div class="demo-step"><span class="step-num">2</span><span class="step-label">Isobara</span><p>A pressione costante: Q<sub>isobara</sub> = &Delta;U + L = nc<sub>v</sub>&Delta;T + p&Delta;V</p></div>
+            <div class="demo-step"><span class="step-num">3</span><span class="step-label">Equazione di stato</span><p>p&Delta;V = nR&Delta;T (dalla pV=nRT a p costante)</p></div>
+            <div class="demo-step"><span class="step-num">4</span><span class="step-label">Sostituendo</span><p>Q<sub>isobara</sub> = nc<sub>v</sub>&Delta;T + nR&Delta;T = n(c<sub>v</sub>+R)&Delta;T = nc<sub>p</sub>&Delta;T</p></div>
+            <div class="demo-step"><span class="step-num">5</span><span class="step-label">Risultato</span><p><strong>c<sub>p</sub> = c<sub>v</sub> + R</strong></p></div>
+          </div>
+        </div>
+
+      </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================
+   BANCA DATI DOMANDE
+   Ogni domanda ha: text, type, options (se multipla),
+   answer, explanation, commonError, deepdive,
+   difficulty (1-3), topic
+   ============================================ */
+
+const QUESTIONS = [
+
+  // ─── SISTEMI E TRASFORMAZIONI ─────────────────────────────────────────────
+  {
+    text: "La termodinamica e' la branca della fisica che studia:",
+    type: "multiple",
+    options: ["Solo i fenomeni di calore nei solidi", "Le leggi fondamentali degli scambi di calore e lavoro tra sistemi", "Solo il comportamento dei gas a livello atomico", "Il moto browniano delle molecole"],
+    answer: 1,
+    explanation: "La termodinamica analizza le leggi fondamentali degli scambi di calore e lavoro, senza fare ipotesi sui costituenti microscopici.",
+    commonError: "Confondere termodinamica (macroscopica) con fisica statistica (microscopica).",
+    deepdive: "Le variabili termodinamiche (T, p, V, n) descrivono il sistema a livello macroscopico.",
+    difficulty: 1, topic: "Sistemi e trasformazioni"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Il principio zero della termodinamica afferma che due sistemi sono in equilibrio termico quando hanno la stessa temperatura.",
+    answer: true,
+    explanation: "Corretto. Due sistemi in contatto termico sono in equilibrio quando non vi e' flusso netto di calore, il che avviene quando hanno la stessa temperatura.",
+    commonError: "Confondere equilibrio termico con equilibrio meccanico.",
+    deepdive: "Il principio zero e' la base per la definizione operativa di temperatura: il termometro misura la temperatura perche' raggiunge l'equilibrio termico con il sistema.",
+    difficulty: 1, topic: "Sistemi e trasformazioni"
+  },
+  {
+    text: "Una trasformazione quasi-statica e':",
+    type: "multiple",
+    options: ["Una trasformazione ideale cosi' lenta da passare sempre attraverso stati di equilibrio", "Una trasformazione reale molto rapida", "Una trasformazione senza scambio di calore", "Una trasformazione a volume costante"],
+    answer: 0,
+    explanation: "La trasformazione quasi-statica e' un modello ideale: il sistema passa attraverso stati di equilibrio successivi. E' rappresentata da una curva continua nel piano p-V.",
+    commonError: "Pensare che quasi-statica significhi veloce. E' l'opposto: deve avvenire lentamente.",
+    deepdive: "Le trasformazioni reali si avvicinano al modello quasi-statico quanto piu' sono lente.",
+    difficulty: 2, topic: "Sistemi e trasformazioni"
+  },
+  {
+    text: "Una trasformazione isobara avviene a:",
+    type: "multiple",
+    options: ["Temperatura costante", "Volume costante", "Senza scambi di calore", "Pressione costante"],
+    answer: 3,
+    explanation: "Isobara = pressione costante. Nel piano p-V e' rappresentata da un segmento orizzontale.",
+    commonError: "Confondere isobara (p costante) con isocora (V costante) e isoterma (T costante).",
+    deepdive: "Mnemonico: iso=stesso; baro=pressione (barometro); cora=volume; terma=temperatura.",
+    difficulty: 1, topic: "Sistemi e trasformazioni"
+  },
+  {
+    text: "Una trasformazione isocora avviene a:",
+    type: "multiple",
+    options: ["Pressione costante", "Temperatura costante", "Volume costante", "Senza scambi di calore"],
+    answer: 2,
+    explanation: "Isocora = volume costante. Nel piano p-V e' un segmento verticale.",
+    commonError: "Confondere isocora (V=cost) con isobara (p=cost).",
+    deepdive: "In una isocora L=0 perche' delta_V=0. Quindi tutto il calore scambiato va a variare U.",
+    difficulty: 1, topic: "Sistemi e trasformazioni"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Una trasformazione adiabatica avviene senza alcuno scambio di calore tra sistema e ambiente.",
+    answer: true,
+    explanation: "Esatto. Q=0 per definizione nella trasformazione adiabatica. Il sistema e' termicamente isolato dall'ambiente.",
+    commonError: "Confondere adiabatica con isoterma: nell'adiabatica Q=0, nell'isoterma deltaT=0.",
+    deepdive: "Nell'adiabatica la temperatura varia: il lavoro compresso/espanso cambia l'energia interna.",
+    difficulty: 1, topic: "Sistemi e trasformazioni"
+  },
+  {
+    text: "Nel piano p-V, una trasformazione isoterma di gas perfetto e' rappresentata da:",
+    type: "multiple",
+    options: ["Un segmento orizzontale (p costante)", "Un arco di iperbole equilatera (pV=costante)", "Un segmento verticale (V costante)", "Una curva con pendenza maggiore delle adiabatiche"],
+    answer: 1,
+    explanation: "Dall'equazione di stato pV=nRT con T costante si ottiene p=nRT/V, un'iperbole equilatera nel piano p-V.",
+    commonError: "Confondere con la isobara (segmento orizzontale).",
+    deepdive: "A temperature diverse corrispondono iperboli diverse: curve isoterme distinte nel piano p-V.",
+    difficulty: 2, topic: "Sistemi e trasformazioni"
+  },
+
+  // ─── LAVORO TERMODINAMICO ──────────────────────────────────────────────────
+  {
+    text: "In una trasformazione isobara a pressione p con variazione di volume delta_V, il lavoro vale:",
+    type: "multiple",
+    options: ["L = p * delta_V", "L = delta_V / p", "L = nRT", "L = 0"],
+    answer: 0,
+    explanation: "In una isobara L = F*s = p*A*s = p*delta_V. E' l'area del rettangolo nel piano p-V.",
+    commonError: "Pensare che il lavoro sia nullo in ogni trasformazione. Solo nell'isocora e' L=0.",
+    deepdive: "La forza sul pistone e' F = p*A. Lo spostamento s corrisponde a delta_V = A*s. Quindi L = p*delta_V.",
+    difficulty: 1, topic: "Lavoro termodinamico"
+  },
+  {
+    text: "Il lavoro compiuto da un gas in una trasformazione quasi-statica e' numericamente uguale a:",
+    type: "multiple",
+    options: ["Il prodotto della pressione per il volume finale", "La variazione di temperatura del gas", "La somma di pressione e volume", "L'area sottesa al grafico della trasformazione nel piano p-V"],
+    answer: 3,
+    explanation: "In qualsiasi trasformazione quasi-statica il lavoro e' l'area sottesa al grafico nel piano p-V.",
+    commonError: "Pensare che il lavoro sia sempre p*V invece che p*delta_V.",
+    deepdive: "Per una trasformazione generica L=integrale(p dV). Graficamente e' l'area colorata nel diagramma p-V.",
+    difficulty: 2, topic: "Lavoro termodinamico"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "In una trasformazione isocora il lavoro compiuto dal gas e' nullo.",
+    answer: true,
+    explanation: "Corretto. Se il volume non cambia (delta_V=0), il gas non sposta il pistone: L=p*delta_V=0.",
+    commonError: "Pensare che in una isocora ci sia comunque del lavoro perche' la pressione cambia.",
+    deepdive: "Il lavoro richiede uno spostamento. Senza variazione di volume non c'e' spostamento del pistone.",
+    difficulty: 1, topic: "Lavoro termodinamico"
+  },
+  {
+    text: "In una trasformazione isoterma di n moli di gas perfetto da Vi a Vf, il lavoro e':",
+    type: "multiple",
+    options: ["L = p*(Vf-Vi)", "L = nRT*ln(Vf/Vi)", "L = 0", "L = (1/2)*f*n*R*delta_T"],
+    answer: 1,
+    explanation: "In isoterma pV=nRT=costante, quindi p=nRT/V. L=integrale(p dV) = nRT*ln(Vf/Vi).",
+    commonError: "Usare L=p*delta_V che vale solo per la isobara, non per l'isoterma dove p non e' costante.",
+    deepdive: "ln(Vf/Vi) > 0 se il gas si espande (Vf>Vi): L>0 (il gas compie lavoro). Se Vf<Vi: L<0.",
+    difficulty: 2, topic: "Lavoro termodinamico"
+  },
+  {
+    text: "Se un gas si espande (Vf > Vi) in una trasformazione, il lavoro e':",
+    type: "multiple",
+    options: ["Negativo, il sistema riceve energia", "Dipende dal tipo di trasformazione ma il segno e' sempre negativo", "Positivo: il sistema cede energia meccanica all'ambiente espandendo il pistone", "Nullo perche' la temperatura potrebbe non cambiare"],
+    answer: 2,
+    explanation: "L>0 quando il gas si espande: spinge il pistone verso l'esterno, compiendo lavoro sull'ambiente.",
+    commonError: "Confondere il segno del lavoro: espansione = lavoro positivo (sistema cede energia).",
+    deepdive: "Per convenzione del primo principio: L>0 significa che il sistema fa lavoro sull'esterno.",
+    difficulty: 2, topic: "Lavoro termodinamico"
+  },
+  {
+    text: "In una trasformazione ciclica, il lavoro totale compiuto dal gas e' uguale a:",
+    type: "multiple",
+    options: ["L'area racchiusa dalla curva chiusa nel piano p-V", "Zero, perche' il sistema torna allo stato iniziale", "La somma dei moduli dei calori scambiati", "nRT*ln(Vf/Vi)"],
+    answer: 0,
+    explanation: "Il lavoro totale e' l'area della regione chiusa nel piano p-V. Il segno dipende dal verso di percorrenza.",
+    commonError: "Pensare che in un ciclo il lavoro sia zero perche' lo stato finale coincide con quello iniziale. Quello e' delta_U=0, non L=0.",
+    deepdive: "Se il ciclo e' percorso in senso orario L>0 (macchina termica). In senso antiorario L<0 (frigorifero).",
+    difficulty: 3, topic: "Lavoro termodinamico"
+  },
+
+  // ─── PRIMO PRINCIPIO ──────────────────────────────────────────────────────
+  {
+    text: "Secondo le convenzioni del primo principio, il calore Q e':",
+    type: "multiple",
+    options: ["Sempre positivo", "Negativo quando entra nel sistema", "Positivo quando esce dal sistema", "Positivo quando entra nel sistema, negativo quando esce"],
+    answer: 3,
+    explanation: "Q>0: calore entrante (sistema acquista energia). Q<0: calore uscente (sistema cede energia).",
+    commonError: "Invertire la convenzione dei segni.",
+    deepdive: "Analogamente L>0 significa che il sistema compie lavoro sull'ambiente (perde energia).",
+    difficulty: 1, topic: "Primo principio"
+  },
+  {
+    text: "Il primo principio della termodinamica afferma:",
+    type: "multiple",
+    options: ["Q = L in ogni trasformazione", "L'energia interna e' sempre costante", "delta_U = Q - L", "delta_U = Q + L"],
+    answer: 2,
+    explanation: "delta_U = Q - L. La variazione di energia interna e' uguale al calore assorbito meno il lavoro compiuto.",
+    commonError: "Scrivere delta_U = Q + L. Il segno meno viene dalla convenzione: L>0 riduce l'energia interna.",
+    deepdive: "E' la conservazione dell'energia per sistemi termodinamici. L'energia interna e' una funzione di stato.",
+    difficulty: 1, topic: "Primo principio"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "In una trasformazione ciclica, la variazione di energia interna e' nulla e quindi Q = L.",
+    answer: true,
+    explanation: "In un ciclo lo stato finale coincide con quello iniziale, quindi delta_U=0. Dal primo principio: 0=Q-L, cioe' Q=L.",
+    commonError: "Pensare che in un ciclo anche Q e L siano zero.",
+    deepdive: "Una macchina termica sfrutta proprio questo: Q_netto = L_netto in una trasformazione ciclica.",
+    difficulty: 2, topic: "Primo principio"
+  },
+  {
+    text: "In una trasformazione adiabatica (Q=0), il primo principio diventa:",
+    type: "multiple",
+    options: ["delta_U = L", "delta_U = -L", "delta_U = 0", "L = 0"],
+    answer: 1,
+    explanation: "delta_U = Q - L = 0 - L = -L. Se il gas si espande (L>0) si raffredda (delta_U<0).",
+    commonError: "Scrivere delta_U = L invece di -L. Ricordare il segno meno nel primo principio.",
+    deepdive: "Un'espansione adiabatica raffredda il gas: tutta l'energia del lavoro viene dall'energia interna.",
+    difficulty: 2, topic: "Primo principio"
+  },
+  {
+    text: "In una trasformazione isocora (L=0), il primo principio diventa:",
+    type: "multiple",
+    options: ["delta_U = Q", "delta_U = -Q", "delta_U = 0", "Q = -L"],
+    answer: 0,
+    explanation: "delta_U = Q - 0 = Q. Tutta l'energia termica scambiata va a modificare l'energia interna.",
+    commonError: "Pensare che delta_U = 0 nell'isocora. Questo e' vero nell'isoterma, non nell'isocora.",
+    deepdive: "In una isocora il calore si usa interamente per variare la temperatura del gas.",
+    difficulty: 1, topic: "Primo principio"
+  },
+  {
+    text: "Un sistema assorbe Q = -100 J (cede calore) e subisce un lavoro L = -250 J (lavoro compiuto sull'ambiente e' negativo, cioe' il sistema subisce lavoro). Calcola delta_U in joule.",
+    type: "numeric",
+    answer: 150,
+    tolerance: 2,
+    explanation: "delta_U = Q - L = -100 - (-250) = -100 + 250 = +150 J. L'energia interna aumenta.",
+    commonError: "Non gestire correttamente i segni. L=-250 significa che il sistema SUBISCE 250J di lavoro dall'esterno.",
+    deepdive: "L=-250 J: il sistema viene compresso. Q=-100 J: cede calore. Nonostante ceda calore, l'energia interna aumenta perche' la compressione porta piu' energia di quanta ne sia ceduta.",
+    difficulty: 3, topic: "Primo principio"
+  },
+  {
+    text: "In una trasformazione isoterma di gas perfetto, delta_U=0. Per il primo principio:",
+    type: "multiple",
+    options: ["L = 0 e Q = 0", "L > 0 implica Q > 0 ma non sono uguali", "L e Q sono indipendenti", "Q = L: tutto il calore assorbito viene convertito in lavoro"],
+    answer: 3,
+    explanation: "delta_U=0 => Q-L=0 => Q=L. In isoterma il gas converte interamente il calore assorbito in lavoro.",
+    commonError: "Pensare che in isoterma Q=0. E' Q=L, non Q=0.",
+    deepdive: "Questo NON viola il secondo principio perche' la trasformazione isoterma non e' un ciclo.",
+    difficulty: 3, topic: "Primo principio"
+  },
+
+  // ─── ENERGIA INTERNA GAS PERFETTO ─────────────────────────────────────────
+  {
+    text: "L'energia interna di un gas perfetto dipende:",
+    type: "multiple",
+    options: ["Dalla pressione e dal volume", "Solo dal volume", "Solo dalla temperatura", "Dalla massa e dalla pressione"],
+    answer: 2,
+    explanation: "Per un gas perfetto U=U(T): l'energia interna dipende solo dalla temperatura.",
+    commonError: "Pensare che U dipenda da p o V. Per un gas ideale non c'e' interazione intermolecolare.",
+    deepdive: "Questo fu verificato dall'esperimento di Joule (espansione libera): T non cambia, quindi U non cambia.",
+    difficulty: 1, topic: "Energia interna gas perfetto"
+  },
+  {
+    text: "La formula dell'energia interna di n moli di gas perfetto e':",
+    type: "multiple",
+    options: ["U = (1/2)*f*n*R*T", "U = n*R*T", "U = f*n*R*T", "U = (1/2)*n*R*T"],
+    answer: 0,
+    explanation: "U = (1/2)*f*n*R*T, dove f e' il numero di gradi di liberta', n le moli, R=8.314 J/(mol*K), T la temperatura in Kelvin.",
+    commonError: "Dimenticare il fattore 1/2 o il fattore f.",
+    deepdive: "Il teorema di equipartizione dell'energia assegna (1/2)kT per ogni grado di liberta' per molecola.",
+    difficulty: 2, topic: "Energia interna gas perfetto"
+  },
+  {
+    text: "Il numero di gradi di liberta' f per un gas monoatomico perfetto e':",
+    type: "multiple",
+    options: ["1", "2", "5", "3"],
+    answer: 3,
+    explanation: "Un gas monoatomico ha 3 gradi di liberta' traslazionali (x, y, z). f=3.",
+    commonError: "Assegnare f=5 (biatomico) al monoatomico. Il biatomico ha 2 gradi rotazionali in piu'.",
+    deepdive: "f=3: monoatomico (solo traslazione). f=5: biatomico (traslazione+rotazione). f=6: poliatomico.",
+    difficulty: 2, topic: "Energia interna gas perfetto"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Per un gas biatomico perfetto il numero di gradi di liberta' e' f = 5.",
+    answer: true,
+    explanation: "Corretto. f=5 per gas biatomico: 3 traslazionali + 2 rotazionali.",
+    commonError: "Assegnare f=3 (monoatomico) al biatomico.",
+    deepdive: "I gas biatomici come N2, O2, H2 hanno 2 assi di rotazione rilevanti. Il terzo asse ha momento d'inerzia trascurabile.",
+    difficulty: 1, topic: "Energia interna gas perfetto"
+  },
+  {
+    text: "La variazione di energia interna di n moli di gas perfetto tra Ti e Tf e':",
+    type: "multiple",
+    options: ["delta_U = n*R*(Tf-Ti)", "delta_U = (1/2)*f*n*R*(Tf-Ti)", "delta_U = f*n*R*T", "delta_U = (1/2)*f*n*(Tf-Ti)"],
+    answer: 1,
+    explanation: "delta_U = (1/2)*f*n*R*(Tf-Ti). E' indipendente dal tipo di trasformazione (U e' funzione di stato).",
+    commonError: "Dimenticare il fattore (1/2) o R.",
+    deepdive: "Poiche' U dipende solo da T, delta_U e' la stessa in qualsiasi trasformazione che porta da Ti a Tf.",
+    difficulty: 2, topic: "Energia interna gas perfetto"
+  },
+
+  // ─── CALORI SPECIFICI ─────────────────────────────────────────────────────
+  {
+    text: "Il calore specifico molare cv e':",
+    type: "multiple",
+    options: ["Il calore specifico a pressione costante", "Il calore molare necessario per aumentare di 1 K la temperatura di 1 mole a volume costante", "Il calore per unita' di massa", "La variazione di temperatura per 1 J di calore"],
+    answer: 1,
+    explanation: "cv e' il calore specifico molare a volume costante: Q = n*cv*delta_T in isocora.",
+    commonError: "Confondere cv (volume costante) con cp (pressione costante).",
+    deepdive: "In isocora Q=delta_U, quindi cv = (1/n)*delta_U/delta_T = (1/2)*f*R.",
+    difficulty: 1, topic: "Calori specifici"
+  },
+  {
+    text: "Per un gas monoatomico perfetto, cv e cp valgono rispettivamente:",
+    type: "multiple",
+    options: ["cv=(3/2)R e cp=(5/2)R", "cv=(5/2)R e cp=(7/2)R", "cv=(1/2)R e cp=(3/2)R", "cv=R e cp=2R"],
+    answer: 0,
+    explanation: "Gas monoatomico (f=3): cv=(1/2)*3*R=(3/2)R; cp=cv+R=(3/2)R+R=(5/2)R.",
+    commonError: "Usare i valori del biatomico. Monoatomico: cv=3/2 R. Biatomico: cv=5/2 R.",
+    deepdive: "cv=(1/2)*f*R. Per f=3: cv=3/2 R. cp=cv+R segue dalla relazione di Mayer.",
+    difficulty: 2, topic: "Calori specifici"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Per un gas biatomico perfetto, cv = (5/2)R e cp = (7/2)R.",
+    answer: true,
+    explanation: "Corretto. Gas biatomico (f=5): cv=(1/2)*5*R=(5/2)R; cp=cv+R=(5/2)R+R=(7/2)R.",
+    commonError: "Confondere con le formule del gas monoatomico.",
+    deepdive: "L'aria (miscela di N2 e O2, entrambi biatomici) ha cv~(5/2)R e cp~(7/2)R in prima approssimazione.",
+    difficulty: 2, topic: "Calori specifici"
+  },
+  {
+    text: "La relazione di Mayer lega cp e cv tramite:",
+    type: "multiple",
+    options: ["cp = cv - R", "cp = 2*cv", "cp = cv + R", "cp = cv * R"],
+    answer: 2,
+    explanation: "cp = cv + R. Il termine R viene dall'energia spesa per espandere il gas nella trasformazione isobara.",
+    commonError: "Scrivere cp = cv - R (segno sbagliato). cp e' sempre maggiore di cv.",
+    deepdive: "In isobara Q=delta_U+L=n*cv*delta_T+n*R*delta_T=n*(cv+R)*delta_T=n*cp*delta_T, quindi cp=cv+R.",
+    difficulty: 1, topic: "Calori specifici"
+  },
+  {
+    text: "Per quale motivo cp > cv in un gas perfetto?",
+    type: "multiple",
+    options: ["Perche' a pressione costante il gas e' piu' compresso", "Perche' a pressione costante il gas si espande e compie lavoro: serve piu' calore per la stessa delta_T", "Perche' i gradi di liberta' aumentano a pressione costante", "Perche' la temperatura aumenta piu' rapidamente a pressione costante"],
+    answer: 1,
+    explanation: "In isobara il calore fornito serve sia per aumentare l'energia interna (come in isocora) sia per fare il lavoro di espansione L=n*R*delta_T.",
+    commonError: "Pensare che i gradi di liberta' cambino con la pressione.",
+    deepdive: "L'extra calore rispetto all'isocora e' proprio il lavoro p*delta_V = n*R*delta_T.",
+    difficulty: 3, topic: "Calori specifici"
+  },
+  {
+    text: "Per un gas biatomico, gamma = cp/cv vale:",
+    type: "multiple",
+    options: ["5/3", "3/2", "3/5", "7/5"],
+    answer: 3,
+    explanation: "gamma = cp/cv = (7/2)R / (5/2)R = 7/5 = 1.4 per gas biatomico.",
+    commonError: "Usare 5/3 che e' il valore del gas monoatomico.",
+    deepdive: "gamma monoatomico = (5/2)/(3/2) = 5/3 ~ 1.67. gamma biatomico = (7/2)/(5/2) = 7/5 = 1.4.",
+    difficulty: 2, topic: "Calori specifici"
+  },
+  {
+    text: "Calcola gamma = cp/cv per un gas monoatomico (cp=5/2 R, cv=3/2 R). Rispondi con due decimali.",
+    type: "numeric",
+    answer: 1.67,
+    tolerance: 0.02,
+    explanation: "gamma = (5/2)/(3/2) = 5/3 ~ 1.667.",
+    commonError: "Calcolare (5/2)-(3/2)=1 invece del rapporto.",
+    deepdive: "gamma = 5/3 e' il valore teorico per gas monoatomico. Per l'argon sperimentale si misura gamma ~ 1.67.",
+    difficulty: 2, topic: "Calori specifici"
+  },
+
+  // ─── TRASFORMAZIONE ADIABATICA ────────────────────────────────────────────
+  {
+    text: "In una trasformazione adiabatica di gas perfetto, la relazione tra pressione e volume e':",
+    type: "multiple",
+    options: ["pi*Vi^gamma = pf*Vf^gamma", "pi*Vi = pf*Vf (legge di Boyle)", "pi/Ti = pf/Tf", "pi*Vi^2 = pf*Vf^2"],
+    answer: 0,
+    explanation: "p*V^gamma = costante con gamma=cp/cv. E' diversa dalla legge di Boyle (p*V=cost) che vale per l'isoterma.",
+    commonError: "Confondere con la legge di Boyle (isoterma). Nell'adiabatica l'esponente e' gamma, non 1.",
+    deepdive: "Poiche' gamma>1, la curva adiabatica e' piu' ripida dell'isoterma nel piano p-V.",
+    difficulty: 2, topic: "Trasformazione adiabatica"
+  },
+  {
+    text: "Nel piano p-V, una curva adiabatica rispetto a un'isoterma passante per lo stesso punto ha:",
+    type: "multiple",
+    options: ["La stessa pendenza", "Pendenza minore in valore assoluto", "Pendenza nulla (orizzontale)", "Pendenza maggiore in valore assoluto"],
+    answer: 3,
+    explanation: "L'adiabatica e' piu' ripida dell'isoterma perche' p*V^gamma=cost con gamma>1 > p*V=cost.",
+    commonError: "Pensare che le due curve abbiano la stessa pendenza.",
+    deepdive: "Questo e' visibile graficamente: l'adiabatica 'scende' piu' rapidamente dell'isoterma durante un'espansione.",
+    difficulty: 3, topic: "Trasformazione adiabatica"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "In una espansione adiabatica, il gas compie lavoro a spese della sua energia interna e si raffredda.",
+    answer: true,
+    explanation: "Esatto. Q=0, quindi delta_U=-L. Se L>0 (espansione), allora delta_U<0: il gas si raffredda.",
+    commonError: "Pensare che la temperatura rimanga costante nell'adiabatica.",
+    deepdive: "Esempio fisico: l'aria che sale in quota si espande adiabaticamente e si raffredda di circa 10 gradi C/km.",
+    difficulty: 2, topic: "Trasformazione adiabatica"
+  },
+  {
+    text: "La relazione temperatura-volume in una trasformazione adiabatica di gas perfetto e':",
+    type: "multiple",
+    options: ["Ti*Vi = Tf*Vf", "Ti*Vi^(gamma-1) = Tf*Vf^(gamma-1)", "Ti/Vi = Tf/Vf", "Ti*Vi^gamma = Tf*Vf^gamma"],
+    answer: 1,
+    explanation: "T*V^(gamma-1) = costante, quindi Ti*Vi^(gamma-1) = Tf*Vf^(gamma-1).",
+    commonError: "Usare l'esponente gamma invece di gamma-1.",
+    deepdive: "Si ricava da p*V^gamma = cost combinata con pV=nRT: sostituendo p=nRT/V si ottiene T*V^(gamma-1)=cost.",
+    difficulty: 2, topic: "Trasformazione adiabatica"
+  },
+  {
+    text: "In una compressione adiabatica (Vf < Vi), il gas:",
+    type: "multiple",
+    options: ["Si raffredda e delta_U < 0 perche' Q=0", "Non cambia temperatura perche' Q=0", "Si scalda e delta_U > 0 perche' L < 0 e delta_U = -L > 0", "Cede calore all'ambiente"],
+    answer: 2,
+    explanation: "Compressione: L<0 (lavoro fatto sul sistema). delta_U=-L=-(<0)=+>0: il gas si scalda.",
+    commonError: "Pensare che Q=0 implichi delta_T=0. In adiabatica Q=0 ma la temperatura varia.",
+    deepdive: "Una pompa a bicicletta si scalda: e' una compressione quasi-adiabatica.",
+    difficulty: 3, topic: "Trasformazione adiabatica"
+  },
+  {
+    text: "L'esponente gamma nella relazione adiabatica p*V^gamma = costante vale:",
+    type: "multiple",
+    options: ["gamma = cp/cv", "gamma = cv/cp", "gamma = cp + cv", "gamma = cp - cv"],
+    answer: 0,
+    explanation: "gamma = cp/cv. Per monoatomico: 5/3~1.67. Per biatomico: 7/5=1.4.",
+    commonError: "Invertire: gamma = cv/cp invece di cp/cv.",
+    deepdive: "gamma > 1 sempre (perche' cp>cv), il che garantisce che la curva adiabatica sia piu' ripida dell'isoterma.",
+    difficulty: 1, topic: "Trasformazione adiabatica"
+  },
+
+  // ─── MACCHINE TERMICHE ────────────────────────────────────────────────────
+  {
+    text: "Una macchina termica e' un dispositivo che:",
+    type: "multiple",
+    options: ["Converte tutto il calore in lavoro", "Trasferisce calore spontaneamente dal freddo al caldo", "Aumenta la temperatura senza consumo di energia", "Utilizza una trasformazione ciclica per convertire calore in lavoro"],
+    answer: 3,
+    explanation: "Una macchina termica e' un dispositivo ciclico che assorbe calore da un serbatoio caldo, produce lavoro e cede calore al serbatoio freddo.",
+    commonError: "Pensare che converta tutto il calore in lavoro: il secondo principio lo vieta.",
+    deepdive: "Il ciclo e' necessario affinche' la macchina funzioni in modo continuo.",
+    difficulty: 1, topic: "Macchine termiche"
+  },
+  {
+    text: "Il rendimento di una macchina termica e' definito come:",
+    type: "multiple",
+    options: ["eta = Qc/L", "eta = |Qf|/Qc", "eta = L/Qc", "eta = Qc/|Qf|"],
+    answer: 2,
+    explanation: "eta = L/Qc: rapporto tra lavoro prodotto e calore assorbito dal serbatoio caldo.",
+    commonError: "Invertire il rapporto (Qc/L) o usare |Qf| invece di L.",
+    deepdive: "Equivalentemente: eta = 1 - |Qf|/Qc = (Qc-|Qf|)/Qc.",
+    difficulty: 1, topic: "Macchine termiche"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "In una macchina termica, il lavoro prodotto e' uguale alla differenza tra il calore assorbito e il calore ceduto: L = Qc - |Qf|.",
+    answer: true,
+    explanation: "Esatto. Dal primo principio in ciclo (delta_U=0): L = Qc - |Qf|.",
+    commonError: "Pensare che il lavoro sia uguale all'intero calore assorbito Qc.",
+    deepdive: "La differenza Qc - |Qf| rappresenta l'energia 'utile' estratta dal calore.",
+    difficulty: 1, topic: "Macchine termiche"
+  },
+  {
+    text: "Un motore termico con rendimento del 30% assorbe Qc = 1000 J. Il lavoro prodotto e':",
+    type: "multiple",
+    options: ["700 J", "300 J", "1000 J", "3333 J"],
+    answer: 1,
+    explanation: "L = eta * Qc = 0.30 * 1000 = 300 J. Il calore ceduto al freddo e' |Qf| = 700 J.",
+    commonError: "Calcolare Qc - eta = 1000 - 0.30 invece di eta * Qc.",
+    deepdive: "|Qf| = Qc - L = 1000 - 300 = 700 J. Il 70% del calore viene sprecato nel serbatoio freddo.",
+    difficulty: 2, topic: "Macchine termiche"
+  },
+  {
+    text: "Il ciclo Otto (motore a benzina a 4 tempi) e' composto da:",
+    type: "multiple",
+    options: ["Due adiabatiche e due isocore", "Due adiabatiche e due isobare", "Due isoterme e due adiabatiche (ciclo di Carnot)", "Quattro trasformazioni isobare"],
+    answer: 0,
+    explanation: "Il ciclo Otto: Aspirazione (A-B, isobara), Compressione (B-C, adiabatica), Combustione (C-D, isocora), Espansione (D-E, adiabatica), Scarico (E-A, isocora).",
+    commonError: "Confondere il ciclo Otto con il ciclo di Carnot (2 isoterme + 2 adiabatiche).",
+    deepdive: "Nel ciclo semplificato si considerano solo 2 adiabatiche e 2 isocore (combustione e scarico).",
+    difficulty: 2, topic: "Macchine termiche"
+  },
+  {
+    text: "Una macchina termica ha Qc = 2000 J e |Qf| = 1400 J. Il suo rendimento e':",
+    type: "multiple",
+    options: ["30%", "70%", "140%", "43%"],
+    answer: 0,
+    explanation: "L = 2000-1400 = 600 J. eta = 600/2000 = 0.30 = 30%.",
+    commonError: "Calcolare |Qf|/Qc = 1400/2000 = 70% che e' la quota di calore NON convertita in lavoro.",
+    deepdive: "eta = 1 - |Qf|/Qc = 1 - 0.70 = 0.30 = 30%.",
+    difficulty: 3, topic: "Macchine termiche"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Il rendimento di una macchina termica e' sempre minore di 1 (cioe' minore del 100%).",
+    answer: true,
+    explanation: "Esatto: il secondo principio vieta che tutta l'energia termica sia convertita in lavoro. Una macchina reale deve sempre cedere calore al serbatoio freddo.",
+    commonError: "Pensare che con una macchina molto efficiente si possa raggiungere eta=1.",
+    deepdive: "eta=1 richiederebbe |Qf|=0, cioe' nessuna cessione di calore al freddo: questo viola l'enunciato di Kelvin.",
+    difficulty: 1, topic: "Macchine termiche"
+  },
+
+  // ─── SECONDO PRINCIPIO ────────────────────────────────────────────────────
+  {
+    text: "L'enunciato di Kelvin del secondo principio afferma che:",
+    type: "multiple",
+    options: ["E' impossibile costruire una macchina il cui unico risultato sia convertire tutto il calore in lavoro", "Il rendimento massimo e' il 100%", "Il calore puo' trasferirsi spontaneamente dal freddo al caldo", "L'energia si conserva sempre"],
+    answer: 0,
+    explanation: "Enunciato di Kelvin: e' impossibile realizzare una trasformazione il cui unico risultato sia la conversione di tutto il calore assorbito da una sola sorgente in lavoro.",
+    commonError: "Confondere con l'enunciato di Clausius (che riguarda il trasferimento di calore).",
+    deepdive: "La parola chiave e' 'unico risultato': in una espansione isoterma si converte tutto il calore in lavoro, ma non e' l'unico risultato (il volume cambia).",
+    difficulty: 1, topic: "Secondo principio"
+  },
+  {
+    text: "L'enunciato di Clausius del secondo principio afferma che:",
+    type: "multiple",
+    options: ["E' impossibile realizzare una trasformazione il cui unico risultato sia il passaggio di calore da un corpo freddo a uno caldo", "Le macchine termiche possono avere rendimento del 100%", "L'energia interna di un sistema isolato e' costante", "Ogni trasformazione e' reversibile"],
+    answer: 0,
+    explanation: "Clausius: il calore non fluisce spontaneamente dal freddo al caldo come unico risultato. Serve lavoro esterno (frigorifero).",
+    commonError: "Confondere con l'enunciato di Kelvin.",
+    deepdive: "Il frigorifero trasferisce calore dal freddo al caldo, ma non e' l'unico risultato: consuma energia elettrica.",
+    difficulty: 1, topic: "Secondo principio"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Gli enunciati di Kelvin e di Clausius del secondo principio sono equivalenti.",
+    answer: true,
+    explanation: "Esatto. Si dimostra che negare Kelvin implica negare Clausius e viceversa: i due enunciati sono logicamente equivalenti.",
+    commonError: "Pensare che i due enunciati descrivano fenomeni indipendenti.",
+    deepdive: "La dimostrazione usa le macchine termiche ipotetiche: se si violasse Kelvin si potrebbe costruire una macchina di Clausius e viceversa.",
+    difficulty: 2, topic: "Secondo principio"
+  },
+  {
+    text: "Una trasformazione e' reversibile se:",
+    type: "multiple",
+    options: ["Avviene molto rapidamente", "Non implica scambio di calore", "Sistema e ambiente hanno temperature molto diverse", "Sistema e ambiente possono essere riportati esattamente al loro stato iniziale, effettuando la trasformazione a ritroso"],
+    answer: 3,
+    explanation: "Reversibilita': il sistema e l'ambiente tornano entrambi al loro stato iniziale percorrendo la trasformazione in senso inverso.",
+    commonError: "Pensare che 'reversibile' significhi semplicemente che il sistema torna allo stato iniziale (ciclo).",
+    deepdive: "Le trasformazioni reali sono sempre irreversibili per via dei processi dissipativi (attrito, conduzione termica tra corpi a T diversa).",
+    difficulty: 2, topic: "Secondo principio"
+  },
+  {
+    text: "Le trasformazioni reali sono:",
+    type: "multiple",
+    options: ["Sempre reversibili grazie alla conservazione dell'energia", "Irreversibili, perche' presentano fenomeni dissipativi come l'attrito", "Reversibili se avvengono lentamente", "Indipendenti dalla direzione del processo"],
+    answer: 1,
+    explanation: "Le trasformazioni reali sono irreversibili: fenomeni dissipativi (attrito, conduzione spontanea di calore) non possono essere 'annullati'.",
+    commonError: "Pensare che una trasformazione lenta sia reversibile. La quasi-staticita' e' necessaria ma non sufficiente per la reversibilita'.",
+    deepdive: "Una trasformazione quasi-statica senza attrito e senza conduzione termica tra corpi a T diversa e' reversibile.",
+    difficulty: 2, topic: "Secondo principio"
+  },
+  {
+    text: "Se fosse falso l'enunciato di Kelvin, si potrebbe costruire una macchina che converte tutto il calore in lavoro. Combinandola con una macchina termica normale si otterrebbe:",
+    type: "multiple",
+    options: ["Una macchina piu' efficiente ma ancora limitata", "Una violazione del principio zero", "Una macchina che trasferisce calore spontaneamente dal freddo al caldo senza lavoro esterno, violando Clausius", "Nessuna conseguenza pratica"],
+    answer: 2,
+    explanation: "Questo dimostra l'equivalenza: violando Kelvin si ottiene una violazione di Clausius. La macchina ipotetica di Kelvin + una normale macchina termica produrrebbe il trasferimento netto di calore dal freddo al caldo.",
+    commonError: "Non cogliere la connessione logica tra i due enunciati.",
+    deepdive: "La dimostrazione rigorosa e' presentata nel teorema di equivalenza degli enunciati del secondo principio.",
+    difficulty: 3, topic: "Secondo principio"
+  },
+
+  // ─── MACCHINA DI CARNOT ───────────────────────────────────────────────────
+  {
+    text: "Il teorema di Carnot afferma che:",
+    type: "multiple",
+    options: ["Tutte le macchine termiche hanno lo stesso rendimento", "Il rendimento di Carnot puo' essere uguale a 1", "Nessuna macchina reale che operi tra Tc e Tf puo' avere rendimento maggiore di una macchina reversibile tra le stesse temperature", "Le macchine reali sono piu' efficienti delle ideali"],
+    answer: 2,
+    explanation: "Il teorema di Carnot stabilisce il rendimento massimo raggiungibile da qualsiasi macchina termica operante tra Tc e Tf.",
+    commonError: "Pensare che tutte le macchine reversibili abbiano lo stesso rendimento indipendentemente dalle temperature.",
+    deepdive: "Il teorema implica che il rendimento massimo dipende solo dalle temperature dei serbatoi, non dal tipo di macchina.",
+    difficulty: 1, topic: "Macchina di Carnot"
+  },
+  {
+    text: "Il rendimento della macchina di Carnot che opera tra Tc (serbatoio caldo) e Tf (serbatoio freddo) vale:",
+    type: "multiple",
+    options: ["eta = 1 - Tc/Tf", "eta = Tf/Tc", "eta = 1 + Tf/Tc", "eta = 1 - Tf/Tc"],
+    answer: 3,
+    explanation: "eta_Carnot = 1 - Tf/Tc, con le temperature in Kelvin. Poiche' Tf<Tc, il rendimento e' compreso tra 0 e 1.",
+    commonError: "Invertire il rapporto: 1 - Tc/Tf darebbe un numero negativo (sbagliato).",
+    deepdive: "Se Tf->0 K allora eta->1 (ma il terzo principio impedisce Tf=0). Se Tc=Tf allora eta=0.",
+    difficulty: 1, topic: "Macchina di Carnot"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Le temperature nella formula del rendimento di Carnot devono essere espresse in Kelvin.",
+    answer: true,
+    explanation: "Corretto. La formula eta=1-Tf/Tc vale solo con le temperature in Kelvin (temperature assolute).",
+    commonError: "Usare le temperature in Celsius. Questo porta a risultati errati.",
+    deepdive: "Esempio: Tc=27 gradi C = 300 K, Tf=27 gradi C = 300 K -> eta=0. Con i Celsius si otterrebbe 0/0=errore.",
+    difficulty: 1, topic: "Macchina di Carnot"
+  },
+  {
+    text: "Una macchina di Carnot opera tra Tc = 500 K e Tf = 300 K. Il suo rendimento e':",
+    type: "multiple",
+    options: ["60%", "40%", "50%", "30%"],
+    answer: 1,
+    explanation: "eta = 1 - Tf/Tc = 1 - 300/500 = 1 - 0.6 = 0.4 = 40%.",
+    commonError: "Calcolare 300/500=0.6=60% senza sottrarre da 1.",
+    deepdive: "Il 40% del calore assorbito viene convertito in lavoro. Il restante 60% e' ceduto al serbatoio freddo.",
+    difficulty: 2, topic: "Macchina di Carnot"
+  },
+  {
+    text: "Il ciclo di Carnot e' composto da:",
+    type: "multiple",
+    options: ["Due isoterme e due isocore", "Due adiabatiche e due isocore (ciclo Otto)", "Due isoterme e due adiabatiche", "Quattro trasformazioni adiabatiche"],
+    answer: 2,
+    explanation: "Ciclo di Carnot: espansione isoterma a Tc, espansione adiabatica, compressione isoterma a Tf, compressione adiabatica. Tutte reversibili.",
+    commonError: "Confondere con il ciclo Otto (2 adiabatiche + 2 isocore).",
+    deepdive: "Il ciclo di Carnot e' l'unico ciclo la cui efficienza dipende solo da Tc e Tf.",
+    difficulty: 2, topic: "Macchina di Carnot"
+  },
+  {
+    text: "Il rapporto |Qf|/Qc nella macchina di Carnot vale:",
+    type: "multiple",
+    options: ["Tf/Tc (rapporto delle temperature assolute dei serbatoi)", "Tc/Tf", "1 - Tf/Tc", "Tf/(Tc-Tf)"],
+    answer: 0,
+    explanation: "|Qf|/Qc = Tf/Tc. Questo consente di definire la scala assoluta di temperatura tramite i rapporti dei calori.",
+    commonError: "Invertire: Tc/Tf darebbe un rapporto > 1 (|Qf| > Qc), impossibile.",
+    deepdive: "Da eta=1-|Qf|/Qc=1-Tf/Tc si ricava |Qf|/Qc=Tf/Tc. Kelvin uso' questo per definire la scala termodinamica.",
+    difficulty: 3, topic: "Macchina di Carnot"
+  },
+
+  // ─── ENTROPIA ──────────────────────────────────────────────────────────────
+  {
+    text: "L'entropia e' una grandezza fisica che misura:",
+    type: "multiple",
+    options: ["La temperatura di un sistema", "Il lavoro disponibile nel sistema", "La degradazione della qualita' dell'energia in un processo", "L'energia cinetica media delle molecole"],
+    answer: 2,
+    explanation: "L'entropia misura la 'degradazione della qualita' dell'energia: energia ad alta temperatura e' piu' pregiata di energia a bassa temperatura.",
+    commonError: "Confondere entropia con energia interna.",
+    deepdive: "Interpretazione microscopica (Boltzmann): S = k*ln(W), dove W e' il numero di microstati compatibili.",
+    difficulty: 1, topic: "Entropia"
+  },
+  {
+    text: "La variazione di entropia in una trasformazione reversibile e' definita come:",
+    type: "multiple",
+    options: ["delta_S = Q*T", "delta_S = somma(delta_Q/T) lungo il processo reversibile", "delta_S = delta_U/T", "delta_S = L/T"],
+    answer: 1,
+    explanation: "delta_S = somma(delta_Qi/Ti) per trasformazioni reversibili. Per una trasformazione a T costante: delta_S = Q/T.",
+    commonError: "Scrivere delta_S = Q*T invece di Q/T.",
+    deepdive: "Unita' di misura: J/K. L'entropia e' una funzione di stato: delta_S non dipende dal percorso.",
+    difficulty: 1, topic: "Entropia"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "L'entropia e' una funzione di stato: la sua variazione dipende solo dagli stati iniziale e finale, non dal percorso seguito.",
+    answer: true,
+    explanation: "Esatto. delta_S tra due stati A e B e' la stessa indipendentemente dalla trasformazione (reversibile o no) che collega A a B.",
+    commonError: "Pensare che delta_S dipenda dal tipo di trasformazione.",
+    deepdive: "Per calcolare delta_S di una trasformazione irreversibile si sceglie una trasformazione reversibile equivalente e si calcola su quella.",
+    difficulty: 1, topic: "Entropia"
+  },
+  {
+    text: "In una trasformazione adiabatica reversibile, la variazione di entropia e':",
+    type: "multiple",
+    options: ["Sempre positiva", "Sempre negativa", "Uguale a Q/T", "Nulla (delta_S = 0)"],
+    answer: 3,
+    explanation: "In adiabatica Q=0, quindi delta_S = Q/T = 0. Questo vale SOLO per adiabatica reversibile.",
+    commonError: "Pensare che delta_S=0 in tutte le adiabatiche. Un'adiabatica irreversibile ha delta_S>0.",
+    deepdive: "Un'adiabatica reversibile e' anche detta 'isentropica' (delta_S=0).",
+    difficulty: 2, topic: "Entropia"
+  },
+  {
+    text: "In ogni processo reversibile, la variazione di entropia dell'universo e':",
+    type: "multiple",
+    options: ["Sempre positiva", "Sempre negativa", "Nulla", "Pari a Q/T"],
+    answer: 2,
+    explanation: "In un processo reversibile delta_S_universo = delta_S_sistema + delta_S_ambiente = 0.",
+    commonError: "Confondere la variazione di entropia del sistema con quella dell'universo.",
+    deepdive: "Se il sistema cede calore Q a T costante: delta_S_sist = -Q/T e delta_S_amb = +Q/T. Somma = 0.",
+    difficulty: 1, topic: "Entropia"
+  },
+  {
+    text: "In ogni processo irreversibile reale, l'entropia dell'universo:",
+    type: "multiple",
+    options: ["Rimane costante", "Diminuisce", "Puo' aumentare o diminuire a seconda del processo", "Aumenta sempre"],
+    answer: 3,
+    explanation: "Secondo principio in termini di entropia: delta_S_universo > 0 per tutti i processi irreversibili reali.",
+    commonError: "Pensare che l'entropia possa diminuire nell'universo. Puo' diminuire in un sottosistema, ma non nell'universo.",
+    deepdive: "L'entropia dell'universo non diminuisce mai: delta_S_univ >= 0 (= per reversibili, > per irreversibili).",
+    difficulty: 1, topic: "Entropia"
+  },
+  {
+    text: "La variazione di entropia in un passaggio di stato (es. fusione) a temperatura T costante vale:",
+    type: "multiple",
+    options: ["delta_S = m*L*T", "delta_S = m*L/T", "delta_S = m*L/delta_T", "delta_S = m*c*T"],
+    answer: 1,
+    explanation: "delta_S = Q/T = m*L/T, dove L e' il calore latente specifico e T la temperatura del passaggio di stato.",
+    commonError: "Moltiplicare per T invece di dividere.",
+    deepdive: "La fusione del ghiaccio a 0 gradi C = 273 K: delta_S = m*334000/273 > 0 (il disordine aumenta dal solido al liquido).",
+    difficulty: 2, topic: "Entropia"
+  },
+  {
+    text: "1200 J di calore fluiscono spontaneamente da un serbatoio a 650 K a uno a 350 K. La variazione di entropia dell'universo e':",
+    type: "multiple",
+    options: ["0 J/K (processo reversibile)", "-1.6 J/K", "+1.6 J/K (il processo e' irreversibile e delta_S_univ > 0)", "+3.4 J/K"],
+    answer: 2,
+    explanation: "delta_S_univ = -1200/650 + 1200/350 = -1.85 + 3.43 = +1.58 ~ +1.6 J/K > 0: processo irreversibile.",
+    commonError: "Calcolare solo uno dei due contributi o sbagliare i segni.",
+    deepdive: "Il serbatoio caldo perde entropia (-Q/Tc), il freddo ne acquista (+Q/Tf). Poiche' Tf<Tc, l'acquisto supera la perdita.",
+    difficulty: 3, topic: "Entropia"
+  },
+
+  // ─── TERZO PRINCIPIO ──────────────────────────────────────────────────────
+  {
+    text: "Il terzo principio della termodinamica afferma che:",
+    type: "multiple",
+    options: ["Tutte le trasformazioni tendono all'equilibrio termico", "E' impossibile raggiungere lo zero assoluto T=0K mediante un numero finito di trasformazioni", "L'entropia di un sistema isolato e' sempre costante", "L'energia interna e' zero a 0 K"],
+    answer: 1,
+    explanation: "Il terzo principio (Nernst): e' impossibile raggiungere T=0K con un numero finito di trasformazioni.",
+    commonError: "Confondere con il secondo principio (che riguarda l'entropia nei processi).",
+    deepdive: "Il terzo principio non impedisce di avvicinarsi a 0 K: si sono raggiunte temperature di 10^-12 K.",
+    difficulty: 1, topic: "Terzo principio"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Il terzo principio stabilisce che e' impossibile raggiungere T=0K con un numero finito di trasformazioni, ma non impedisce di avvicinarsi arbitrariamente a tale temperatura.",
+    answer: true,
+    explanation: "Esatto. Il terzo principio pone un limite asintotico: si puo' raggiungere temperature arbitrariamente vicine allo zero assoluto, ma non 0 K con un numero finito di passi.",
+    commonError: "Pensare che il terzo principio impedisca qualsiasi raffreddamento verso lo zero.",
+    deepdive: "Tecniche criogeniche moderne (demagnetizzazione adiabatica) hanno raggiunto T~10^-9 K.",
+    difficulty: 1, topic: "Terzo principio"
+  },
+  {
+    text: "Lo zero assoluto corrisponde a:",
+    type: "multiple",
+    options: ["T = 0 K = -273.15 gradi C", "T = 0 K = 0 gradi C", "T = 0 K = 100 gradi C", "T = 0 K = -100 gradi C"],
+    answer: 0,
+    explanation: "0 K = -273.15 gradi C. La scala Kelvin e' la scala di temperatura assoluta: T(K) = T(gradi C) + 273.15.",
+    commonError: "Pensare che 0 K corrisponda a 0 gradi C.",
+    deepdive: "La conversione: T(K) = T(gradi C) + 273.15. Temperatura ambiente ~300 K = ~27 gradi C.",
+    difficulty: 1, topic: "Terzo principio"
+  }
+];
+/* ============================================
+   ULTRA PREPARAZIONE - 5 domande da 10
+   Esercizi avanzati con ragionamento multi-step
+   ============================================ */
+const ULTRA_QUESTIONS = [
+  {
+    text: "Una macchina di Carnot opera tra Tc=800 K e Tf=320 K. Calcola il rendimento percentuale (numero intero).",
+    type: "numeric", answer: 60, tolerance: 1,
+    explanation: "eta = 1 - 320/800 = 1 - 0.4 = 0.60 = 60%.",
+    commonError: "Calcolare 320/800=40% senza sottrarre da 1.",
+    deepdive: "Con eta=60%, per Qc=1000J si producono L=600J e si cedono |Qf|=400J al freddo.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "La stessa macchina di Carnot (Tc=800K, Tf=320K) assorbe Qc=5000 J. Calcola il lavoro prodotto in J.",
+    type: "numeric", answer: 3000, tolerance: 10,
+    explanation: "L = eta * Qc = 0.60 * 5000 = 3000 J.",
+    commonError: "Calcolare Qc - Tf/Tc invece di eta*Qc.",
+    deepdive: "|Qf| = 5000 - 3000 = 2000 J. Verifica: |Qf|/Qc = 2000/5000 = 0.4 = Tf/Tc = 320/800 = 0.4. Corretto.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "n=2 moli di gas monoatomico (f=3) passano da Ti=300K a Tf=500K. Calcola delta_U in J (R=8.314). Arrotonda all'intero.",
+    type: "numeric", answer: 4988, tolerance: 50,
+    explanation: "delta_U = (1/2)*f*n*R*delta_T = (1/2)*3*2*8.314*200 = 3*8.314*200 = 4988.4 J.",
+    commonError: "Dimenticare il fattore 1/2 o usare f=5 (biatomico).",
+    deepdive: "delta_U e' indipendente dal tipo di trasformazione: vale per isocora, isobara, isoterma, adiabatica.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "1 mol di gas perfetto si espande isotermicamente a T=300K da Vi=1L a Vf=3L. Calcola il lavoro in J (R=8.314). Arrotonda alla decina.",
+    type: "numeric", answer: 2740, tolerance: 50,
+    explanation: "L = nRT*ln(Vf/Vi) = 1*8.314*300*ln(3) = 2494.2*1.0986 = 2741 J ~ 2740 J.",
+    commonError: "Usare L=p*delta_V (formula isobara, non isoterma). Oppure dimenticare ln.",
+    deepdive: "ln(3)~1.099. L>0: il gas si espande e compie lavoro. In isoterma delta_U=0 quindi Q=L=2740 J.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Un gas a p=2*10^5 Pa si espande isobaricamente da Vi=0.01 m3 a Vf=0.03 m3. Calcola il lavoro in J.",
+    type: "numeric", answer: 4000, tolerance: 10,
+    explanation: "L = p*delta_V = 2*10^5 * (0.03-0.01) = 2*10^5 * 0.02 = 4000 J.",
+    commonError: "Calcolare p*(Vf+Vi) invece di p*(Vf-Vi).",
+    deepdive: "4000 J e' l'area del rettangolo nel piano p-V: base=0.02 m3, altezza=2*10^5 Pa.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Una macchina termica reale ha eta=25% tra Tc=600K e Tf=200K. Rispetto al limite di Carnot essa:",
+    type: "multiple",
+    options: ["Supera il rendimento di Carnot (violazione del secondo principio)", "Ha un rendimento inferiore al limite di Carnot, come prevede il secondo principio", "Ha lo stesso rendimento di Carnot (25% = 66.7%)", "Non puo' operare perche' il rendimento e' troppo basso"],
+    answer: 1,
+    explanation: "eta_Carnot = 1 - 200/600 = 66.7%. La macchina reale (25%) ha eta < eta_Carnot: corretto, nessuna violazione.",
+    commonError: "Pensare che eta_reale debba essere uguale a eta_Carnot.",
+    deepdive: "Il teorema di Carnot garantisce solo che eta_reale <= eta_Carnot. Le macchine reali sono sempre meno efficienti per via delle irreversibilita'.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Una macchina assorbe Qc=4000 J e ha eta=0.35. Quanta energia cede al serbatoio freddo (in J)?",
+    type: "numeric", answer: 2600, tolerance: 10,
+    explanation: "L = 0.35*4000 = 1400 J. |Qf| = Qc - L = 4000 - 1400 = 2600 J.",
+    commonError: "Calcolare |Qf| = Qc*eta = 1400 J invece di Qc-L.",
+    deepdive: "|Qf|/Qc = 2600/4000 = 0.65 = 1 - eta = 1 - 0.35. Corretto.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "1200 J di calore fluiscono da 600 K a 300 K. La variazione di entropia dell'universo in J/K e':",
+    type: "multiple",
+    options: ["0 (processo reversibile)", "-2 J/K", "2 J/K", "+4 J/K"],
+    answer: 2,
+    explanation: "delta_S_univ = -1200/600 + 1200/300 = -2 + 4 = +2 J/K > 0: processo irreversibile.",
+    commonError: "Calcolare solo il contributo di un serbatoio.",
+    deepdive: "Il serbatoio caldo perde 2 J/K di entropia. Il freddo ne guadagna 4 J/K. Aumento netto: 2 J/K.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "n=3 moli di gas biatomico (cp=7/2 R=29.1 J/mol/K) si riscaldano isobaricamente di delta_T=100K. Calcola Q in J (arrotonda alla decina).",
+    type: "numeric", answer: 8730, tolerance: 100,
+    explanation: "Q = n*cp*delta_T = 3*29.1*100 = 8730 J.",
+    commonError: "Usare cv invece di cp. In isobara si usa cp.",
+    deepdive: "In isocora Q=n*cv*delta_T = 3*(5/2)*8.314*100 = 6235 J. La differenza (8730-6235=2495 J) e' il lavoro di espansione.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Un sistema compie un ciclo: assorbe Q1=800J da un serbatoio a 600K e cede |Q2|=400J a uno a 300K. Il processo e' compatibile con il secondo principio?",
+    type: "multiple",
+    options: ["Si': eta_ciclo < eta_Carnot", "No: viola il secondo principio perche' eta_ciclo > eta_Carnot", "Si': eta_ciclo = eta_Carnot (macchina di Carnot)", "Non si puo' determinare senza conoscere il tipo di ciclo"],
+    answer: 1,
+    explanation: "eta_ciclo = L/Q1 = 400/800 = 50%. eta_Carnot = 1-300/600 = 50%. eta_ciclo = eta_Carnot: solo una macchina reversibile puo' raggiungere eta_Carnot. Una macchina reale non puo'. Paradosso: l'uguaglianza implica che sarebbe una macchina di Carnot ideale.",
+    commonError: "Accettare senza verificare il confronto con il limite di Carnot.",
+    deepdive: "eta_ciclo = eta_Carnot e' teoricamente possibile solo per una macchina reversibile (Carnot). Se il ciclo e' reale (irreversibile), eta_reale < eta_Carnot.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  }
+];
+/* ============================================
+   VARIABILI DI STATO
+   ============================================ */
+let currentQuestions = [];  // domande della sessione corrente
+let currentIndex = 0;       // indice domanda corrente
+let correctCount = 0;       // risposte corrette
+let wrongCount = 0;         // risposte errate
+let history = [];           // cronologia risposte
+let topicStats = {};        // statistiche per argomento
+let errorQuestionIds = [];  // indici domande sbagliate (per ripasso)
+let answered = false;       // se la domanda corrente ha ricevuto risposta
+
+/* ============================================
+   INIZIALIZZAZIONE
+   ============================================ */
+(function init() {
+  // Popola i filtri per argomento
+  const topics = [...new Set(QUESTIONS.map(q => q.topic))];
+  const grid = document.getElementById('topic-filters');
+  topics.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'topic-item';
+    div.innerHTML = `<input type="checkbox" checked value="${t}" class="topic-cb"> ${t}`;
+    grid.appendChild(div);
+  });
+
+  // Mostra statistiche precedenti da localStorage
+  loadPreviousStats();
+})();
+
+/* Carica statistiche salvate */
+function loadPreviousStats() {
+  const saved = localStorage.getItem('termodinamica_stats');
+  if (saved) {
+    const data = JSON.parse(saved);
+    document.getElementById('prev-stats').style.display = 'block';
+    document.getElementById('prev-stats-text').textContent =
+      `${data.correct}/${data.total} corrette (${data.percentage}%) - ${data.date}`;
+    // Mostra pulsante "ripassa errori" se ci sono errori salvati
+    const savedErrors = localStorage.getItem('termodinamica_errors');
+    if (savedErrors && JSON.parse(savedErrors).length > 0) {
+      document.getElementById('btn-errors').style.display = 'inline-block';
+    }
+  }
+}
+
+/* Cancella progressi */
+function clearProgress() {
+  localStorage.removeItem('termodinamica_stats');
+  localStorage.removeItem('termodinamica_errors');
+  document.getElementById('prev-stats').style.display = 'none';
+  document.getElementById('btn-errors').style.display = 'none';
+}
+
+/* ============================================
+   AVVIO QUIZ
+   ============================================ */
+function startQuiz(mode) {
+  // Reset stato
+  currentIndex = 0;
+  correctCount = 0;
+  wrongCount = 0;
+  history = [];
+  topicStats = {};
+  errorQuestionIds = [];
+  answered = false;
+
+  // Seleziona domande in base alla modalita'
+  const selectedTopics = [...document.querySelectorAll('.topic-cb:checked')].map(cb => cb.value);
+
+  if (mode === 'ultra') {
+    currentQuestions = [...ULTRA_QUESTIONS];
+  } else if (mode === 'errors') {
+    const savedErrors = localStorage.getItem('termodinamica_errors');
+    if (savedErrors) {
+      const errorIds = JSON.parse(savedErrors);
+      currentQuestions = errorIds.map(id => QUESTIONS[id]).filter(q => q);
+    }
+    if (currentQuestions.length === 0) {
+      alert('Non ci sono errori salvati da ripassare!');
+      return;
+    }
+  } else {
+    currentQuestions = QUESTIONS.filter(q => selectedTopics.includes(q.topic));
+    if (currentQuestions.length === 0) {
+      alert('Seleziona almeno un argomento!');
+      return;
+    }
+  }
+
+  if (mode === 'random') {
+    shuffleArray(currentQuestions);
+  } else if (mode === 'all') {
+    // Ordina per difficolta' crescente
+    currentQuestions.sort((a, b) => a.difficulty - b.difficulty);
+  }
+
+  // Inizializza statistiche per argomento
+  const topics = [...new Set(currentQuestions.map(q => q.topic))];
+  topics.forEach(t => { topicStats[t] = { correct: 0, wrong: 0, total: 0 }; });
+
+  // Mostra schermata quiz
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('total-q').textContent = currentQuestions.length;
+
+  showQuestion();
+}
+
+/* Mescola array (Fisher-Yates) */
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+/* ============================================
+   MOSTRA DOMANDA
+   ============================================ */
+function showQuestion() {
+  answered = false;
+  const q = currentQuestions[currentIndex];
+
+  // Aggiorna header
+  document.getElementById('current-q').textContent = currentIndex + 1;
+  document.getElementById('score-correct').textContent = correctCount;
+  document.getElementById('score-wrong').textContent = wrongCount;
+  const pct = ((currentIndex) / currentQuestions.length) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+
+  // Meta (argomento, difficolta', tipo)
+  const meta = document.getElementById('question-meta');
+  const diffLabels = ['Facile', 'Media', 'Difficile'];
+  const typeLabels = { multiple: 'Scelta multipla', truefalse: 'Vero/Falso', numeric: 'Esercizio numerico', completion: 'Completamento' };
+  meta.innerHTML = `
+    <span class="badge badge-topic">${q.topic}</span>
+    <span class="badge badge-diff-${q.difficulty}">${diffLabels[q.difficulty - 1]}</span>
+    <span class="badge badge-type">${typeLabels[q.type]}</span>
+  `;
+
+  // Testo domanda
+  document.getElementById('question-text').textContent = q.text;
+
+  // Area risposta
+  const area = document.getElementById('answer-area');
+  area.innerHTML = '';
+  document.getElementById('submit-area').style.display = 'none';
+
+  if (q.type === 'multiple') {
+    // Crea array di indici e mescolali per randomizzare l'ordine delle opzioni
+    const indices = q.options.map((_, i) => i);
+    shuffleArray(indices);
+    q._shuffledIndices = indices; // salva la mappatura per la correzione
+
+    const container = document.createElement('div');
+    container.className = 'options-container';
+    indices.forEach((origIdx, displayIdx) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = q.options[origIdx];
+      btn.onclick = () => handleMultipleChoice(displayIdx);
+      btn.id = 'opt-' + displayIdx;
+      btn.dataset.origIdx = origIdx;
+      container.appendChild(btn);
+    });
+    area.appendChild(container);
+  } else if (q.type === 'truefalse') {
+    // Mostra l'affermazione
+    const stmt = document.createElement('p');
+    stmt.style.cssText = 'font-style:italic; margin-bottom:15px; padding:12px; background:#f0f0f0; border-radius:8px;';
+    stmt.textContent = '\"' + q.statement + '\"';
+    area.appendChild(stmt);
+
+    const container = document.createElement('div');
+    container.className = 'options-container';
+    ['Vero', 'Falso'].forEach((label, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = label;
+      btn.onclick = () => handleTrueFalse(i === 0);
+      btn.id = 'tf-' + i;
+      container.appendChild(btn);
+    });
+    area.appendChild(container);
+  } else if (q.type === 'numeric') {
+    const container = document.createElement('div');
+    container.className = 'answer-input-container';
+    container.innerHTML = `<input type="text" class="answer-input" id="numeric-input" placeholder="Scrivi il valore numerico..." onkeydown="if(event.key==='Enter')checkOpenAnswer()">`;
+    area.appendChild(container);
+    document.getElementById('submit-area').style.display = 'block';
+  } else if (q.type === 'completion') {
+    const container = document.createElement('div');
+    container.className = 'answer-input-container';
+    container.innerHTML = `
+      <input type="text" class="answer-input" id="completion-input-0" placeholder="Prima parola mancante..." style="margin-bottom:8px;" onkeydown="if(event.key==='Enter')document.getElementById('completion-input-1').focus()">
+      <input type="text" class="answer-input" id="completion-input-1" placeholder="Seconda parola mancante..." onkeydown="if(event.key==='Enter')checkOpenAnswer()">
+    `;
+    area.appendChild(container);
+    document.getElementById('submit-area').style.display = 'block';
+  }
+
+  // Nascondi feedback, professore e pulsante next
+  document.getElementById('feedback-box').style.display = 'none';
+  document.getElementById('deepdive-box').style.display = 'none';
+  document.getElementById('next-btn-container').style.display = 'none';
+  document.getElementById('prof-container').className = 'prof-container';
+}
+
+/* ============================================
+   GESTIONE RISPOSTE
+   ============================================ */
+
+/* Scelta multipla */
+function handleMultipleChoice(displayIdx) {
+  if (answered) return;
+  answered = true;
+
+  const q = currentQuestions[currentIndex];
+  // Ricava l'indice originale dalla mappatura mescolata
+  const origSelected = q._shuffledIndices[displayIdx];
+  const isCorrect = origSelected === q.answer;
+
+  // Evidenzia opzioni usando l'indice originale salvato in data-origIdx
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    const origIdx = parseInt(btn.dataset.origIdx);
+    if (origIdx === q.answer) btn.classList.add('correct');
+    if (i === displayIdx && !isCorrect) btn.classList.add('wrong');
+  });
+
+  processAnswer(isCorrect, q);
+}
+
+/* Vero/Falso */
+function handleTrueFalse(selected) {
+  if (answered) return;
+  answered = true;
+
+  const q = currentQuestions[currentIndex];
+  const isCorrect = selected === q.answer;
+
+  const correctIdx = q.answer ? 0 : 1;
+  const selectedIdx = selected ? 0 : 1;
+
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (i === correctIdx) btn.classList.add('correct');
+    if (i === selectedIdx && !isCorrect) btn.classList.add('wrong');
+  });
+
+  processAnswer(isCorrect, q);
+}
+
+/* Risposta aperta (numerica o completamento) */
+function checkOpenAnswer() {
+  if (answered) return;
+  answered = true;
+
+  const q = currentQuestions[currentIndex];
+  let isCorrect = false;
+
+  if (q.type === 'numeric') {
+    const input = document.getElementById('numeric-input');
+    const val = parseFloat(input.value.replace(',', '.'));
+    isCorrect = !isNaN(val) && Math.abs(val - q.answer) <= q.tolerance;
+    input.style.borderColor = isCorrect ? 'var(--success)' : 'var(--danger)';
+    input.style.background = isCorrect ? 'var(--success-light)' : 'var(--danger-light)';
+  } else if (q.type === 'completion') {
+    const inputs = [
+      document.getElementById('completion-input-0').value.trim().toLowerCase(),
+      document.getElementById('completion-input-1').value.trim().toLowerCase()
+    ];
+    const answers = q.answer.map(a => a.toLowerCase());
+    isCorrect = inputs[0].includes(answers[0]) && inputs[1].includes(answers[1]);
+
+    [0, 1].forEach(i => {
+      const el = document.getElementById('completion-input-' + i);
+      const ok = inputs[i].includes(answers[i]);
+      el.style.borderColor = ok ? 'var(--success)' : 'var(--danger)';
+      el.style.background = ok ? 'var(--success-light)' : 'var(--danger-light)';
+    });
+  }
+
+  processAnswer(isCorrect, q);
+}
+
+/* Logica comune di elaborazione risposta */
+function processAnswer(isCorrect, q) {
+  // Aggiorna contatori
+  if (isCorrect) {
+    correctCount++;
+    topicStats[q.topic].correct++;
+  } else {
+    wrongCount++;
+    topicStats[q.topic].wrong++;
+    // Salva indice per ripasso
+    const globalIdx = QUESTIONS.indexOf(q);
+    if (globalIdx !== -1) errorQuestionIds.push(globalIdx);
+  }
+  topicStats[q.topic].total++;
+
+  // Cronologia
+  history.push({
+    question: q.text,
+    topic: q.topic,
+    correct: isCorrect,
+    difficulty: q.difficulty
+  });
+
+  // Mostra feedback
+  showFeedback(isCorrect, q);
+
+  // Aggiorna punteggio
+  document.getElementById('score-correct').textContent = correctCount;
+  document.getElementById('score-wrong').textContent = wrongCount;
+}
+
+/* ============================================
+   FEEDBACK E APPROFONDIMENTI
+   ============================================ */
+/* ============================================
+   PROF. PALUDETTO — SVG CARTOON
+   Ispirato alla foto: capelli ricci scuri, barba,
+   occhiali, espressione autorevole
+   ============================================ */
+
+// SVG del prof felice/approvazione
+const PROF_SVG_HAPPY = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sfondo glow verde -->
+  <defs>
+    <radialGradient id="glowG" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#06d6a0;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#06d6a0;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowG)"/>
+  <!-- Corpo/giacca -->
+  <path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+  <path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#1e40af" stroke="none"/>
+  <!-- Collo -->
+  <rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/>
+  <!-- Testa -->
+  <ellipse cx="110" cy="105" rx="48" ry="52" fill="#deb887"/>
+  <!-- Capelli ricci scuri -->
+  <path d="M62 95 Q58 55 80 42 Q95 33 110 32 Q125 33 140 42 Q162 55 158 95" fill="#2c1810" stroke="#1a0f0a" stroke-width="1"/>
+  <circle cx="68" cy="82" r="8" fill="#2c1810"/><circle cx="72" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="152" cy="82" r="8" fill="#2c1810"/><circle cx="148" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="78" cy="90" r="6" fill="#2c1810"/><circle cx="142" cy="90" r="6" fill="#2c1810"/>
+  <circle cx="85" cy="65" r="6" fill="#2c1810"/><circle cx="135" cy="65" r="6" fill="#2c1810"/>
+  <circle cx="95" cy="50" r="7" fill="#2c1810"/><circle cx="125" cy="50" r="7" fill="#2c1810"/>
+  <circle cx="110" cy="45" r="8" fill="#2c1810"/>
+  <circle cx="100" cy="55" r="5" fill="#2c1810"/><circle cx="120" cy="55" r="5" fill="#2c1810"/>
+  <!-- Barba -->
+  <path d="M78 118 Q80 145 110 152 Q140 145 142 118 Q142 130 130 140 Q110 150 90 140 Q78 130 78 118Z" fill="#3d2914" stroke="#2c1810" stroke-width="1"/>
+  <path d="M75 108 Q72 125 78 118" fill="#3d2914"/><path d="M145 108 Q148 125 142 118" fill="#3d2914"/>
+  <!-- Occhiali -->
+  <rect x="76" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <rect x="116" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <line x1="104" y1="102" x2="116" y2="102" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="76" y1="100" x2="66" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="144" y1="100" x2="154" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <!-- Occhi felici (archi sorridenti) -->
+  <path d="M84 102 Q90 96 96 102" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M124 102 Q130 96 136 102" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Sopracciglia alzate (contento) -->
+  <path d="M78 86 Q90 80 100 84" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M120 84 Q130 80 142 86" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Bocca sorridente (nella barba) -->
+  <path d="M96 132 Q110 142 124 132" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Pollice su -->
+  <g transform="translate(165,140) rotate(-15)">
+    <rect x="0" y="12" width="18" height="26" rx="5" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/>
+    <rect x="4" y="-8" width="12" height="24" rx="6" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/>
+  </g>
+  <!-- Badge check -->
+  <circle cx="180" cy="45" r="18" fill="#06d6a0"/>
+  <path d="M171 45 L177 51 L189 39" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+// SVG del prof arrabbiato/disapprovazione
+const PROF_SVG_ANGRY = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sfondo glow rosso -->
+  <defs>
+    <radialGradient id="glowR" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ef476f;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#ef476f;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowR)"/>
+  <!-- Corpo/giacca -->
+  <path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+  <path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#1e40af" stroke="none"/>
+  <!-- Collo -->
+  <rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/>
+  <!-- Testa -->
+  <ellipse cx="110" cy="105" rx="48" ry="52" fill="#deb887"/>
+  <!-- Capelli ricci scuri -->
+  <path d="M62 95 Q58 55 80 42 Q95 33 110 32 Q125 33 140 42 Q162 55 158 95" fill="#2c1810" stroke="#1a0f0a" stroke-width="1"/>
+  <circle cx="68" cy="82" r="8" fill="#2c1810"/><circle cx="72" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="152" cy="82" r="8" fill="#2c1810"/><circle cx="148" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="78" cy="90" r="6" fill="#2c1810"/><circle cx="142" cy="90" r="6" fill="#2c1810"/>
+  <circle cx="85" cy="65" r="6" fill="#2c1810"/><circle cx="135" cy="65" r="6" fill="#2c1810"/>
+  <circle cx="95" cy="50" r="7" fill="#2c1810"/><circle cx="125" cy="50" r="7" fill="#2c1810"/>
+  <circle cx="110" cy="45" r="8" fill="#2c1810"/>
+  <circle cx="100" cy="55" r="5" fill="#2c1810"/><circle cx="120" cy="55" r="5" fill="#2c1810"/>
+  <!-- Barba -->
+  <path d="M78 118 Q80 145 110 152 Q140 145 142 118 Q142 130 130 140 Q110 150 90 140 Q78 130 78 118Z" fill="#3d2914" stroke="#2c1810" stroke-width="1"/>
+  <path d="M75 108 Q72 125 78 118" fill="#3d2914"/><path d="M145 108 Q148 125 142 118" fill="#3d2914"/>
+  <!-- Occhiali -->
+  <rect x="76" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <rect x="116" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <line x1="104" y1="102" x2="116" y2="102" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="76" y1="100" x2="66" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="144" y1="100" x2="154" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <!-- Occhi arrabbiati (puntini intensi) -->
+  <circle cx="90" cy="101" r="3.5" fill="#1a1a2e"/>
+  <circle cx="130" cy="101" r="3.5" fill="#1a1a2e"/>
+  <!-- Sopracciglia aggrottate -->
+  <path d="M78 88 Q88 82 100 88" fill="none" stroke="#2c1810" stroke-width="3" stroke-linecap="round" transform="rotate(8, 89, 85)"/>
+  <path d="M120 88 Q132 82 142 88" fill="none" stroke="#2c1810" stroke-width="3" stroke-linecap="round" transform="rotate(-8, 131, 85)"/>
+  <!-- Bocca contrariata -->
+  <path d="M96 135 Q110 128 124 135" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Mano facepalm -->
+  <g transform="translate(152,120) rotate(10)">
+    <rect x="0" y="0" width="22" height="14" rx="5" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/>
+    <rect x="3" y="-6" width="5" height="10" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/>
+    <rect x="9" y="-8" width="5" height="12" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/>
+    <rect x="15" y="-6" width="5" height="10" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/>
+  </g>
+  <!-- Badge X -->
+  <circle cx="180" cy="45" r="18" fill="#ef476f"/>
+  <path d="M173 38 L187 52 M187 38 L173 52" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Vena frustrazione -->
+  <g transform="translate(55,55)">
+    <path d="M0 5 L5 0 L10 5 L5 10 Z" fill="none" stroke="#ef476f" stroke-width="2"/>
+  </g>
+</svg>`;
+
+// SVG versione neutra per header
+const PROF_SVG_NEUTRAL = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glowN" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#4361ee;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#4361ee;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowN)"/>
+  <path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+  <path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#1e40af" stroke="none"/>
+  <rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/>
+  <ellipse cx="110" cy="105" rx="48" ry="52" fill="#deb887"/>
+  <path d="M62 95 Q58 55 80 42 Q95 33 110 32 Q125 33 140 42 Q162 55 158 95" fill="#2c1810" stroke="#1a0f0a" stroke-width="1"/>
+  <circle cx="68" cy="82" r="8" fill="#2c1810"/><circle cx="72" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="152" cy="82" r="8" fill="#2c1810"/><circle cx="148" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="78" cy="90" r="6" fill="#2c1810"/><circle cx="142" cy="90" r="6" fill="#2c1810"/>
+  <circle cx="85" cy="65" r="6" fill="#2c1810"/><circle cx="135" cy="65" r="6" fill="#2c1810"/>
+  <circle cx="95" cy="50" r="7" fill="#2c1810"/><circle cx="125" cy="50" r="7" fill="#2c1810"/>
+  <circle cx="110" cy="45" r="8" fill="#2c1810"/>
+  <circle cx="100" cy="55" r="5" fill="#2c1810"/><circle cx="120" cy="55" r="5" fill="#2c1810"/>
+  <path d="M78 118 Q80 145 110 152 Q140 145 142 118 Q142 130 130 140 Q110 150 90 140 Q78 130 78 118Z" fill="#3d2914" stroke="#2c1810" stroke-width="1"/>
+  <path d="M75 108 Q72 125 78 118" fill="#3d2914"/><path d="M145 108 Q148 125 142 118" fill="#3d2914"/>
+  <rect x="76" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <rect x="116" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <line x1="104" y1="102" x2="116" y2="102" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="76" y1="100" x2="66" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="144" y1="100" x2="154" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <circle cx="90" cy="101" r="3" fill="#1a1a2e"/>
+  <circle cx="130" cy="101" r="3" fill="#1a1a2e"/>
+  <path d="M80 86 Q90 82 100 85" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M120 85 Q130 82 140 86" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M100 134 L120 134" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+</svg>`;
+
+// Inietta SVG nei container
+(function initProfSVG() {
+  document.getElementById('prof-svg-happy').innerHTML = PROF_SVG_HAPPY;
+  document.getElementById('prof-svg-angry').innerHTML = PROF_SVG_ANGRY;
+  document.getElementById('prof-header-svg').innerHTML = PROF_SVG_NEUTRAL;
+})();
+
+/* Frasi del Prof. Paludetto */
+const PROF_CORRECT_PHRASES = [
+  "Bene. Questa e' fisica fatta con criterio.",
+  "Corretto. Finalmente una risposta degna.",
+  "Ottimo. Qui il campo elettrico non ti spaventa.",
+  "Bravo. Coulomb sarebbe soddisfatto.",
+  "Si', ci siamo. Ragionamento pulito.",
+  "Esatto. Vedo che qualcuno ha studiato.",
+  "Risposta corretta. Continua cosi' e il 10 e' tuo.",
+  "Perfetto. Gauss approva dal paradiso dei fisici.",
+  "Bene bene. Questo lo metto sul registro con il segno piu'.",
+  "Corretto. Non ti servira' neanche il ripasso.",
+  "Giusto. Hai la stoffa del fisico.",
+  "Ok, non male. Forse c'e' speranza per questa classe."
+];
+
+const PROF_WRONG_PHRASES = [
+  "No. Cosi' non va.",
+  "Attenzione: qui hai confuso i concetti.",
+  "Errore. Rivedi bene il ragionamento.",
+  "Questa risposta non regge. Riprova.",
+  "Fermati un attimo: qui c'e' da ripassare.",
+  "No, no, no. Torna sugli appunti.",
+  "Sbagliato. Ma almeno ci hai provato.",
+  "Questo errore lo vedo ogni anno. Leggi la spiegazione.",
+  "Coulomb si sta rivoltando. Concentrati.",
+  "Errore grave. Apri il quaderno e rileggi.",
+  "Non ci siamo. Ma il bello della fisica e' che si puo' rimediare.",
+  "Risposta sbagliata. Ti do un'altra possibilita' dopo."
+];
+
+function showFeedback(isCorrect, q) {
+  const fb = document.getElementById('feedback-box');
+  const dd = document.getElementById('deepdive-box');
+  const prof = document.getElementById('prof-container');
+
+  // --- Prof. Paludetto ---
+  prof.className = 'prof-container show ' + (isCorrect ? 'correct' : 'wrong');
+  const phrases = isCorrect ? PROF_CORRECT_PHRASES : PROF_WRONG_PHRASES;
+  document.getElementById('prof-phrase').textContent = phrases[Math.floor(Math.random() * phrases.length)];
+  document.getElementById('prof-name').textContent = 'Prof. Paludetto';
+
+  // --- Feedback ---
+  fb.style.display = 'block';
+  fb.className = 'feedback-box ' + (isCorrect ? 'feedback-correct' : 'feedback-wrong');
+
+  if (isCorrect) {
+    document.getElementById('feedback-title').textContent = 'Risposta corretta!';
+    document.getElementById('feedback-text').textContent = q.explanation;
+    dd.style.display = 'none';
+  } else {
+    document.getElementById('feedback-title').textContent = 'Risposta sbagliata';
+    document.getElementById('feedback-text').innerHTML =
+      `<strong>Errore comune:</strong> ${q.commonError}<br><br><strong>Spiegazione:</strong> ${q.explanation}`;
+
+    // Mostra approfondimento
+    dd.style.display = 'block';
+    document.getElementById('deepdive-text').textContent = q.deepdive;
+  }
+
+  document.getElementById('next-btn-container').style.display = 'block';
+
+  // Scroll al professore (che e' sopra il feedback)
+  prof.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/* ============================================
+   NAVIGAZIONE
+   ============================================ */
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= currentQuestions.length) {
+    endQuiz();
+  } else {
+    showQuestion();
+    document.getElementById('question-card').scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+/* ============================================
+   FINE QUIZ E RIEPILOGO
+   ============================================ */
+function endQuiz() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'block';
+
+  const total = correctCount + wrongCount;
+  const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+
+  // Punteggio grande
+  const scoreEl = document.getElementById('final-score');
+  scoreEl.textContent = pct + '%';
+  scoreEl.className = 'big-score ' + (pct >= 70 ? 'good' : pct >= 50 ? 'medium' : 'bad');
+  document.getElementById('final-score-label').textContent =
+    `${correctCount} corrette su ${total} domande`;
+
+  // Commento del Prof nel riepilogo
+  const profSummary = document.getElementById('prof-summary');
+  let summaryPhrase, summaryClass;
+  if (pct >= 90) {
+    summaryPhrase = "Eccellente. Risultato da primo della classe. Quasi quasi ti metto 10.";
+    summaryClass = 'correct';
+  } else if (pct >= 70) {
+    summaryPhrase = "Bene, risultato solido. Ma non adagiarti: c'e' ancora margine di miglioramento.";
+    summaryClass = 'correct';
+  } else if (pct >= 50) {
+    summaryPhrase = "Sufficiente, ma di poco. Hai le basi, pero' devi ripassare. Sul serio.";
+    summaryClass = 'wrong';
+  } else {
+    summaryPhrase = "Insufficiente. Ci vediamo all'interrogazione di recupero. Studia.";
+    summaryClass = 'wrong';
+  }
+  profSummary.className = 'prof-container show ' + summaryClass;
+  document.getElementById('prof-summary-svg').innerHTML = pct >= 70 ? PROF_SVG_HAPPY : PROF_SVG_ANGRY;
+  document.getElementById('prof-summary-phrase').textContent = summaryPhrase;
+  document.getElementById('prof-summary-name').textContent = 'Prof. Paludetto';
+
+  // Griglia statistiche
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-box"><div class="stat-number">${total}</div><div class="stat-label">Domande totali</div></div>
+    <div class="stat-box"><div class="stat-number" style="color:var(--success)">${correctCount}</div><div class="stat-label">Corrette</div></div>
+    <div class="stat-box"><div class="stat-number" style="color:var(--danger)">${wrongCount}</div><div class="stat-label">Errate</div></div>
+    <div class="stat-box"><div class="stat-number">${pct}%</div><div class="stat-label">Percentuale</div></div>
+  `;
+
+  // Risultati per argomento
+  const topicDiv = document.getElementById('topic-results');
+  topicDiv.innerHTML = '';
+  const weakTopics = [];
+
+  for (const [topic, stats] of Object.entries(topicStats)) {
+    if (stats.total === 0) continue;
+    const topicPct = Math.round((stats.correct / stats.total) * 100);
+    const cls = topicPct >= 70 ? 'strong' : topicPct >= 50 ? 'medium-res' : 'weak';
+    const barColor = topicPct >= 70 ? 'var(--success)' : topicPct >= 50 ? 'var(--warning)' : 'var(--danger)';
+
+    if (topicPct < 70) weakTopics.push(topic);
+
+    topicDiv.innerHTML += `
+      <div class="topic-result-item ${cls}">
+        <span><strong>${topic}</strong> — ${stats.correct}/${stats.total} (${topicPct}%)</span>
+        <div class="topic-bar"><div class="topic-bar-fill" style="width:${topicPct}%;background:${barColor}"></div></div>
+      </div>
+    `;
+  }
+
+  // Suggerimenti
+  const sugDiv = document.getElementById('suggestions');
+  if (weakTopics.length > 0) {
+    sugDiv.innerHTML = `
+      <h3>Suggerimenti per il ripasso</h3>
+      <p>Dovresti concentrarti su questi argomenti:</p>
+      <ul>${weakTopics.map(t => `<li><strong>${t}</strong> — rileggi gli appunti e rifai gli esercizi su questo tema</li>`).join('')}</ul>
+      <p style="margin-top:8px;">Usa il pulsante "Ripassa gli errori" per rifare solo le domande sbagliate.</p>
+    `;
+  } else {
+    sugDiv.innerHTML = `
+      <h3>Ottimo lavoro!</h3>
+      <p>Hai risposto bene su tutti gli argomenti. Continua cosi'! Prova la modalita' casuale per consolidare.</p>
+    `;
+  }
+
+  // Cronologia
+  const histDiv = document.getElementById('history-list');
+  histDiv.innerHTML = '';
+  history.forEach((h, i) => {
+    histDiv.innerHTML += `
+      <div class="history-item">
+        <span>${i + 1}. ${h.question.substring(0, 60)}${h.question.length > 60 ? '...' : ''}</span>
+        <span class="${h.correct ? 'correct-mark' : 'wrong-mark'}">${h.correct ? 'Corretta' : 'Errata'}</span>
+      </div>
+    `;
+  });
+
+  // Salva in localStorage
+  localStorage.setItem('termodinamica_stats', JSON.stringify({
+    total, correct: correctCount, wrong: wrongCount, percentage: pct,
+    date: new Date().toLocaleDateString('it-IT')
+  }));
+  localStorage.setItem('termodinamica_errors', JSON.stringify(errorQuestionIds));
+}
+
+/* ============================================
+   SEZIONE APPUNTI
+   ============================================ */
+const noteIds = ['sistemi-trasf','lavoro','primo-principio','energia-interna','calori-specifici','adiabatica','macchine','secondo-principio','carnot','entropia','terzo-principio','dim-carnot','dim-mayer'];
+const noteLabels = ['Sistemi e trasformazioni','Lavoro termodinamico','Primo principio','Energia interna','Calori specifici','Adiabatica','Macchine termiche','Secondo principio','Macchina di Carnot','Entropia','Terzo principio','DIM: Rendimento Carnot','DIM: Relaz. di Mayer'];
+
+// Popola navigazione rapida appunti
+(function initNotes() {
+  const nav = document.getElementById('notes-nav');
+  if (!nav) return;
+  noteIds.forEach((id, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = noteLabels[i];
+    btn.onclick = () => {
+      // Apri la sezione e scrolla
+      const body = document.getElementById('body-' + id);
+      if (!body.classList.contains('open')) toggleNote(id);
+      document.getElementById('note-' + id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    nav.appendChild(btn);
+  });
+})();
+
+function showNotes(section) {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'block';
+
+  // Se richiesto, scrolla direttamente alle dimostrazioni
+  if (section === 'dimostrazioni') {
+    setTimeout(() => {
+      const el = document.getElementById('note-dim-carnot');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+}
+
+function hideNotes() {
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+
+function toggleNote(id) {
+  const body = document.getElementById('body-' + id);
+  const toggle = body.previousElementSibling.querySelector('.note-toggle');
+  body.classList.toggle('open');
+  toggle.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+/* ============================================
+   SIMULAZIONE VERIFICA
+   Struttura identica alla verifica del prof:
+   - Parte 1: 10 domande scelta multipla (A-E)
+   - Parte 2: 3 domande aperte/dimostrative
+   ============================================ */
+
+const EXAM_MC = [
+  {
+    text: "Il primo principio della termodinamica afferma:",
+    options: ["delta_U = Q + L", "delta_U = Q - L", "delta_U = L - Q", "Q = L in ogni trasformazione", "delta_U = 0 sempre"],
+    answer: 1,
+    explanation: "delta_U = Q - L: variazione di energia interna = calore assorbito meno lavoro compiuto."
+  },
+  {
+    text: "In una trasformazione adiabatica di gas perfetto, la relazione p-V e':",
+    options: ["p*V = costante", "p*V^gamma = costante", "p/V = costante", "p^gamma * V = costante", "p*V^2 = costante"],
+    answer: 1,
+    explanation: "p*V^gamma = costante, con gamma = cp/cv > 1."
+  },
+  {
+    text: "Il rendimento della macchina di Carnot tra Tc=600K e Tf=300K e':",
+    options: ["25%", "50%", "75%", "100%", "33%"],
+    answer: 1,
+    explanation: "eta = 1 - 300/600 = 1 - 0.5 = 0.5 = 50%."
+  },
+  {
+    text: "L'enunciato di Kelvin del secondo principio dice che:",
+    options: ["Il calore non scorre dal freddo al caldo spontaneamente", "E' impossibile costruire una macchina il cui unico risultato sia convertire tutto il calore in lavoro", "L'entropia dell'universo e' costante", "Le macchine termiche hanno sempre rendimento < 50%", "Nessuna macchina termica e' possibile"],
+    answer: 1,
+    explanation: "Kelvin: impossibile una macchina con unico risultato la conversione totale di calore in lavoro."
+  },
+  {
+    text: "Per un gas monoatomico (f=3), cv e cp valgono:",
+    options: ["cv=R, cp=2R", "cv=(3/2)R, cp=(5/2)R", "cv=(5/2)R, cp=(7/2)R", "cv=(1/2)R, cp=(3/2)R", "cv=2R, cp=3R"],
+    answer: 1,
+    explanation: "Monoatomico (f=3): cv=(3/2)R, cp=cv+R=(5/2)R."
+  },
+  {
+    text: "In una trasformazione isocora (V=costante), il primo principio diventa:",
+    options: ["L = Q", "delta_U = -L", "Q = L", "delta_U = Q", "delta_U = 0"],
+    answer: 3,
+    explanation: "L=0 in isocora. delta_U = Q - 0 = Q."
+  },
+  {
+    text: "Il lavoro compiuto da un gas in una trasformazione isobara a pressione p e variazione di volume delta_V e':",
+    options: ["L = nRT", "L = nRT*ln(Vf/Vi)", "L = 0", "L = p*delta_V", "L = delta_U"],
+    answer: 3,
+    explanation: "L = p*delta_V. In isobara p e' costante, quindi il lavoro e' il prodotto della pressione per la variazione di volume."
+  },
+  {
+    text: "In ogni processo irreversibile, la variazione di entropia dell'universo e':",
+    options: ["Nulla", "Negativa", "Uguale a Q/T", "Positiva", "Uguale a delta_U/T"],
+    answer: 3,
+    explanation: "delta_S_universo > 0 per ogni processo irreversibile: il secondo principio in termini di entropia."
+  },
+  {
+    text: "Una macchina termica assorbe Qc=2000J e ha eta=40%. Il calore ceduto al serbatoio freddo e':",
+    options: ["800 J", "1200 J", "2000 J", "400 J", "1600 J"],
+    answer: 1,
+    explanation: "L = 0.4*2000 = 800 J. |Qf| = Qc - L = 2000 - 800 = 1200 J."
+  },
+  {
+    text: "La relazione di Mayer e':",
+    options: ["cv = cp + R", "cp = cv - R", "cp = cv + R", "cp = cv * R", "cv = cp * R"],
+    answer: 2,
+    explanation: "cp = cv + R. A pressione costante serve piu' calore per la stessa delta_T perche' il gas compie lavoro di espansione."
+  }
+];
+const EXAM_OPEN = [
+  {
+    title: "Primo principio applicato alle trasformazioni",
+    text: "n=2 moli di gas monoatomico subiscono: (a) una trasformazione isocora con Q=+600J; (b) poi una espansione isobara a p=10^5 Pa con delta_V=0.01 m3. Per ciascuna trasformazione calcola delta_U e L usando il primo principio."
+  },
+  {
+    title: "Rendimento macchina termica e confronto con Carnot",
+    text: "Una macchina termica opera tra Tc=500K e Tf=250K, assorbe Qc=3000J e cede |Qf|=1800J. (a) Calcola il lavoro prodotto e il rendimento. (b) Calcola il rendimento di Carnot per le stesse temperature. (c) La macchina viola il secondo principio?"
+  },
+  {
+    title: "Variazione di entropia",
+    text: "1500 J di calore fluiscono da un serbatoio a 750 K a uno a 300 K. (a) Calcola la variazione di entropia di ciascun serbatoio. (b) Calcola delta_S_universo. (c) Il processo e' spontaneo? Perche'?"
+  }
+];
+let examTimer = null;
+let examSeconds = 3000; // 50 minuti
+let examSubmitted = false;
+
+function showExam() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'block';
+
+  examSubmitted = false;
+  document.getElementById('exam-submit-btn').style.display = 'inline-block';
+  document.getElementById('exam-result').style.display = 'none';
+
+  renderExamMC();
+  renderExamOpen();
+  startExamTimer();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function hideExam() {
+  clearInterval(examTimer);
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+
+function resetExam() {
+  examSeconds = 3000;
+  showExam();
+}
+
+/* Renderizza domande a scelta multipla con opzioni mescolate */
+function renderExamMC() {
+  const container = document.getElementById('exam-mc-questions');
+  container.innerHTML = '';
+
+  EXAM_MC.forEach((q, qi) => {
+    // Mescola opzioni
+    const indices = q.options.map((_, i) => i);
+    shuffleArray(indices);
+    q._shuffled = indices;
+
+    const letters = ['A', 'B', 'C', 'D', 'E'];
+    let html = `<div class="exam-question" id="exam-q-${qi}">
+      <div class="eq-text"><span class="eq-number">${qi + 1}.</span> ${q.text}</div>
+      <div class="exam-options">`;
+
+    indices.forEach((origIdx, dispIdx) => {
+      html += `
+        <div class="exam-option" id="exam-opt-${qi}-${dispIdx}">
+          <input type="radio" name="exam-q-${qi}" id="exam-radio-${qi}-${dispIdx}" value="${origIdx}">
+          <label for="exam-radio-${qi}-${dispIdx}">${letters[dispIdx]}. ${q.options[origIdx]}</label>
+        </div>`;
+    });
+
+    html += `</div>
+      <div class="exam-correction" id="exam-corr-${qi}"></div>
+    </div>`;
+    container.innerHTML += html;
+  });
+}
+
+/* Renderizza domande aperte */
+function renderExamOpen() {
+  const container = document.getElementById('exam-open-questions');
+  container.innerHTML = '';
+
+  EXAM_OPEN.forEach((q, qi) => {
+    const num = EXAM_MC.length + qi + 1;
+    container.innerHTML += `
+      <div class="exam-question" id="exam-open-${qi}">
+        <div class="eq-text"><span class="eq-number">${num}.</span> ${q.text}</div>
+        <div class="exam-open-area">
+          <textarea id="exam-textarea-${qi}" placeholder="Scrivi qui la tua risposta..."></textarea>
+        </div>
+        <div class="exam-correction" id="exam-open-corr-${qi}"></div>
+      </div>`;
+  });
+}
+
+/* Timer */
+function startExamTimer() {
+  examSeconds = 3000;
+  clearInterval(examTimer);
+  updateTimerDisplay();
+  examTimer = setInterval(() => {
+    examSeconds--;
+    updateTimerDisplay();
+    if (examSeconds <= 0) {
+      clearInterval(examTimer);
+      if (!examSubmitted) submitExam();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(examSeconds / 60);
+  const s = examSeconds % 60;
+  const el = document.getElementById('exam-timer');
+  el.textContent = `Tempo: ${m}:${s.toString().padStart(2, '0')}`;
+  el.style.color = examSeconds < 300 ? 'var(--danger)' : 'var(--dark)';
+}
+
+/* Consegna verifica */
+function submitExam() {
+  if (examSubmitted) return;
+  if (!confirm('Sei sicuro di voler consegnare la verifica?')) return;
+
+  examSubmitted = true;
+  clearInterval(examTimer);
+
+  let correctMC = 0;
+
+  // Correggi scelta multipla
+  EXAM_MC.forEach((q, qi) => {
+    const selected = document.querySelector(`input[name="exam-q-${qi}"]:checked`);
+    const corrDiv = document.getElementById('exam-corr-' + qi);
+    const selectedVal = selected ? parseInt(selected.value) : -1;
+    const isCorrect = selectedVal === q.answer;
+
+    if (isCorrect) {
+      correctMC++;
+      corrDiv.className = 'exam-correction show correct-box';
+      corrDiv.innerHTML = `<strong>Corretta!</strong> ${q.explanation}`;
+    } else {
+      corrDiv.className = 'exam-correction show wrong-box';
+      corrDiv.innerHTML = `<strong>Sbagliata.</strong> ${q.explanation}`;
+    }
+
+    // Evidenzia opzioni
+    q._shuffled.forEach((origIdx, dispIdx) => {
+      const optEl = document.getElementById(`exam-opt-${qi}-${dispIdx}`);
+      if (origIdx === q.answer) optEl.classList.add('correct-highlight');
+      if (dispIdx === getDisplayIdx(qi, selectedVal) && !isCorrect) optEl.classList.add('wrong-highlight');
+    });
+
+    // Disabilita radio
+    document.querySelectorAll(`input[name="exam-q-${qi}"]`).forEach(r => r.disabled = true);
+  });
+
+  // Mostra soluzioni aperte
+  EXAM_OPEN.forEach((q, qi) => {
+    const corrDiv = document.getElementById('exam-open-corr-' + qi);
+    corrDiv.className = 'exam-correction show correct-box';
+    corrDiv.innerHTML = `<strong>Soluzione completa:</strong><pre style="white-space:pre-wrap;font-family:inherit;margin-top:8px;">${q.solution}</pre>`;
+  });
+
+  // Calcolo voto: 10 MC (0.6 punti ciascuna = 6 pt) + 3 aperte (valutazione manuale suggerita)
+  const mcPoints = correctMC * 0.6;
+  const grade = Math.min(10, mcPoints + 4); // mc da 0 a 6 + max 4 per aperte (autovalutazione)
+  const mcGrade = (mcPoints / 6 * 10).toFixed(1);
+
+  document.getElementById('exam-submit-btn').style.display = 'none';
+  const resultDiv = document.getElementById('exam-result');
+  resultDiv.style.display = 'block';
+
+  const gradeEl = document.getElementById('exam-grade');
+  gradeEl.textContent = `${correctMC}/10 risposte multiple corrette`;
+  gradeEl.style.color = correctMC >= 7 ? 'var(--success)' : correctMC >= 5 ? 'var(--warning)' : 'var(--danger)';
+
+  document.getElementById('exam-grade-detail').innerHTML =
+    `Parte 1 (scelta multipla): <strong>${correctMC}/10</strong> — Voto stimato parte 1: <strong>${mcGrade}/10</strong><br>
+     Parte 2 (domande aperte): confronta le tue risposte con le soluzioni mostrate sopra.`;
+
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function getDisplayIdx(qi, origVal) {
+  const shuffled = EXAM_MC[qi]._shuffled;
+  return shuffled.indexOf(origVal);
+}
+
+/* ============================================
+   VERIFICA DIMOSTRAZIONI
+   6 domande aperte: riproduci la dimostrazione
+   ============================================ */
+
+const DEMO_EXAM = [
+  {
+    title: "Dimostrazione: cp = cv + R (relazione di Mayer)",
+    text: "Dimostra, usando il primo principio della termodinamica e l'equazione di stato del gas perfetto, la relazione di Mayer: cp = cv + R.",
+    solution: "1. DEFINIZIONE cv: in una trasformazione isocora (L=0) il primo principio da' delta_U=Q.\n   Per definizione: Q_isocora = n*cv*delta_T, quindi delta_U = n*cv*delta_T.\n\n2. DEFINIZIONE cp: in una trasformazione isobara (p=costante) il primo principio da' delta_U = Q - L.\n   Per definizione: Q_isobara = n*cp*delta_T.\n   Il lavoro isobaro e': L = p*delta_V.\n\n3. EQUAZIONE DI STATO: pV = nRT, a pressione costante:\n   p*delta_V = n*R*delta_T.\n\n4. SOSTITUZIONE nel primo principio per la isobara:\n   n*cv*delta_T = n*cp*delta_T - n*R*delta_T\n   (usando delta_U = n*cv*delta_T indipendentemente dalla trasformazione)\n\n5. SEMPLIFICANDO n*delta_T (diverso da zero):\n   cv = cp - R\n\n6. RISULTATO:\n   cp = cv + R"
+  },
+  {
+    title: "Dimostrazione: rendimento macchina di Carnot eta = 1 - Tf/Tc",
+    text: "Dimostra che il rendimento della macchina di Carnot che opera tra Tc e Tf e' eta = 1 - Tf/Tc, sfruttando le proprieta' del ciclo (2 isoterme + 2 adiabatiche reversibili).",
+    solution: "1. CICLO DI CARNOT: A-B isoterma a Tc, B-C adiabatica, C-D isoterma a Tf, D-A adiabatica.\n\n2. CALORE NELLE ISOTERME:\n   - Espansione AB: Qc = nRTc*ln(VB/VA) > 0 (gas assorbe)\n   - Compressione CD: |Qf| = nRTf*ln(VC/VD) > 0 (gas cede)\n\n3. RELAZIONE DALLE ADIABATICHE (T*V^(gamma-1)=cost):\n   Adiabatica BC: Tc*VB^(gamma-1) = Tf*VC^(gamma-1)\n   Adiabatica DA: Tc*VA^(gamma-1) = Tf*VD^(gamma-1)\n   Dividendo membro a membro:\n   (VB/VA)^(gamma-1) = (VC/VD)^(gamma-1)\n   Quindi: VB/VA = VC/VD\n\n4. RAPPORTO DEI CALORI:\n   |Qf|/Qc = [nRTf*ln(VC/VD)] / [nRTc*ln(VB/VA)] = Tf/Tc\n   (perche' i logaritmi si cancellano avendo VB/VA = VC/VD)\n\n5. RENDIMENTO:\n   eta = 1 - |Qf|/Qc = 1 - Tf/Tc"
+  },
+  {
+    title: "Dimostrazione: delta_S = 0 in una adiabatica reversibile",
+    text: "Dimostra che la variazione di entropia e' nulla in una trasformazione adiabatica reversibile, e spiega perche' questo NON vale per una adiabatica irreversibile.",
+    solution: "1. DEFINIZIONE DI VARIAZIONE DI ENTROPIA (per processi reversibili):\n   delta_S = somma(delta_Qi / Ti) lungo il processo reversibile.\n\n2. TRASFORMAZIONE ADIABATICA: per definizione, Q=0 in ogni stadio.\n   Quindi ogni contributo delta_Qi = 0.\n\n3. QUINDI:\n   delta_S = somma(0/Ti) = 0.\n\n4. CONCLUSIONE PER ADIABATICA REVERSIBILE:\n   delta_S_sistema = 0.\n   Poiche' l'ambiente non scambia calore: delta_S_ambiente = 0.\n   Quindi delta_S_universo = 0. Processo reversibile. CORRETTO.\n\n5. CASO IRREVERSIBILE:\n   In un'adiabatica irreversibile Q=0 ancora, ma non si puo' usare delta_S=Q/T direttamente.\n   Per calcolare delta_S bisogna trovare un processo REVERSIBILE che porta dagli stessi stati iniziale e finale.\n   Quel processo reversibile ha delta_Q != 0 in generale.\n   Il secondo principio garantisce che delta_S_universo > 0 per processi irreversibili.\n   Esempio: espansione libera adiabatica (gas si espande nel vuoto). Q=0, L=0, ma delta_S > 0."
+  }
+];
+let demoExamTimer = null;
+let demoExamSeconds = 2400;
+let demoExamSubmitted = false;
+
+function showDemoExam() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'block';
+
+  demoExamSubmitted = false;
+  document.getElementById('demo-exam-submit-btn').style.display = 'inline-block';
+  document.getElementById('demo-exam-result').style.display = 'none';
+
+  renderDemoExamQuestions();
+  startDemoExamTimer();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function hideDemoExam() {
+  clearInterval(demoExamTimer);
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+
+function resetDemoExam() {
+  demoExamSeconds = 2400;
+  showDemoExam();
+}
+
+function renderDemoExamQuestions() {
+  const container = document.getElementById('demo-exam-questions');
+  container.innerHTML = '';
+
+  DEMO_EXAM.forEach((q, qi) => {
+    container.innerHTML += `
+      <div class="exam-question" id="demo-q-${qi}">
+        <div class="eq-text">
+          <span class="eq-number">${qi + 1}.</span>
+          <strong style="color:#7c3aed;">[${q.title}]</strong><br>
+          ${q.text}
+        </div>
+        <div class="exam-open-area">
+          <textarea id="demo-textarea-${qi}" placeholder="Scrivi qui la dimostrazione passo per passo..."></textarea>
+        </div>
+        <div class="exam-correction" id="demo-corr-${qi}"></div>
+      </div>`;
+  });
+}
+
+function startDemoExamTimer() {
+  demoExamSeconds = 2400;
+  clearInterval(demoExamTimer);
+  updateDemoTimerDisplay();
+  demoExamTimer = setInterval(() => {
+    demoExamSeconds--;
+    updateDemoTimerDisplay();
+    if (demoExamSeconds <= 0) {
+      clearInterval(demoExamTimer);
+      if (!demoExamSubmitted) submitDemoExam();
+    }
+  }, 1000);
+}
+
+function updateDemoTimerDisplay() {
+  const m = Math.floor(demoExamSeconds / 60);
+  const s = demoExamSeconds % 60;
+  const el = document.getElementById('demo-exam-timer');
+  el.textContent = `Tempo: ${m}:${s.toString().padStart(2, '0')}`;
+  el.style.color = demoExamSeconds < 300 ? 'var(--danger)' : 'var(--dark)';
+}
+
+function submitDemoExam() {
+  if (demoExamSubmitted) return;
+  if (!confirm('Sei sicuro di voler consegnare la verifica sulle dimostrazioni?')) return;
+
+  demoExamSubmitted = true;
+  clearInterval(demoExamTimer);
+
+  // Mostra le soluzioni per ogni dimostrazione
+  DEMO_EXAM.forEach((q, qi) => {
+    const corrDiv = document.getElementById('demo-corr-' + qi);
+    const textarea = document.getElementById('demo-textarea-' + qi);
+    const userAnswer = textarea.value.trim();
+
+    corrDiv.className = 'exam-correction show correct-box';
+    corrDiv.innerHTML = `
+      <strong>Soluzione completa — ${q.title}:</strong>
+      <pre style="white-space:pre-wrap; font-family:inherit; margin-top:8px; line-height:1.7;">${q.solution}</pre>
+      ${userAnswer.length < 10 ? '<p style="color:var(--danger); margin-top:8px;"><strong>Non hai scritto una risposta per questa domanda.</strong></p>' : '<p style="color:var(--primary); margin-top:8px;"><strong>Confronta la tua risposta con la soluzione qui sopra.</strong></p>'}
+    `;
+    textarea.disabled = true;
+    textarea.style.opacity = '0.7';
+  });
+
+  document.getElementById('demo-exam-submit-btn').style.display = 'none';
+  const resultDiv = document.getElementById('demo-exam-result');
+  resultDiv.style.display = 'block';
+  document.getElementById('demo-exam-grade-detail').innerHTML =
+    'Le dimostrazioni richiedono valutazione manuale. Confronta attentamente ogni tua risposta con la soluzione mostrata sopra.<br>Controlla: hai incluso tutti i passaggi? Le semplificazioni sono corrette? Hai spiegato il significato fisico?';
+
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+</script>
+
+</body>
+</html>
