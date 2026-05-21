@@ -1,0 +1,3370 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Storia — Moti Risorgimentali e 1848</title>
+<style>
+/* ============================================
+   STILI GENERALI
+   ============================================ */
+:root {
+  --primary: #4361ee;
+  --primary-light: #e8ecff;
+  --success: #06d6a0;
+  --success-light: #e6faf4;
+  --danger: #ef476f;
+  --danger-light: #fde8ed;
+  --warning: #ffd166;
+  --dark: #1d3557;
+  --gray: #6c757d;
+  --light: #f8f9fa;
+  --white: #ffffff;
+  --shadow: 0 6px 24px rgba(0,0,0,0.10);
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.15);
+  --radius: 14px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: linear-gradient(160deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  min-height: 100vh;
+  color: var(--dark);
+  line-height: 1.6;
+}
+
+/* ============================================
+   PROF. PALUDETTO — PERSONAGGIO CARTOON
+   ============================================ */
+.prof-container {
+  display: none;
+  position: relative;
+  margin: 20px auto;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.prof-container.show {
+  display: flex;
+  animation: profAppear 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes profAppear {
+  0% { opacity: 0; transform: translateY(60px) scale(0.5); }
+  60% { transform: translateY(-10px) scale(1.05); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes profBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes profShake {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(-5deg); }
+  30% { transform: rotate(5deg); }
+  45% { transform: rotate(-4deg); }
+  60% { transform: rotate(4deg); }
+  75% { transform: rotate(-2deg); }
+}
+
+.prof-svg-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  margin: 0 auto;
+}
+
+.prof-container.correct .prof-svg-container {
+  animation: profBounce 0.8s ease 0.3s;
+  filter: drop-shadow(0 8px 30px rgba(6, 214, 160, 0.35));
+}
+
+.prof-container.wrong .prof-svg-container {
+  animation: profShake 0.6s ease;
+  filter: drop-shadow(0 8px 30px rgba(239, 71, 111, 0.35));
+}
+
+/* Fumetto / Bubble */
+.prof-bubble {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 18px 24px;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+  font-size: 1.1em;
+  font-weight: 600;
+  line-height: 1.5;
+  max-width: 480px;
+  margin-top: -10px;
+}
+
+.prof-bubble::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border: 8px solid transparent;
+  border-bottom-color: var(--white);
+}
+
+.prof-container.correct .prof-bubble {
+  border: 3px solid var(--success);
+  background: linear-gradient(135deg, #f0fff8, var(--white));
+}
+
+.prof-container.wrong .prof-bubble {
+  border: 3px solid var(--danger);
+  background: linear-gradient(135deg, #fff5f7, var(--white));
+}
+
+.prof-container.correct .prof-bubble::before { border-bottom-color: var(--success); }
+.prof-container.wrong .prof-bubble::before { border-bottom-color: var(--danger); }
+
+.prof-name {
+  font-size: 0.7em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+
+.prof-container.correct .prof-name { color: var(--success); }
+.prof-container.wrong .prof-name { color: var(--danger); }
+
+/* SVG nascosti/mostrati */
+.prof-svg-correct, .prof-svg-wrong { display: none; }
+.prof-container.correct .prof-svg-correct { display: block; }
+.prof-container.wrong .prof-svg-wrong { display: block; }
+
+/* Header start screen - versione piccola */
+.prof-header-container {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 10px;
+}
+
+.container {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Sfondo decorativo sottile */
+body::before {
+  content: '';
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at 30% 20%, rgba(67, 97, 238, 0.05) 0%, transparent 50%),
+              radial-gradient(circle at 70% 80%, rgba(124, 58, 237, 0.05) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ============================================
+   SCHERMATA INIZIALE
+   ============================================ */
+#start-screen {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  margin-top: 30px;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+#start-screen h1 {
+  font-size: 2.1em;
+  color: var(--dark);
+  margin-bottom: 6px;
+}
+
+#start-screen h1 span {
+  background: linear-gradient(135deg, var(--primary), #7c3aed);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#start-screen .subtitle {
+  color: var(--gray);
+  font-size: 1em;
+  margin-bottom: 10px;
+}
+
+.prof-welcome {
+  font-size: 0.9em;
+  color: var(--dark);
+  background: var(--light);
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  margin-bottom: 20px;
+  font-weight: 500;
+}
+
+.topic-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+  margin: 20px 0;
+  text-align: left;
+}
+
+.topic-item {
+  background: var(--primary-light);
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.9em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.topic-item input[type="checkbox"] { accent-color: var(--primary); }
+
+.mode-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 25px;
+}
+
+.btn {
+  padding: 12px 28px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,0.15); }
+.btn:active { transform: translateY(0) scale(0.97); }
+
+.btn-primary { background: var(--primary); color: var(--white); }
+.btn-success { background: var(--success); color: var(--white); }
+.btn-warning { background: var(--warning); color: var(--dark); }
+.btn-danger { background: var(--danger); color: var(--white); }
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--primary);
+  color: var(--primary);
+}
+
+.btn-ultra {
+  background: linear-gradient(135deg, #ff6a00, #ee0979);
+  color: var(--white);
+  position: relative;
+  overflow: hidden;
+}
+.btn-ultra::after {
+  content: '🔥';
+  margin-left: 6px;
+}
+
+.btn-exam {
+  background: linear-gradient(135deg, #1d3557, #457b9d);
+  color: var(--white);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.btn-demo {
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: var(--white);
+  font-weight: 700;
+}
+
+/* Sezioni menu principale */
+.menu-section {
+  background: var(--light);
+  border: 1px solid #e0e0e0;
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.menu-section-title {
+  font-size: 0.85em;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--gray);
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.menu-section-title .section-icon {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.section-icon.test { background: var(--primary); }
+.section-icon.study { background: var(--success); }
+
+/* ============================================
+   SEZIONE ESAME
+   ============================================ */
+#exam-screen .exam-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 30px 34px;
+  box-shadow: var(--shadow);
+  margin-bottom: 16px;
+}
+
+.exam-header {
+  text-align: center;
+  border-bottom: 2px solid var(--dark);
+  padding-bottom: 14px;
+  margin-bottom: 24px;
+}
+
+.exam-header h2 { font-size: 1.4em; margin-bottom: 4px; letter-spacing: 1px; }
+.exam-header .exam-info {
+  display: flex; justify-content: space-between; font-size: 0.9em; color: var(--gray);
+  margin-top: 8px;
+}
+
+.exam-question {
+  margin-bottom: 22px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #eee;
+}
+
+.exam-question:last-child { border-bottom: none; }
+
+.exam-question .eq-number {
+  font-weight: 700;
+  color: var(--primary);
+  margin-right: 6px;
+}
+
+.exam-question .eq-text {
+  font-size: 1.02em;
+  margin-bottom: 10px;
+  line-height: 1.7;
+}
+
+.exam-options { padding-left: 10px; }
+
+.exam-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 10px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.exam-option:hover { background: var(--light); }
+.exam-option input[type="radio"] { margin-top: 4px; accent-color: var(--primary); }
+.exam-option label { cursor: pointer; line-height: 1.5; }
+
+.exam-option.correct-highlight { background: var(--success-light); }
+.exam-option.wrong-highlight { background: var(--danger-light); }
+
+.exam-open-area {
+  margin-top: 10px;
+}
+
+.exam-open-area textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95em;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.exam-open-area textarea:focus { border-color: var(--primary); }
+
+.exam-section-title {
+  font-size: 1.1em;
+  font-weight: 700;
+  color: var(--dark);
+  margin: 24px 0 14px;
+  padding: 8px 12px;
+  background: var(--light);
+  border-radius: 6px;
+}
+
+.exam-correction {
+  display: none;
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.93em;
+  line-height: 1.6;
+}
+
+.exam-correction.show { display: block; }
+.exam-correction.correct-box { background: var(--success-light); border-left: 4px solid var(--success); }
+.exam-correction.wrong-box { background: var(--danger-light); border-left: 4px solid var(--danger); }
+
+.exam-result-bar {
+  text-align: center;
+  padding: 20px;
+  background: var(--light);
+  border-radius: var(--radius);
+  margin-top: 20px;
+}
+
+.exam-result-bar .exam-grade {
+  font-size: 2.5em;
+  font-weight: 800;
+}
+
+.exam-timer {
+  font-weight: 600;
+  font-size: 1.1em;
+  color: var(--danger);
+}
+
+.prev-stats {
+  margin-top: 25px;
+  padding: 15px;
+  background: var(--light);
+  border-radius: 8px;
+  font-size: 0.9em;
+}
+
+/* ============================================
+   SCHERMATA QUIZ
+   ============================================ */
+#quiz-screen {
+  display: none;
+  margin-top: 20px;
+}
+
+.quiz-header {
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 16px 24px;
+  box-shadow: var(--shadow);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.progress-info { font-weight: 600; color: var(--dark); }
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), #7c3aed, #a855f7);
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 8px rgba(124, 58, 237, 0.3);
+}
+
+.score-display {
+  display: flex;
+  gap: 15px;
+  font-size: 0.9em;
+}
+
+.score-correct { color: var(--success); font-weight: 600; }
+.score-wrong { color: var(--danger); font-weight: 600; }
+
+.question-card {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 16px;
+  border: 1px solid rgba(0,0,0,0.04);
+  animation: cardAppear 0.4s ease;
+}
+
+@keyframes cardAppear {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.question-meta {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8em;
+  font-weight: 600;
+}
+
+.badge-topic { background: var(--primary-light); color: var(--primary); }
+.badge-diff-1 { background: #d4edda; color: #155724; }
+.badge-diff-2 { background: #fff3cd; color: #856404; }
+.badge-diff-3 { background: #f8d7da; color: #721c24; }
+.badge-type { background: #e2e3e5; color: #383d41; }
+
+.question-text {
+  font-size: 1.15em;
+  font-weight: 500;
+  margin-bottom: 20px;
+  line-height: 1.7;
+}
+
+/* Opzioni scelta multipla */
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 18px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  background: var(--white);
+  font-size: 1em;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.option-btn:hover:not(.disabled) {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: translateX(6px);
+  box-shadow: 0 3px 12px rgba(67, 97, 238, 0.15);
+}
+
+.option-btn.selected { border-color: var(--primary); background: var(--primary-light); }
+.option-btn.correct {
+  border-color: var(--success);
+  background: var(--success-light);
+  animation: correctPulse 0.4s ease;
+}
+.option-btn.wrong {
+  border-color: var(--danger);
+  background: var(--danger-light);
+  animation: wrongShake 0.4s ease;
+}
+.option-btn.disabled { cursor: default; opacity: 0.85; }
+
+@keyframes correctPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+@keyframes wrongShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* Input per risposte aperte/numeriche */
+.answer-input-container { margin-top: 10px; }
+
+.answer-input {
+  width: 100%;
+  padding: 14px 18px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1em;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.answer-input:focus { border-color: var(--primary); }
+
+.submit-answer-btn {
+  margin-top: 12px;
+}
+
+/* Feedback */
+.feedback-box {
+  display: none;
+  border-radius: 14px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  animation: slideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.feedback-correct {
+  background: var(--success-light);
+  border-left: 5px solid var(--success);
+}
+
+.feedback-wrong {
+  background: var(--danger-light);
+  border-left: 5px solid var(--danger);
+}
+
+.feedback-title {
+  font-weight: 700;
+  font-size: 1.1em;
+  margin-bottom: 8px;
+}
+
+.feedback-correct .feedback-title { color: var(--success); }
+.feedback-wrong .feedback-title { color: var(--danger); }
+
+.feedback-text { margin-bottom: 10px; line-height: 1.7; }
+
+/* Approfondimento */
+.deepdive-box {
+  display: none;
+  background: #fff8e1;
+  border-left: 5px solid var(--warning);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  animation: slideIn 0.4s ease;
+}
+
+.deepdive-title {
+  font-weight: 700;
+  color: #e65100;
+  margin-bottom: 8px;
+}
+
+.deepdive-text { line-height: 1.7; }
+
+.next-btn-container {
+  text-align: center;
+  margin: 16px 0;
+}
+
+/* ============================================
+   SCHERMATA RIEPILOGO
+   ============================================ */
+#summary-screen {
+  display: none;
+  margin-top: 20px;
+}
+
+.summary-card {
+  background: var(--white);
+  border-radius: 20px;
+  padding: 34px;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 16px;
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.summary-card h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: var(--dark);
+}
+
+.big-score {
+  text-align: center;
+  font-size: 3em;
+  font-weight: 800;
+  margin: 10px 0;
+}
+
+.big-score.good { color: var(--success); }
+.big-score.medium { color: var(--warning); }
+.big-score.bad { color: var(--danger); }
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.stat-box {
+  background: var(--light);
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.stat-number { font-size: 1.8em; font-weight: 700; }
+.stat-label { font-size: 0.85em; color: var(--gray); }
+
+.topic-results { margin: 20px 0; }
+
+.topic-result-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.topic-result-item.weak { background: var(--danger-light); }
+.topic-result-item.strong { background: var(--success-light); }
+.topic-result-item.medium-res { background: #fff3cd; }
+
+.topic-bar {
+  width: 100px;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.topic-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.suggestions {
+  background: var(--primary-light);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-top: 15px;
+}
+
+.suggestions h3 { color: var(--primary); margin-bottom: 8px; }
+.suggestions ul { padding-left: 20px; }
+.suggestions li { margin-bottom: 5px; }
+
+.history-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  font-size: 0.9em;
+}
+
+.history-item .correct-mark { color: var(--success); font-weight: 700; }
+.history-item .wrong-mark { color: var(--danger); font-weight: 700; }
+
+/* ============================================
+   SEZIONE APPUNTI
+   ============================================ */
+.notes-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.notes-nav button {
+  padding: 6px 14px;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  background: var(--light);
+  font-size: 0.85em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.notes-nav button:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.note-section {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.note-title {
+  padding: 14px 18px;
+  margin: 0;
+  cursor: pointer;
+  background: var(--light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s;
+  user-select: none;
+}
+
+.note-title:hover { background: var(--primary-light); }
+
+.note-toggle { font-size: 0.8em; color: var(--gray); transition: transform 0.3s; }
+
+.note-body {
+  padding: 18px 20px;
+  line-height: 1.8;
+  display: none;
+}
+
+.note-body.open { display: block; }
+
+.note-body h4 {
+  margin: 14px 0 8px;
+  color: var(--primary);
+}
+
+.note-body ul, .note-body ol {
+  padding-left: 22px;
+  margin: 8px 0;
+}
+
+.note-body li { margin-bottom: 4px; }
+
+.formula-box {
+  background: linear-gradient(135deg, #e8ecff, #f0e6ff);
+  border-left: 4px solid var(--primary);
+  padding: 14px 18px;
+  margin: 12px 0;
+  font-size: 1.15em;
+  font-weight: 600;
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  border-radius: 0 8px 8px 0;
+}
+
+.note-tip {
+  background: #fff8e1;
+  border-left: 4px solid var(--warning);
+  padding: 10px 14px;
+  margin: 12px 0;
+  border-radius: 0 8px 8px 0;
+  font-size: 0.95em;
+}
+
+/* Passaggi dimostrazione */
+.demo-step {
+  background: var(--light);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 12px 0;
+  border-left: 4px solid var(--primary);
+  position: relative;
+}
+
+.demo-step .step-num {
+  display: inline-block;
+  background: var(--primary);
+  color: var(--white);
+  font-weight: 700;
+  font-size: 0.8em;
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-right: 8px;
+}
+
+.demo-step .step-label {
+  font-weight: 600;
+  color: var(--dark);
+}
+
+.demo-step p { margin-top: 8px; }
+.demo-step ul { margin-top: 6px; padding-left: 20px; }
+.demo-step li { margin-bottom: 3px; }
+
+/* Infografiche */
+.infographic {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  border: 2px solid #e0e7ff;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 18px;
+  text-align: center;
+  overflow-x: auto;
+}
+
+.infographic svg {
+  max-width: 100%;
+  height: auto;
+}
+
+.info-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0;
+  margin: 10px 0;
+}
+
+.info-block {
+  background: var(--white);
+  border: 2px solid var(--primary);
+  border-radius: 10px;
+  padding: 10px 16px;
+  min-width: 110px;
+  text-align: center;
+  position: relative;
+}
+
+.info-block.highlight {
+  background: linear-gradient(135deg, #e8ecff, #f0e6ff);
+  border-color: #7c3aed;
+}
+
+.info-block.result {
+  background: linear-gradient(135deg, #d4edda, #c3e6cb);
+  border-color: var(--success);
+}
+
+.info-block .ib-title {
+  font-size: 0.75em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gray);
+  margin-bottom: 4px;
+}
+
+.info-block .ib-formula {
+  font-size: 1.1em;
+  font-weight: 700;
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  color: var(--dark);
+}
+
+.info-block .ib-note {
+  font-size: 0.78em;
+  color: var(--gray);
+  margin-top: 3px;
+}
+
+.info-arrow {
+  font-size: 1.5em;
+  color: var(--primary);
+  padding: 0 6px;
+  font-weight: 700;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.info-card {
+  background: var(--white);
+  border-radius: 10px;
+  padding: 12px;
+  border-left: 4px solid var(--primary);
+  text-align: left;
+}
+
+.info-card.green { border-left-color: var(--success); }
+.info-card.red { border-left-color: var(--danger); }
+.info-card.purple { border-left-color: #7c3aed; }
+.info-card.orange { border-left-color: #ff6a00; }
+
+.info-card .ic-title {
+  font-size: 0.8em;
+  font-weight: 700;
+  color: var(--gray);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-card .ic-content {
+  font-size: 0.95em;
+  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.info-card .ic-formula {
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  font-weight: 700;
+  font-size: 1.05em;
+}
+
+.info-visual {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+
+.info-visual-item {
+  text-align: center;
+}
+
+.info-visual-item .iv-icon {
+  font-size: 2.5em;
+  line-height: 1.2;
+}
+
+.info-visual-item .iv-label {
+  font-size: 0.82em;
+  color: var(--gray);
+  margin-top: 2px;
+}
+
+.info-step-flow {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.info-step-box {
+  background: var(--white);
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 10px 14px;
+  min-width: 100px;
+  max-width: 160px;
+  text-align: center;
+  font-size: 0.88em;
+  line-height: 1.4;
+}
+
+.info-step-box.active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.info-step-box .isb-num {
+  display: inline-block;
+  background: var(--primary);
+  color: var(--white);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 0.8em;
+  font-weight: 700;
+  line-height: 22px;
+  margin-bottom: 4px;
+}
+
+.info-step-box .isb-formula {
+  font-family: 'Cambria Math', 'Times New Roman', serif;
+  font-weight: 700;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 600px) {
+  .container { padding: 10px; }
+  #start-screen { padding: 20px; }
+  .question-card { padding: 20px; }
+  .quiz-header { padding: 12px 16px; }
+  #start-screen h1 { font-size: 1.5em; }
+  .prof-svg-container { width: 160px; height: 160px; }
+  .prof-bubble { font-size: 0.95em; padding: 14px 18px; }
+  .info-step-flow { gap: 4px; }
+  .info-arrow { font-size: 1em; padding: 0 2px; }
+  .info-step-box { min-width: 70px; max-width: 110px; font-size: 0.78em; padding: 6px 8px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ============================================
+       SCHERMATA INIZIALE
+       ============================================ -->
+  <div id="start-screen">
+    <div class="prof-header-container" id="prof-header-svg"></div>
+    <h1>Quiz di <span>Storia</span></h1>
+    <p class="subtitle">Massoneria, moti anni '20 e '30, Risorgimento, 1848 europeo — Liceo Scientifico</p>
+    <div class="prof-welcome">Prof. Paludetto dice: "Vediamo se sai orientarti nell'Ottocento."</div>
+
+    <!-- SEZIONE 1: TEST E PREPARAZIONE -->
+    <div class="menu-section">
+      <div class="menu-section-title"><span class="section-icon test"></span> Test e Preparazione</div>
+
+      <h3 style="margin-bottom:10px; text-align:left; font-size:0.95em;">Filtra per argomento:</h3>
+      <div class="topic-grid" id="topic-filters"></div>
+
+      <div class="mode-buttons">
+        <button class="btn btn-primary" onclick="startQuiz('all')">Test completo</button>
+        <button class="btn btn-warning" onclick="startQuiz('random')">Modalita casuale</button>
+        <button class="btn btn-danger" onclick="startQuiz('errors')" id="btn-errors" style="display:none;">Ripassa gli errori</button>
+        <button class="btn btn-ultra" onclick="startQuiz('ultra')">Ultra Preparazione</button>
+      </div>
+      <div class="mode-buttons" style="margin-top:10px;">
+        <button class="btn btn-exam" onclick="showExam()">Simulazione Verifica</button>
+        <button class="btn btn-demo" onclick="showDemoExam()">Verifica Dimostrazioni</button>
+      </div>
+    </div>
+
+    <!-- SEZIONE 2: STUDIO -->
+    <div class="menu-section">
+      <div class="menu-section-title"><span class="section-icon study"></span> Studio e Ripasso</div>
+      <div class="mode-buttons">
+        <button class="btn btn-outline" style="border-color:var(--success);color:var(--success);" onclick="showNotes()">Appunti e Teoria</button>
+        <button class="btn btn-outline" style="border-color:#7c3aed;color:#7c3aed;" onclick="showNotes('dimostrazioni')">Dimostrazioni</button>
+      </div>
+    </div>
+
+    <div class="prev-stats" id="prev-stats" style="display:none;">
+      <strong>Sessione precedente:</strong>
+      <span id="prev-stats-text"></span>
+      <br><button class="btn btn-outline" style="margin-top:8px; padding:6px 16px; font-size:0.85em;" onclick="clearProgress()">Cancella progressi</button>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA QUIZ
+       ============================================ -->
+  <div id="quiz-screen">
+    <div class="quiz-header">
+      <div class="progress-info">
+        Domanda <span id="current-q">1</span> di <span id="total-q">0</span>
+      </div>
+      <div class="score-display">
+        <span class="score-correct">Corrette: <span id="score-correct">0</span></span>
+        <span class="score-wrong">Errate: <span id="score-wrong">0</span></span>
+      </div>
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill" id="progress-bar" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="question-card" id="question-card">
+      <div class="question-meta" id="question-meta"></div>
+      <div class="question-text" id="question-text"></div>
+      <div id="answer-area"></div>
+      <div class="submit-answer-btn" id="submit-area" style="display:none;">
+        <button class="btn btn-primary" onclick="checkOpenAnswer()">Verifica risposta</button>
+      </div>
+    </div>
+
+    <!-- Prof. Paludetto — Cartoon -->
+    <div class="prof-container" id="prof-container">
+      <div class="prof-svg-container">
+        <div class="prof-svg-correct" id="prof-svg-happy"></div>
+        <div class="prof-svg-wrong" id="prof-svg-angry"></div>
+      </div>
+      <div class="prof-bubble">
+        <div class="prof-name" id="prof-name">Prof. Paludetto</div>
+        <div id="prof-phrase"></div>
+      </div>
+    </div>
+
+    <div class="feedback-box" id="feedback-box">
+      <div class="feedback-title" id="feedback-title"></div>
+      <div class="feedback-text" id="feedback-text"></div>
+    </div>
+
+    <div class="deepdive-box" id="deepdive-box">
+      <div class="deepdive-title">Approfondimento</div>
+      <div class="deepdive-text" id="deepdive-text"></div>
+    </div>
+
+    <div class="next-btn-container" id="next-btn-container" style="display:none;">
+      <button class="btn btn-primary" onclick="nextQuestion()">Prossima domanda</button>
+      <button class="btn btn-outline" style="margin-left:8px;" onclick="endQuiz()">Termina</button>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA RIEPILOGO
+       ============================================ -->
+  <div id="summary-screen">
+    <div class="summary-card">
+      <h2>Riepilogo della Sessione</h2>
+
+      <!-- Prof nel riepilogo -->
+      <div class="prof-container show" id="prof-summary" style="margin-bottom:16px;">
+        <div class="prof-svg-container" id="prof-summary-svg"></div>
+        <div class="prof-bubble">
+          <div class="prof-name" id="prof-summary-name">Prof. Paludetto</div>
+          <div id="prof-summary-phrase"></div>
+        </div>
+      </div>
+
+      <div class="big-score" id="final-score"></div>
+      <p style="text-align:center;color:var(--gray);" id="final-score-label"></p>
+
+      <div class="stats-grid" id="stats-grid"></div>
+
+      <h3 style="margin:20px 0 10px;">Risultati per argomento</h3>
+      <div class="topic-results" id="topic-results"></div>
+
+      <div class="suggestions" id="suggestions"></div>
+
+      <h3 style="margin:20px 0 10px;">Cronologia risposte</h3>
+      <div class="history-list" id="history-list"></div>
+    </div>
+
+    <div style="text-align:center; margin:20px 0 40px;">
+      <button class="btn btn-primary" onclick="location.reload()">Ricomincia</button>
+      <button class="btn btn-danger" style="margin-left:10px;" onclick="startQuiz('errors')">Ripassa gli errori</button>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA SIMULAZIONE VERIFICA
+       ============================================ -->
+  <div id="exam-screen" style="display:none; margin-top:20px;">
+
+    <div class="exam-card">
+      <div class="exam-header">
+        <h2>VERIFICA DI STORIA — MOTI RISORGIMENTALI E 1848</h2>
+        <div class="exam-info">
+          <span>Nome: _______________&nbsp;&nbsp; Cognome: _______________</span>
+          <span>Classe: 4°&nbsp;&nbsp; Data: ___/___/______</span>
+        </div>
+        <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+          <span class="exam-timer" id="exam-timer">Tempo: 50:00</span>
+          <button class="btn btn-outline" style="padding:6px 14px; font-size:0.85em;" onclick="hideExam()">Torna al menu</button>
+        </div>
+      </div>
+
+      <!-- PARTE 1: Scelta multipla (10 domande, 5 opzioni A-E) -->
+      <div class="exam-section-title">PARTE 1 — Domande a risposta multipla (10 domande)</div>
+      <div id="exam-mc-questions"></div>
+
+      <!-- PARTE 2: Domande aperte / dimostrative (3 domande) -->
+      <div class="exam-section-title">PARTE 2 — Domande aperte e dimostrazioni (3 domande)</div>
+      <div id="exam-open-questions"></div>
+
+      <div style="text-align:center; margin-top:24px;">
+        <button class="btn btn-primary" onclick="submitExam()" id="exam-submit-btn" style="padding:14px 40px; font-size:1.05em;">Consegna Verifica</button>
+      </div>
+
+      <div class="exam-result-bar" id="exam-result" style="display:none;">
+        <p style="font-size:1.1em; margin-bottom:8px;">Risultato della verifica:</p>
+        <div class="exam-grade" id="exam-grade"></div>
+        <p id="exam-grade-detail" style="color:var(--gray);margin-top:6px;"></p>
+        <div style="margin-top:16px;">
+          <button class="btn btn-primary" onclick="resetExam()">Ripeti la verifica</button>
+          <button class="btn btn-outline" style="margin-left:8px;" onclick="hideExam()">Torna al menu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA VERIFICA DIMOSTRAZIONI
+       ============================================ -->
+  <div id="demo-exam-screen" style="display:none; margin-top:20px;">
+    <div class="exam-card">
+      <div class="exam-header" style="border-bottom-color:#7c3aed;">
+        <h2 style="color:#7c3aed;">VERIFICHE APERTE — STORIA</h2>
+        <p style="font-size:0.9em; color:var(--gray); margin-top:4px;">Riproduci ogni dimostrazione passo per passo, come se fosse un compito in classe.</p>
+        <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+          <span class="exam-timer" id="demo-exam-timer">Tempo: 40:00</span>
+          <button class="btn btn-outline" style="padding:6px 14px; font-size:0.85em;" onclick="hideDemoExam()">Torna al menu</button>
+        </div>
+      </div>
+
+      <div id="demo-exam-questions"></div>
+
+      <div style="text-align:center; margin-top:24px;">
+        <button class="btn btn-demo" onclick="submitDemoExam()" id="demo-exam-submit-btn" style="padding:14px 40px; font-size:1.05em;">Consegna Verifica</button>
+      </div>
+
+      <div class="exam-result-bar" id="demo-exam-result" style="display:none;">
+        <p style="font-size:1.1em; margin-bottom:8px;">Verifica consegnata!</p>
+        <p id="demo-exam-grade-detail" style="color:var(--gray);"></p>
+        <div style="margin-top:16px;">
+          <button class="btn btn-demo" onclick="resetDemoExam()">Ripeti la verifica</button>
+          <button class="btn btn-outline" style="margin-left:8px;" onclick="hideDemoExam()">Torna al menu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SCHERMATA APPUNTI
+       ============================================ -->
+  <div id="notes-screen" style="display:none; margin-top:20px;">
+    <div class="summary-card">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:20px;">
+        <h2 style="margin:0;">Appunti di Storia</h2>
+        <button class="btn btn-outline" onclick="hideNotes()" style="padding:8px 18px; font-size:0.9em;">Torna al menu</button>
+      </div>
+
+      <!-- Navigazione argomenti -->
+      <div class="notes-nav" id="notes-nav"></div>
+
+      <!-- Contenuto argomenti -->
+      <div id="notes-content">
+
+        <div class="note-section" id="note-massoneria">
+          <h3 class="note-title" onclick="toggleNote('massoneria')">1. Massoneria e societ&agrave; segrete <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-massoneria">
+            <p>Le <strong>societ&agrave; segrete</strong> erano il principale strumento di lotta politica quando il dissenso era vietato: libere associazioni che perseguono uno scopo comune attraverso la clandestinit&agrave;.</p>
+            <div class="info-grid" style="margin-top:10px;">
+              <div class="info-card"><div class="ic-title">1717</div><div class="ic-content">Grande Loggia di Londra — fissate le caratteristiche della Massoneria</div></div>
+              <div class="info-card green"><div class="ic-title">1723</div><div class="ic-content">Libro delle Costituzioni — base teorica; Dio = Grande Architetto dell'Universo</div></div>
+              <div class="info-card orange"><div class="ic-title">Carboneria</div><div class="ic-content">Obiettivo: costituzione <em>liberale</em></div></div>
+              <div class="info-card purple"><div class="ic-title">Comuneros, Adelfi, Filadelfi</div><div class="ic-content">Obiettivo: costituzione <em>democratica</em></div></div>
+            </div>
+            <div class="note-tip">La Chiesa cattolica condann&ograve; costantemente la Massoneria.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-buonarroti">
+          <h3 class="note-title" onclick="toggleNote('buonarroti')">2. Buonarroti e insurrezioni <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-buonarroti">
+            <p><strong>Filippo Buonarroti</strong> (1761): discepolo di Babeuf, partecip&ograve; alla Congiura degli Eguali. Teorizzava una rivoluzione <em>sociale</em> oltre che politica: il <strong>comunismo agrario</strong> (confisca terre dallo Stato, assegnate ai contadini). Insuccesso.</p>
+            <p style="margin-top:8px;"><strong>Limite delle societ&agrave; segrete progressiste</strong>: la segretezza dei programmi e degli iscritti imped&igrave; il coinvolgimento delle classi popolari &rarr; fallimento delle insurrezioni.</p>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-opposizione">
+          <h3 class="note-title" onclick="toggleNote('opposizione')">3. Opposizione intellettuale <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-opposizione">
+            <ul>
+              <li><strong>1816</strong>: gli Austriaci promuovono la rivista &laquo;Biblioteca italiana&raquo; (posizione tradizionalista)</li>
+              <li><strong>Settembre 1818</strong>: intellettuali milanesi (tra cui Giovanni Berchet) fondano &laquo;<strong>Il Conciliatore</strong>&raquo;</li>
+              <li>Obiettivo: formare un'opinione pubblica moderata, borghese e liberale</li>
+              <li><strong>Ottobre 1819</strong>: chiusa per pressioni della polizia</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-moti-20">
+          <h3 class="note-title" onclick="toggleNote('moti-20')">4. Moti degli anni '20 <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-moti-20">
+            <div class="info-grid">
+              <div class="info-card"><div class="ic-title">Spagna (gen. 1820)</div><div class="ic-content">Truppe a Cadice si ribellano; Ferdinando VII ripristina Costituzione di Cadice 1812</div></div>
+              <div class="info-card green"><div class="ic-title">Portogallo</div><div class="ic-content">Giovanni VI concede Costituzione simile a quella spagnola</div></div>
+              <div class="info-card orange"><div class="ic-title">Regno due Sicilie (lug. 1820)</div><div class="ic-content">Nola (Avellino): Ferdinando I riconosce Costituzione di Cadice</div></div>
+              <div class="info-card purple"><div class="ic-title">Piemonte (1821)</div><div class="ic-content">Guarnigione di Alessandria sotto Santorre di Santarosa; Vittorio Emanuele I abdica a Carlo Felice</div></div>
+            </div>
+            <p style="margin-top:10px;"><strong>Carlo Alberto</strong>: comportamento contraddittorio (soprannome &laquo;re tentenna&raquo;): prima favorevole ai ribelli, poi si schiera col re; concede la Costituzione di Cadice come reggente.</p>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-restaurazione">
+          <h3 class="note-title" onclick="toggleNote('restaurazione')">5. La Restaurazione risponde — Congressi <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-restaurazione">
+            <div class="formula-box">Troppau 1820 &rarr; Lubiana 1821 &rarr; Verona 1822</div>
+            <p>Metternich applica il <strong>principio di intervento</strong> della Santa Alleanza.</p>
+            <ul>
+              <li>Napoli: truppe austriache entrano il 23 marzo 1821</li>
+              <li>Piemonte: Carlo Felice + Austriaci sconfiggono Santarosa (8 aprile 1821)</li>
+              <li>Spagna: esercito francese conquista Trocadero (agosto 1823)</li>
+              <li>Portogallo: repressione dei conservatori locali (1824)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-grecia-gb">
+          <h3 class="note-title" onclick="toggleNote('grecia-gb')">6. Grecia e Gran Bretagna <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-grecia-gb">
+            <p><strong>Grecia</strong> (sotto dominio ottomano): la borghesia commerciale fonda l'<strong>Eteria</strong>. Marzo 1821: rivolta. 1823: Congresso di Epidauro, indipendenza proclamata. Russia, Inghilterra, Francia la difendono. <strong>1829</strong>: Pace di Adrianopoli sancisce l'indipendenza. <strong>1832</strong>: corona a Ottone I di Baviera.</p>
+            <p style="margin-top:8px;"><strong>Gran Bretagna</strong>: risponde con riforme (non repressione): sindacati operai, riforma elettorale (1832), ma la &laquo;Carta del popolo&raquo; (suffragio universale) viene respinta dal Parlamento.</p>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-moti-30-fr">
+          <h3 class="note-title" onclick="toggleNote('moti-30-fr')">7. Moti anni '30: Francia <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-moti-30-fr">
+            <p><strong>Carlo X</strong> tenta di restaurare l'assolutismo. Il 25 luglio 1830 emana 4 ordinanze (scioglie Camera, censura stampa, restringe voto, indice elezioni). I parigini insorgono (<strong>&laquo;Tre giornate gloriose&raquo;</strong> 27-29 luglio 1830). La corona passa a <strong>Luigi Filippo d'Orleans</strong> (&laquo;re borghese&raquo;), nuova Costituzione pi&ugrave; liberale.</p>
+            <p style="margin-top:8px;"><strong>1848</strong>: governo Guizot aumenta tasse &rarr; &laquo;campagna dei banchetti&raquo; (vietata il 22/2/1848) &rarr; insurrezione, proclamazione della Repubblica, governo provvisorio. 10 dicembre 1848: eletto presidente <strong>Carlo Luigi Napoleone Bonaparte</strong>, poi imperatore nel 1852.</p>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-moti-30-eu">
+          <h3 class="note-title" onclick="toggleNote('moti-30-eu')">8. Moti anni '30: Europa e Italia <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-moti-30-eu">
+            <div class="info-grid">
+              <div class="info-card"><div class="ic-title">Belgio</div><div class="ic-content">25 ago. 1830: insurrezione di Bruxelles. Conferenza di Londra: riconosciuto <strong>Regno del Belgio</strong>. Corona a Leopoldo di Sassonia-Coburgo</div></div>
+              <div class="info-card green"><div class="ic-title">Polonia</div><div class="ic-content">29 nov. 1830: rivolta a Varsavia. Zar Nicola I reprime; regime pi&ugrave; rigido</div></div>
+              <div class="info-card orange"><div class="ic-title">Italia centrale (1831)</div><div class="ic-content">Congiura estense; Francesco IV d'Este fugge. Rivolta in Emilia, Marche, Stato Pontificio. A Bologna: Governo Provvisorio delle Province Unite</div></div>
+            </div>
+            <div class="note-tip">Francia proclama il <strong>principio di non intervento</strong>: nessuna ingerenza straniera negli affari interni di uno Stato.</div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-risorgimento">
+          <h3 class="note-title" onclick="toggleNote('risorgimento')">9. Dibattito Risorgimentale <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-risorgimento">
+            <p>Il <strong>Risorgimento</strong> = processo di formazione dell'idea di unit&agrave; nazionale italiana. Due schieramenti:</p>
+            <div class="info-grid" style="margin-top:10px;">
+              <div class="info-card"><div class="ic-title">Moderati (dx risorgimentale)</div><div class="ic-content">Coinvolgimento dei sovrani come garanzia del successo</div></div>
+              <div class="info-card purple"><div class="ic-title">Democratici (sx risorgimentale)</div><div class="ic-content">Sovrani inaffidabili; puntare sul popolo &rarr; stato: <strong>repubblica</strong></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-mazzini-cattaneo">
+          <h3 class="note-title" onclick="toggleNote('mazzini-cattaneo')">10. Mazzini e Cattaneo <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-mazzini-cattaneo">
+            <p><strong>Mazzini</strong>: 1831 fonda la <strong>Giovine Italia</strong>. Critica la Carboneria per la segretezza. &laquo;Dio e Popolo&raquo;: individui e popoli chiamati da Dio alla loro missione storica. &laquo;Pensiero e Azione&raquo;: teoria + pratica inseparabili. Si unisce anche <strong>Garibaldi</strong>.</p>
+            <p style="margin-top:8px;"><strong>Cattaneo</strong>: <strong>repubblica federale</strong> (modelli: USA e Svizzera). Metodo: riforme politiche ed economiche. Italia federale avrebbe fatto parte degli Stati Uniti d'Europa.</p>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-gioberti-balbo">
+          <h3 class="note-title" onclick="toggleNote('gioberti-balbo')">11. Gioberti, Balbo e Cavour <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-gioberti-balbo">
+            <p><strong>Gioberti</strong> (Neoguelfismo): confederazione degli Stati italiani <strong>presieduta dal papa</strong>.</p>
+            <p style="margin-top:6px;"><strong>Balbo</strong> (moderatismo filosabaudo): forza militare = <strong>Regno di Sardegna</strong>; Austria spostata verso i Balcani diplomaticamente.</p>
+            <p style="margin-top:6px;"><strong>Cavour</strong>: esponente pi&ugrave; significativo dei filosabaudi; indic&ograve; la via per l'unit&agrave; d'Italia.</p>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-1848">
+          <h3 class="note-title" onclick="toggleNote('1848')">12. 1848 Europeo <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-1848">
+            <p><strong>Crisi anni '40</strong>: paese pi&ugrave; colpito = Irlanda (epidemia patate 1845). Protesta proletariato, richiesta voto, rivendicazioni nazionali.</p>
+            <p style="margin-top:6px;"><strong>Impero Asburgico</strong>: 13 marzo 1848 rivolta a Vienna; Ferdinando I concede Assemblea Costituente. Budapest, Praga repressa (giugno), poi Vienna (ottobre). Dicembre: Ferdinando I abdica &rarr; <strong>Francesco Giuseppe</strong>.</p>
+            <p style="margin-top:6px;"><strong>Francia</strong>: campagna banchetti vietata 22/2/1848 &rarr; Repubblica. 10/12/1848: eletto Carlo Luigi Napoleone. 1852: si proclama imperatore.</p>
+          </div>
+        </div>
+
+        <div class="note-section" id="note-dim-mazzini">
+          <h3 class="note-title" onclick="toggleNote('dim-mazzini')">ANALISI: Il pensiero di Mazzini <span class="note-toggle">▼</span></h3>
+          <div class="note-body" id="body-dim-mazzini">
+            <div class="demo-step"><span class="step-num">1</span><span class="step-label">Giovine Italia (1831)</span><p>Nuova organizzazione fondata per superare il limite della Carboneria: segretezza &rarr; impossibilit&agrave; di coinvolgere il popolo.</p></div>
+            <div class="demo-step"><span class="step-num">2</span><span class="step-label">Dio e Popolo</span><p>Dio si identifica con lo spirito della Storia. Individui (doveri personali) e popoli (missione storica) sono chiamati a contribuire al bene dell'umanit&agrave;.</p></div>
+            <div class="demo-step"><span class="step-num">3</span><span class="step-label">Missione dell'Italia</span><p>Abbattere i pilastri del sistema: l'Impero asburgico e lo Stato Pontificio.</p></div>
+            <div class="demo-step"><span class="step-num">4</span><span class="step-label">Pensiero e Azione</span><p>Teoria e pratica inseparabili. Limite: fallimento delle insurrezioni mazziniane.</p></div>
+          </div>
+        </div>
+
+      </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================
+   BANCA DATI DOMANDE
+   Ogni domanda ha: text, type, options (se multipla),
+   answer, explanation, commonError, deepdive,
+   difficulty (1-3), topic
+   ============================================ */
+
+const QUESTIONS = [
+
+  // MASSONERIA E SOCIETA' SEGRETE
+  {
+    text: "Cosa sono le societa' segrete?",
+    type: "multiple",
+    options: ["Organizzazioni statali per il controllo dell'ordine pubblico","Associazioni religiose riconosciute dalla Chiesa","Libere associazioni che perseguono uno scopo comune attraverso la clandestinita'","Organizzazioni militari delle monarchie europee"],
+    answer: 2,
+    explanation: "Le societa' segrete sono libere associazioni che fanno della clandestinita' la condizione necessaria e permanente per il raggiungimento del loro fine.",
+    commonError: "Non confondere con associazioni legali o religiose.",
+    deepdive: "Il dissenso politico era vietato, quindi la clandestinita' era l'unica forma possibile di opposizione organizzata.",
+    difficulty: 1, topic: "Massoneria e societa' segrete"
+  },
+  {
+    text: "In quale anno fu costituita la Grande Loggia di Londra?",
+    type: "multiple",
+    options: ["1717","1723","1799","1815"],
+    answer: 0,
+    explanation: "1717: costituzione della Grande Loggia di Londra, dove furono fissate le caratteristiche della Massoneria moderna.",
+    commonError: "Non confondere con il 1723 (Libro delle Costituzioni).",
+    deepdive: "La Grande Loggia di Londra trasformo' le logge artigiane medievali in un'organizzazione politico-filosofica.",
+    difficulty: 1, topic: "Massoneria e societa' segrete"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Il Libro delle Costituzioni del 1723 introduce il concetto di Dio come 'Grande Architetto dell'Universo', un Dio che non interviene nelle faccende umane.",
+    answer: true,
+    explanation: "Esatto. Il capitolo sulla religione nel Libro delle Costituzioni propone il deismo: Dio come Architetto dell'Universo, senza Provvidenza.",
+    commonError: "Non confondere con la visione cristiana della Provvidenza, che la Massoneria esclude.",
+    deepdive: "Questo deismo massonico era incompatibile con il cattolicesimo, da cui la costante condanna della Chiesa.",
+    difficulty: 2, topic: "Massoneria e societa' segrete"
+  },
+  {
+    text: "Qual era l'obiettivo principale della Carboneria?",
+    type: "multiple",
+    options: ["Instaurare la monarchia assoluta","Abolire la proprieta' privata","Ottenere l'indipendenza delle colonie","Ottenere una costituzione liberale"],
+    answer: 3,
+    explanation: "La Carboneria, la piu' nota societa' segreta, aveva come obiettivo l'ottenimento di una costituzione liberale.",
+    commonError: "Attenzione: liberale (non democratica). Le societa' democratiche erano Comuneros, Adelfi e Filadelfi.",
+    deepdive: "La differenza tra liberale e democratica e' fondamentale: la prima voleva limitare il potere del sovrano, la seconda voleva la sovranita' popolare.",
+    difficulty: 2, topic: "Massoneria e societa' segrete"
+  },
+  {
+    text: "Quale atteggiamento ebbe la Chiesa cattolica verso la Massoneria?",
+    type: "multiple",
+    options: ["Di pieno appoggio","Di costante condanna","Di indifferenza","Di collaborazione sul tema religioso"],
+    answer: 1,
+    explanation: "La Chiesa cattolica condanno' costantemente la Massoneria, incompatibile con il cattolicesimo per il suo deismo e la sua segretezza.",
+    commonError: "La Massoneria cercava di conciliare i culti, ma questo non implico' mai l'approvazione cattolica.",
+    deepdive: "Le prime condanne papali della Massoneria risalgono al 1738 con Clemente XII.",
+    difficulty: 1, topic: "Massoneria e societa' segrete"
+  },
+  {
+    text: "Quali organizzazioni avevano come obiettivo una costituzione democratica (non liberale)?",
+    type: "multiple",
+    options: ["La Massoneria e la Carboneria","La Grande Loggia e la Carboneria","Comuneros, Adelfi e Filadelfi","La Giovine Italia e la Carboneria"],
+    answer: 2,
+    explanation: "Comuneros, Adelfi e Filadelfi puntavano a una costituzione democratica, mentre la Carboneria si accontentava di una costituzione liberale.",
+    commonError: "Non confondere democratica (sovranita' popolare, repubblica) con liberale (limiti al potere sovrano, monarchia costituzionale).",
+    deepdive: "Questa distinzione rispecchia il piu' ampio dibattito tra moderati e democratici nel Risorgimento.",
+    difficulty: 2, topic: "Massoneria e societa' segrete"
+  },
+
+  // BUONARROTI E INSURREZIONI
+  {
+    text: "Filippo Buonarroti era discepolo di:",
+    type: "multiple",
+    options: ["Babeuf","Mazzini","Carlo Alberto","Metternich"],
+    answer: 0,
+    explanation: "Buonarroti era discepolo di Babeuf e partecipo' alla Congiura degli Eguali, da cui mutuò l'ideale del comunismo.",
+    commonError: "Non confondere con Mazzini, figura successiva del Risorgimento.",
+    deepdive: "Babeuf teorizzò il primo comunismo moderno: abolizione della proprieta' privata e uguaglianza economica.",
+    difficulty: 1, topic: "Buonarroti e insurrezioni"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Buonarroti teorizzava una rivoluzione non solo politica ma anche sociale, con il comunismo agrario: le terre confiscate dallo Stato venivano assegnate ai contadini.",
+    answer: true,
+    explanation: "Corretto. Per Buonarroti non bastava la liberta' politica: serviva una rivoluzione sociale che instaurasse il comunismo agrario.",
+    commonError: "Non confondere con il semplice liberalismo politico.",
+    deepdive: "Il progetto naufragò: la Congiura degli Eguali (1796) fu scoperta e Babeuf fu giustiziato.",
+    difficulty: 1, topic: "Buonarroti e insurrezioni"
+  },
+  {
+    text: "Qual era il principale limite delle societa' segrete progressiste che le porto' al fallimento?",
+    type: "multiple",
+    options: ["L'eccessiva violenza dei loro metodi","Il sostegno delle classi aristocratiche","L'opposizione della borghesia liberale","La segretezza che impediva il coinvolgimento delle classi popolari"],
+    answer: 3,
+    explanation: "La segretezza dei programmi e degli iscritti rese impossibile il coinvolgimento delle classi popolari, portando al fallimento delle insurrezioni.",
+    commonError: "L'errore strategico non fu la violenza ma la chiusura: senza il popolo, le societa' segrete erano troppo deboli.",
+    deepdive: "Questa critica sara' alla base della svolta di Mazzini, che fondo' la Giovine Italia proprio per superare questo limite.",
+    difficulty: 2, topic: "Buonarroti e insurrezioni"
+  },
+  {
+    text: "La Congiura degli Eguali era legata al nome di:",
+    type: "multiple",
+    options: ["Mazzini","Babeuf","Garibaldi","Gioberti"],
+    answer: 1,
+    explanation: "La Congiura degli Eguali (1796) fu organizzata da Babeuf per instaurare una societa' comunista in Francia dopo la Rivoluzione.",
+    commonError: "Non confondere con Mazzini e la Giovine Italia, successive di decenni.",
+    deepdive: "Babeuf fu arrestato, processato e ghigliottinato nel 1797.",
+    difficulty: 1, topic: "Buonarroti e insurrezioni"
+  },
+  {
+    text: "Il comunismo agrario di Buonarroti prevedeva:",
+    type: "multiple",
+    options: ["La nazionalizzazione delle industrie","Il suffragio universale","La confisca delle terre da parte dello Stato e la loro assegnazione ai contadini","La liberta' di stampa e di associazione"],
+    answer: 2,
+    explanation: "Il comunismo agrario = confisca delle terre dallo Stato e assegnazione ai contadini. Un progetto rimasto senza successo.",
+    commonError: "Non era un programma industriale ma agrario, adatto a societa' prevalentemente rurali.",
+    deepdive: "Il termine 'agrario' indica che il programma si concentrava sulla terra, non sulle fabbriche (che non erano ancora diffuse).",
+    difficulty: 2, topic: "Buonarroti e insurrezioni"
+  },
+
+  // OPPOSIZIONE INTELLETTUALE
+  {
+    text: "La rivista 'Il Conciliatore' fu pubblicata a Milano a partire da:",
+    type: "multiple",
+    options: ["1816","1820","1823","settembre 1818"],
+    answer: 3,
+    explanation: "Il Conciliatore fu pubblicata a Milano a partire da settembre 1818, su iniziativa di intellettuali tra cui Giovanni Berchet.",
+    commonError: "Il 1816 e' l'anno della Biblioteca italiana (rivista austriaca).",
+    deepdive: "Il Conciliatore si occupava di statistica, economia, scienze, letteratura e istruzione.",
+    difficulty: 1, topic: "Opposizione intellettuale"
+  },
+  {
+    text: "Qual era l'obiettivo de 'Il Conciliatore'?",
+    type: "multiple",
+    options: ["Formare un'opinione pubblica moderata, borghese e liberale","Sostenere le posizioni dell'aristocrazia tradizionalista","Propagandare le idee della Giovine Italia","Difendere gli interessi degli Austriaci in Italia"],
+    answer: 0,
+    explanation: "Obiettivo: formare un'opinione pubblica moderata, borghese e liberale — un contraltare alla visione tradizionalista della Biblioteca italiana.",
+    commonError: "La Biblioteca italiana era quella tradizionalista; Il Conciliatore era l'opposto.",
+    deepdive: "La stampa era il principale vettore di formazione dell'opinione pubblica nell'Ottocento pre-rivoluzionario.",
+    difficulty: 1, topic: "Opposizione intellettuale"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "La rivista 'Biblioteca italiana' promossa dagli Austriaci nel 1816 sosteneva posizioni liberali e progressiste.",
+    answer: false,
+    explanation: "Falso. Dopo il fallimento dell'iniziativa originale, la Biblioteca italiana si limito' a sostenere una visione tradizionalista, allineata con gli interessi austriaci.",
+    commonError: "Confondere i due giornali: Biblioteca italiana = tradizionalista/austriaca; Il Conciliatore = liberale/progressista.",
+    deepdive: "Alcuni intellettuali italiani si rifiutarono di contribuire alla Biblioteca italiana, dando poi vita al Conciliatore.",
+    difficulty: 2, topic: "Opposizione intellettuale"
+  },
+  {
+    text: "Perche' 'Il Conciliatore' fu chiuso nell'ottobre 1819?",
+    type: "multiple",
+    options: ["Per mancanza di lettori","Per pressioni della polizia","Per decisione autonoma dei redattori","Perche' aveva raggiunto il suo obiettivo"],
+    answer: 1,
+    explanation: "Il Conciliatore fu chiuso per pressioni della polizia austriaca nell'ottobre 1819, dopo poco piu' di un anno di pubblicazioni.",
+    commonError: "Non fu una scelta volontaria dei redattori ma una coercizione delle autorita'.",
+    deepdive: "La chiusura della rivista dimostro' i limiti dell'opposizione intellettuale aperta sotto il dominio austriaco.",
+    difficulty: 1, topic: "Opposizione intellettuale"
+  },
+
+  // MOTI DEGLI ANNI '20
+  {
+    text: "Dove ebbe inizio la prima ondata rivoluzionaria del 1820?",
+    type: "multiple",
+    options: ["Napoli","Piemonte","Spagna","Portogallo"],
+    answer: 2,
+    explanation: "La prima ondata rivoluzionaria del 1820 scoppio' in Spagna, con le truppe a Cadice che si ribellarono il 1 gennaio 1820.",
+    commonError: "Napoli e Piemonte seguirono poco dopo, ma la scintilla fu spagnola.",
+    deepdive: "Ferdinando VII Borbone aveva cancellato le tracce del periodo napoleonico e tentava di riconquistare le colonie americane.",
+    difficulty: 1, topic: "Moti degli anni '20"
+  },
+  {
+    text: "Quale costituzione fu ripristinata in Spagna nel 1820?",
+    type: "multiple",
+    options: ["Costituzione di Cadice del 1812","Costituzione di Vienna del 1815","Carta costituzionale del 1814","Costituzione di Madrid del 1820"],
+    answer: 0,
+    explanation: "Ferdinando VII fu costretto a ripristinare la Costituzione liberale di Cadice del 1812.",
+    commonError: "La Costituzione di Cadice era gia' esistente, non fu creata nel 1820.",
+    deepdive: "La Costituzione di Cadice del 1812 era una delle piu' liberali del suo tempo: sovranita' nazionale, unicameralismo, suffragio maschile.",
+    difficulty: 1, topic: "Moti degli anni '20"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "La rivolta siciliana del 1820 ottenne la separazione dell'isola dal Regno di Napoli.",
+    answer: false,
+    explanation: "Falso. La rivolta siciliana, che rivendicava la separazione, fu repressa dall'esercito inviato da Napoli.",
+    commonError: "Solo nel sud (Nola) fu ottenuta la costituzione; la Sicilia fu repressa.",
+    deepdive: "L'obiettivo siciliano era l'autonomia dall'Italia meridionale, non l'indipendenza nazionale.",
+    difficulty: 2, topic: "Moti degli anni '20"
+  },
+  {
+    text: "La guarnigione di quale citta' si ribello' in Piemonte nel 1821, dando il via alla rivolta?",
+    type: "multiple",
+    options: ["Torino","Genova","Cuneo","Alessandria"],
+    answer: 3,
+    explanation: "La guarnigione di Alessandria si ribello' sotto la guida di Santorre di Santarosa.",
+    commonError: "Non fu Torino (sede del re) ma Alessandria, citta' di guarnigione.",
+    deepdive: "La scelta di una guarnigione militare come punto di partenza era tipica delle rivolte del periodo: i militari erano spesso simpatizzanti liberali.",
+    difficulty: 2, topic: "Moti degli anni '20"
+  },
+  {
+    text: "Perche' Carlo Alberto fu soprannominato 're tentenna'?",
+    type: "multiple",
+    options: ["Per la sua salute cagionevole","Per il comportamento contraddittorio durante i moti del 1821: prima favorevole ai ribelli poi si schiero' col re","Perche' non riusci' mai a salire al trono","Per la sua incapacita' militare nella campagna contro l'Austria"],
+    answer: 1,
+    explanation: "Carlo Alberto prima incoraggi' i ribelli (8 marzo), poi dichiaro' fedelta' al re (10 marzo), poi come reggente concesse la costituzione, poi si unì alle forze repressive. Da qui 're tentenna'.",
+    commonError: "Il soprannome non riguarda le sue capacita' fisiche o militari ma il suo comportamento politico ondivago.",
+    deepdive: "Il voltafaccia di Carlo Alberto ebbe conseguenze durature: nel 1848 dovette riscattarsi dichiarando guerra all'Austria.",
+    difficulty: 2, topic: "Moti degli anni '20"
+  },
+  {
+    text: "Chi guido' la rivolta piemontese del 1821?",
+    type: "multiple",
+    options: ["Carlo Alberto","Vittorio Emanuele I","Santorre di Santarosa","Carlo Felice"],
+    answer: 2,
+    explanation: "La guarnigione di Alessandria si ribello' sotto la guida di Santorre di Santarosa.",
+    commonError: "Carlo Alberto era il reggente e mostro' simpatie ma non guido' la rivolta.",
+    deepdive: "Santarosa fuggi' poi all'estero e mori' nel 1825 combattendo per l'indipendenza greca.",
+    difficulty: 1, topic: "Moti degli anni '20"
+  },
+  {
+    text: "La rivolta del 1 luglio 1820 nel Regno delle due Sicilie scoppio' a:",
+    type: "multiple",
+    options: ["Nola (presso Avellino) e obbligò Ferdinando I a riconoscere la Costituzione di Cadice","Palermo e porto' alla separazione della Sicilia","Napoli direttamente e rovescio' il re","Catanzaro e rivendicava l'unita' d'Italia"],
+    answer: 0,
+    explanation: "La rivolta scoppio' a Nola (presso Avellino) e obbligò Ferdinando I a riconoscere la Costituzione di Cadice.",
+    commonError: "La Sicilia fu un moto separato, con obiettivi diversi, che fu represso.",
+    deepdive: "Il moto fu organizzato dalla Carboneria che aveva grande diffusione nell'Italia meridionale.",
+    difficulty: 2, topic: "Moti degli anni '20"
+  },
+
+  // LA RESTAURAZIONE RISPONDE
+  {
+    text: "Quanti congressi convocò l'Europa della Restaurazione per rispondere ai moti rivoluzionari?",
+    type: "multiple",
+    options: ["1","2","5","3"],
+    answer: 3,
+    explanation: "Tre congressi: Troppau (1820), Lubiana (1821) e Verona (1822).",
+    commonError: "Non confondere con i quattro congressi del Congresso di Vienna.",
+    deepdive: "I tre congressi erano convocati dalla Santa Alleanza per coordinare la risposta repressiva.",
+    difficulty: 1, topic: "La Restaurazione risponde"
+  },
+  {
+    text: "Qual era l'ordine cronologico dei congressi della Restaurazione in risposta ai moti?",
+    type: "multiple",
+    options: ["Lubiana, Troppau, Verona","Troppau (1820), Lubiana (1821), Verona (1822)","Verona, Troppau, Lubiana","Troppau, Verona, Lubiana"],
+    answer: 1,
+    explanation: "L'ordine corretto e': Troppau 1820, Lubiana 1821, Verona 1822.",
+    commonError: "Ricordare l'ordine: T-L-V (1820-1821-1822).",
+    deepdive: "Ogni congresso rispondeva a crisi specifiche: Troppau ai moti italiani e spagnoli, Verona alla Spagna.",
+    difficulty: 2, topic: "La Restaurazione risponde"
+  },
+  {
+    text: "Secondo Metternich, per rispondere alle rivolte bisognava applicare:",
+    type: "multiple",
+    options: ["Il principio di neutralita'","Il principio di autodeterminazione dei popoli","Il principio di intervento sancito dalla Santa Alleanza","Il principio di non ingerenza"],
+    answer: 2,
+    explanation: "Metternich sosteneva il principio di intervento: le grandi potenze avevano il diritto-dovere di intervenire militarmente per reprimere le rivolte.",
+    commonError: "Il principio di non intervento fu proclamato dalla Francia nel 1830 in occasione del Belgio: e' l'opposto.",
+    deepdive: "Il principio di intervento era una delle basi della Restaurazione: nessuna rivoluzione poteva essere tollerata.",
+    difficulty: 2, topic: "La Restaurazione risponde"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Le truppe austriache entrarono a Napoli il 23 marzo 1821 per ristabilire l'ordine nel Regno delle due Sicilie.",
+    answer: true,
+    explanation: "Corretto. Le truppe austriache riportarono l'ordine nel Regno di Napoli il 23 marzo 1821, annullando le conquiste dei rivoluzionari.",
+    commonError: "Non confondere con la Spagna (Francia) o il Piemonte.",
+    deepdive: "L'Austria aveva interessi diretti in Italia: qualsiasi destabilizzazione minacciava i suoi domini nel Nord.",
+    difficulty: 1, topic: "La Restaurazione risponde"
+  },
+  {
+    text: "La rivolta spagnola fu definitivamente sconfitta con la conquista di:",
+    type: "multiple",
+    options: ["Trocadero (fortezza di Cadice) nell'agosto 1823 dall'esercito francese","Madrid nel 1821 dalle truppe austriache","Barcellona nel 1820 dalle truppe borboniche","Cadice nel 1822 dall'armata santa"],
+    answer: 0,
+    explanation: "L'esercito francese conquisto' la fortezza di Trocadero presso Cadice nell'agosto 1823, sconfiggendo definitivamente gli insorti spagnoli.",
+    commonError: "Fu la Francia (non l'Austria) a intervenire in Spagna, su mandato del Congresso di Verona.",
+    deepdive: "Il re di Francia aveva interessi nella stabilita' della monarchia borbonica spagnola.",
+    difficulty: 3, topic: "La Restaurazione risponde"
+  },
+
+  // GRECIA E GRAN BRETAGNA
+  {
+    text: "Quale societa' segreta guido' la rivolta greca del 1821?",
+    type: "multiple",
+    options: ["Carboneria","Comuneros","Eteria","Giovine Italia"],
+    answer: 2,
+    explanation: "L'Eteria, societa' segreta della borghesia commerciale greca, guido' la rivolta contro il dominio ottomano nel marzo 1821.",
+    commonError: "Carboneria e Comuneros erano societa' segrete italiane e spagnole.",
+    deepdive: "L'Eteria era stata fondata a Odessa nel 1814 da greci della diaspora.",
+    difficulty: 1, topic: "Grecia e Gran Bretagna"
+  },
+  {
+    text: "In quale anno la pace di Adrianopoli sancì l'indipendenza della Grecia?",
+    type: "multiple",
+    options: ["1821","1823","1825","1829"],
+    answer: 3,
+    explanation: "La pace di Adrianopoli del 1829 sancì ufficialmente l'indipendenza della Grecia dal dominio ottomano.",
+    commonError: "Il 1823 e' il Congresso di Epidauro (proclamazione), non la pace definitiva.",
+    deepdive: "Tra il 1823 e il 1829 le potenze europee intervennero militarmente: la flotta turca fu distrutta a Navarino.",
+    difficulty: 2, topic: "Grecia e Gran Bretagna"
+  },
+  {
+    text: "A chi fu assegnata la corona di Grecia nel 1832?",
+    type: "multiple",
+    options: ["A un principe russo","A Ottone I di Baviera","A un principe britannico","A un discendente degli Ottomani"],
+    answer: 1,
+    explanation: "Nel 1832 la corona di Grecia fu assegnata a Ottone I di Baviera, secondo la logica della Restaurazione che voleva i nuovi stati come monarchie.",
+    commonError: "La scelta di un principe straniero era tipica del periodo: garantiva stabilita' e neutralita'.",
+    deepdive: "La Restaurazione impose che la Grecia diventasse un regno, non una repubblica.",
+    difficulty: 1, topic: "Grecia e Gran Bretagna"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "La Gran Bretagna rispose ai problemi politici e sociali del periodo con riforme, non con la repressione come le altre grandi potenze.",
+    answer: true,
+    explanation: "Corretto. Solo la Gran Bretagna rispose con riforme: sindacati, riforma elettorale, pur respingendo la Carta del popolo.",
+    commonError: "Non confondere con le potenze continentali che usarono la forza militare.",
+    deepdive: "Il riformismo britannico era favorito dalla tradizione parlamentare e dalla rapida industrializzazione.",
+    difficulty: 1, topic: "Grecia e Gran Bretagna"
+  },
+  {
+    text: "Cosa fu la 'Carta del popolo' in Gran Bretagna?",
+    type: "multiple",
+    options: ["Una petizione per il suffragio universale, respinta dal Parlamento","Una nuova Costituzione approvata nel 1832","Un manifesto rivoluzionario dei lavoratori","La legge che istituì i sindacati operai"],
+    answer: 0,
+    explanation: "La Carta del popolo era una petizione per il suffragio universale, che fu pero' respinta dal Parlamento britannico.",
+    commonError: "Non fu una legge approvata ma una petizione respinta.",
+    deepdive: "Il movimento cartista (dal nome della Carta) fu la prima grande mobilitazione operaia della storia britannica.",
+    difficulty: 2, topic: "Grecia e Gran Bretagna"
+  },
+
+  // MOTI ANNI '30: FRANCIA
+  {
+    text: "Quale re tento' nel 1830 di restaurare l'assolutismo monarchico in Francia?",
+    type: "multiple",
+    options: ["Luigi XVIII","Luigi Filippo d'Orleans","Napoleone Bonaparte","Carlo X"],
+    answer: 3,
+    explanation: "Carlo X (succeduto a Luigi XVIII nel 1824) tento' di restaurare l'assolutismo, finendo per scatenare la rivoluzione del luglio 1830.",
+    commonError: "Luigi XVIII aveva invece concesso una Carta costituzionale.",
+    deepdive: "Carlo X apparteneva alla linea piu' reazionaria dei Borboni, mentre Luigi XVIII era stato piu' moderato.",
+    difficulty: 1, topic: "Moti anni '30: Francia"
+  },
+  {
+    text: "Quante ordinanze emano' Carlo X il 25 luglio 1830?",
+    type: "multiple",
+    options: ["2","3","4","5"],
+    answer: 2,
+    explanation: "Quattro ordinanze: scioglimento Camera, controllo stampa, modifica legge elettorale, nuove elezioni.",
+    commonError: "Ricordare il numero preciso: 4.",
+    deepdive: "Le 4 ordinanze furono la scintilla della rivoluzione: i parigini le vissero come un colpo di Stato.",
+    difficulty: 2, topic: "Moti anni '30: Francia"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Le 'Tre giornate gloriose' furono le giornate di scontro a Parigi dal 27 al 29 luglio 1830.",
+    answer: true,
+    explanation: "Corretto. Il popolo parigino combatte' dal 27 al 29 luglio 1830, innalzando barricate contro le forze di Carlo X.",
+    commonError: "Non confondere con la rivoluzione del 1848.",
+    deepdive: "Le Tre Gloriose furono determinate dalla borghesia liberale parigina, che poi offri' la corona a Luigi Filippo.",
+    difficulty: 1, topic: "Moti anni '30: Francia"
+  },
+  {
+    text: "Chi sali' al trono di Francia dopo le Tre Giornate Gloriose del 1830?",
+    type: "multiple",
+    options: ["Carlo X","Luigi Filippo d'Orleans, detto 're borghese'","Napoleone III","Luigi XVIII"],
+    answer: 1,
+    explanation: "L'alta borghesia e i liberali moderati offrirono la corona a Luigi Filippo d'Orleans, che governo' come 're borghese'.",
+    commonError: "Luigi XVIII era gia' morto nel 1824. Carlo X fu l'esiliato, non il successore.",
+    deepdive: "Luigi Filippo era chiamato 're borghese' perche' il suo governo rappresentava gli interessi della borghesia.",
+    difficulty: 1, topic: "Moti anni '30: Francia"
+  },
+  {
+    text: "Chi fu eletto presidente della Repubblica francese il 10 dicembre 1848?",
+    type: "multiple",
+    options: ["Carlo Luigi Napoleone Bonaparte","Luigi Filippo d'Orleans","Guizot","Adolphe Thiers"],
+    answer: 0,
+    explanation: "Carlo Luigi Napoleone Bonaparte fu eletto presidente il 10 dicembre 1848, sfruttando il nome Napoleon. Si proclamo' poi imperatore nel 1852.",
+    commonError: "Non confondere con Luigi Filippo, re dal 1830 al 1848.",
+    deepdive: "L'elezione di Napoleone III dimostro' la forza del bonapartismo in Francia e la debolezza dei repubblicani.",
+    difficulty: 2, topic: "Moti anni '30: Francia"
+  },
+  {
+    text: "La 'campagna dei banchetti' in Francia era:",
+    type: "multiple",
+    options: ["Una serie di banchetti di corte organizzati da Luigi Filippo","Una campagna di protesta dei contadini contro le tasse","Un'iniziativa culturale della borghesia parigina","Una forma di manifestazione politica dell'opposizione per richiedere la riforma elettorale"],
+    answer: 3,
+    explanation: "La campagna dei banchetti era una serie di riunioni di aspetto conviviale ma con contenuto politico, usate per aggirare il divieto di assemblee politiche.",
+    commonError: "Non erano veri banchetti di lusso ma assemblee politiche in forma di cena.",
+    deepdive: "Quando il governo vieto' la campagna dei banchetti (22/2/1848), il popolo insorse.",
+    difficulty: 3, topic: "Moti anni '30: Francia"
+  },
+
+  // MOTI ANNI '30: EUROPA E ITALIA
+  {
+    text: "Con il Congresso di Vienna il Belgio e l'Olanda furono uniti nel:",
+    type: "multiple",
+    options: ["Ducato dei Paesi Bassi","Confederazione del Reno","Regno dei Paesi Bassi","Gran Ducato del Nord"],
+    answer: 2,
+    explanation: "Il Congresso di Vienna uni' Belgio e Olanda nel Regno dei Paesi Bassi, governato dalla dinastia Orange-Nassau.",
+    commonError: "Non confondere con il termine storico 'Paesi Bassi' che puo' indicare solo l'Olanda.",
+    deepdive: "Le profonde differenze tra Belgio (cattolico, industriale) e Olanda (protestante, mercantile) resero l'unione instabile.",
+    difficulty: 1, topic: "Moti anni '30: Europa"
+  },
+  {
+    text: "A chi fu assegnata la corona del nuovo Regno del Belgio?",
+    type: "multiple",
+    options: ["A un principe francese","A Leopoldo di Sassonia-Coburgo","A Guglielmo II d'Orange-Nassau","A Federico Guglielmo di Prussia"],
+    answer: 1,
+    explanation: "La Conferenza di Londra riconobbe il Belgio e assegno' la corona a Leopoldo di Sassonia-Coburgo.",
+    commonError: "Guglielmo II era il re olandese, non il re belga.",
+    deepdive: "Leopoldo I era lo zio della futura regina Vittoria d'Inghilterra.",
+    difficulty: 1, topic: "Moti anni '30: Europa"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "La rivolta polacca del 29 novembre 1830 contro le truppe russe fu soppressa dallo zar Nicola I, lasciando la Polonia con un regime piu' rigido.",
+    answer: true,
+    explanation: "Corretto. La rivolta di Varsavia fu repressa da Nicola I e la Polonia si ritrovò con un regime piu' rigido.",
+    commonError: "Non confondere con la rivolta polacca del 1863.",
+    deepdive: "La Polonia era stata divisa tra Russia, Prussia e Austria nel 1795: il nazionalismo polacco rimase vivo per tutto l'Ottocento.",
+    difficulty: 1, topic: "Moti anni '30: Europa"
+  },
+  {
+    text: "La rivolta nell'Italia centrale del 1831 fu innescata da:",
+    type: "multiple",
+    options: ["La congiura estense, con il duca Francesco IV d'Este protagonista e poi fuggitivo","L'insurrezione di Venezia contro gli austriaci","La rivolta di Napoli contro i Borboni","La Giovine Italia di Mazzini"],
+    answer: 0,
+    explanation: "La rivolta fu innescata dalla congiura estense: il duca Francesco IV d'Este aveva stretto rapporti con Ciro Menotti, ma poi fuggi' quando la rivolta esplose.",
+    commonError: "La Giovine Italia fu fondata nel 1831 ma non guido' questa rivolta.",
+    deepdive: "A Bologna fu istituito il Governo Provvisorio delle Province Unite.",
+    difficulty: 2, topic: "Moti anni '30: Europa"
+  },
+  {
+    text: "Cosa significava il principio di non intervento proclamato dalla Francia in occasione della crisi belga?",
+    type: "multiple",
+    options: ["La Francia non avrebbe aiutato militarmente nessuna nazione in guerra","La Francia riconosceva la neutralita' svizzera","La Francia non avrebbe usato forze navali nel Mediterraneo","La Francia si opponeva a ogni ingerenza straniera negli affari interni di uno Stato"],
+    answer: 3,
+    explanation: "La Francia proclamo' il principio di non intervento: opposizione a qualsiasi ingerenza straniera negli affari interni di uno Stato.",
+    commonError: "Non riguardava la neutralita' francese in assoluto ma il rifiuto dell'interferenza esterna.",
+    deepdive: "Il principio di non intervento era l'opposto del principio di intervento di Metternich.",
+    difficulty: 3, topic: "Moti anni '30: Europa"
+  },
+
+  // DIBATTITO RISORGIMENTALE
+  {
+    text: "Come si chiama il processo di sviluppo dell'idea di unita' nazionale italiana nell'Ottocento?",
+    type: "multiple",
+    options: ["Illuminismo italiano","Risorgimento","Romanticismo italiano","Restaurazione"],
+    answer: 1,
+    explanation: "Il Risorgimento e' il processo attraverso cui si diffuse e si realizzo' l'idea di unita' nazionale italiana.",
+    commonError: "Non confondere con correnti culturali come illuminismo e romanticismo, che ne erano precondizioni.",
+    deepdive: "Il termine 'risorgimento' (rinascita) era gia' usato da Alfieri e altri illuministi per indicare la rinascita dell'Italia.",
+    difficulty: 1, topic: "Dibattito Risorgimentale"
+  },
+  {
+    text: "Qual era la posizione dei moderati nel dibattito risorgimentale?",
+    type: "multiple",
+    options: ["Puntare su una rivoluzione popolare per instaurare una repubblica","Fare affidamento esclusivamente sulle societa' segrete","Coinvolgere i sovrani come garanti del successo dell'unificazione","Aspettare l'intervento straniero come unica soluzione"],
+    answer: 2,
+    explanation: "I moderati credevano che il coinvolgimento dei sovrani fosse la garanzia del successo dell'unificazione italiana.",
+    commonError: "La posizione democratica (popolo, repubblica) e' quella di Mazzini, non dei moderati.",
+    deepdive: "I moderati erano piu' prudenti: preferivano riforme graduali con il supporto delle case regnanti.",
+    difficulty: 2, topic: "Dibattito Risorgimentale"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "I democratici risorgimentali credevano che i sovrani fossero garanti affidabili dell'unificazione italiana.",
+    answer: false,
+    explanation: "Falso. I democratici, avendo visto il fallimento dei moti (anche per tradimento dei sovrani), li consideravano inaffidabili. Puntavano sul popolo e su uno stato repubblicano.",
+    commonError: "La posizione di fiducia nei sovrani era quella dei MODERATI, non dei democratici.",
+    deepdive: "Il fallimento dei moti degli anni '20 e '30, spesso traditi dai sovrani, era la principale prova dei democratici.",
+    difficulty: 2, topic: "Dibattito Risorgimentale"
+  },
+  {
+    text: "Quale forma di stato auspicavano i democratici risorgimentali?",
+    type: "multiple",
+    options: ["Una repubblica fondata sul coinvolgimento del popolo","Una monarchia costituzionale guidata dai Savoia","Una confederazione di stati presieduta dal papa","Un impero federale sul modello asburgico"],
+    answer: 0,
+    explanation: "I democratici puntavano sul coinvolgimento del popolo per instaurare uno Stato repubblicano.",
+    commonError: "Monarchia (Savoia) e' la posizione dei moderati filosabaudi. Confederazione col papa e' Gioberti.",
+    deepdive: "La distinzione monarchia vs. repubblica e' centrale nel Risorgimento: i democratici (Mazzini, Garibaldi) volevano la repubblica.",
+    difficulty: 1, topic: "Dibattito Risorgimentale"
+  },
+  {
+    text: "Il dibattito risorgimentale riguardava principalmente:",
+    type: "multiple",
+    options: ["I rapporti tra l'Italia e la Francia napoleonica","La questione coloniale italiana in Africa","Il sistema fiscale del Regno di Sardegna","I mezzi da impiegare e le caratteristiche politiche del futuro Stato italiano"],
+    answer: 3,
+    explanation: "Il dibattito risorgimentale era la polemica sui mezzi per unire l'Italia e sulle caratteristiche politiche (monarchia/repubblica, federale/unitario) del futuro Stato.",
+    commonError: "Non e' un dibattito su politica estera o economia ma sulla forma dell'unificazione.",
+    deepdive: "Le risposte erano molteplici: Mazzini (repubblica unitaria), Cattaneo (repubblica federale), Gioberti (confederazione col papa), Balbo-Cavour (monarchia sabauda).",
+    difficulty: 2, topic: "Dibattito Risorgimentale"
+  },
+
+  // MAZZINI E CATTANEO
+  {
+    text: "In quale anno Mazzini fondo' la Giovine Italia?",
+    type: "multiple",
+    options: ["1820","1823","1831","1848"],
+    answer: 2,
+    explanation: "Mazzini fondo' la Giovine Italia nel 1831, dopo essere uscito dalla Carboneria e aver elaborato la sua critica alla segretezza.",
+    commonError: "Il 1820 e' l'inizio dei moti; il 1848 e' la rivoluzione europea.",
+    deepdive: "La Giovine Italia si proponeva come organizzazione aperta al popolo, non segreta come la Carboneria.",
+    difficulty: 1, topic: "Mazzini e Cattaneo"
+  },
+  {
+    text: "Qual era la critica fondamentale di Mazzini alla Carboneria?",
+    type: "multiple",
+    options: ["La segretezza del programma che rendeva impossibile il coinvolgimento popolare","L'eccessiva violenza dei suoi metodi","Il mancato appoggio alle monarchie europee","L'assenza di una visione religiosa del processo storico"],
+    answer: 0,
+    explanation: "Mazzini critico' la Carboneria perche' la segretezza era un errore strategico che rendeva impossibile il coinvolgimento popolare.",
+    commonError: "Non fu la violenza o la religione il problema principale ma la chiusura verso il popolo.",
+    deepdive: "Questa critica e' coerente con la sua teoria: il popolo e' il protagonista della storia, non le elite segrete.",
+    difficulty: 1, topic: "Mazzini e Cattaneo"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Per Mazzini il pensiero teoretico non andava disgiunto dall'azione concreta: questo principio e' riassunto nel binomio 'Pensiero e Azione'.",
+    answer: true,
+    explanation: "Corretto. Per Mazzini teoria e pratica erano inseparabili: il pensiero doveva tradursi in azione, e l'azione doveva essere guidata dal pensiero.",
+    commonError: "Non confondere con il solo pensiero (utopia) o la sola azione (avventurismo).",
+    deepdive: "Il limite di Mazzini fu che le sue insurrezioni pratiche fallirono ripetutamente.",
+    difficulty: 1, topic: "Mazzini e Cattaneo"
+  },
+  {
+    text: "Il binomio 'Dio e Popolo' nel pensiero di Mazzini significava:",
+    type: "multiple",
+    options: ["Un'alleanza tra la Chiesa cattolica e le classi popolari","La sottomissione del popolo alla volonta' di Dio tramite la Chiesa","L'identita' tra fede religiosa e rivoluzione violenta","Individui e popoli chiamati da Dio a contribuire al bene dell'umanita' attraverso la propria missione storica"],
+    answer: 3,
+    explanation: "Per Mazzini Dio e' lo spirito della Storia: individui (doveri personali) e popoli (missione storica) sono chiamati a contribuire al bene dell'umanita'.",
+    commonError: "Non e' il Dio della Chiesa cattolica ma un Dio immanente nella Storia.",
+    deepdive: "Questo deismo progressivo di Mazzini si distingueva dal cattolicesimo e dall'ateismo rivoluzionario.",
+    difficulty: 2, topic: "Mazzini e Cattaneo"
+  },
+  {
+    text: "Secondo Carlo Cattaneo, quale doveva essere la forma di stato per l'Italia unita?",
+    type: "multiple",
+    options: ["Una monarchia guidata dai Savoia","Una repubblica federale sul modello di Stati Uniti e Svizzera","Una confederazione presieduta dal papa","Un'unica repubblica centralizzata"],
+    answer: 1,
+    explanation: "Per Cattaneo la soluzione era la repubblica federale, prendendo a modello gli Stati Uniti e la Svizzera.",
+    commonError: "Non confondere con Mazzini (repubblica unitaria) o Gioberti (confederazione col papa).",
+    deepdive: "Per Cattaneo lo Stato centralizzato era inadeguato per l'Italia, che aveva forti identita' regionali.",
+    difficulty: 2, topic: "Mazzini e Cattaneo"
+  },
+  {
+    text: "Nel progetto di Cattaneo, quale sarebbe stato il ruolo dell'Italia federale in Europa?",
+    type: "multiple",
+    options: ["Diventare la guida spirituale dell'Europa cristiana","Ottenere il primato militare nel Mediterraneo","Fare parte degli Stati Uniti d'Europa","Porsi come potenza coloniale in Africa"],
+    answer: 2,
+    explanation: "Per Cattaneo l'Italia federale avrebbe poi fatto parte di un piu' ampio progetto degli Stati Uniti d'Europa.",
+    commonError: "Non e' un progetto di supremazia italiana ma di integrazione europea.",
+    deepdive: "Cattaneo fu uno dei precursori dell'idea federalista europea, anticipando in parte l'odierna Unione Europea.",
+    difficulty: 3, topic: "Mazzini e Cattaneo"
+  },
+
+  // GIOBERTI, BALBO E CAVOUR
+  {
+    text: "Qual era la proposta del Neoguelfismo di Gioberti?",
+    type: "multiple",
+    options: ["Una confederazione fra gli Stati italiani presieduta dal papa","Una repubblica federale sul modello svizzero","La monarchia dei Savoia come guida dell'unificazione","L'appoggio dell'Austria all'unificazione italiana"],
+    answer: 0,
+    explanation: "Gioberti proposte una confederazione fra gli Stati italiani presieduta dal papa. La proposta fu definita neoguelfa per la sua posizione filopapale.",
+    commonError: "Non confondere con Cattaneo (federale-repubblicano) o Balbo (filosabaudo).",
+    deepdive: "Il termine 'neoguelfo' alludeva alla posizione medievale dei guelfi, favorevoli al papa contro l'imperatore.",
+    difficulty: 1, topic: "Gioberti, Balbo e Cavour"
+  },
+  {
+    text: "Chi fu definito 'colui che individuo' la via per l'unita' d'Italia' tra i moderati filosabaudi?",
+    type: "multiple",
+    options: ["Vincenzo Gioberti","Carlo Cattaneo","Cesare Balbo","Camillo Benso conte di Cavour"],
+    answer: 3,
+    explanation: "Cavour fu il piu' significativo esponente dei filosabaudi e colui che individuo' e realizzo' la via per l'unita' d'Italia.",
+    commonError: "Balbo fu importante ma e' Cavour il protagonista della realizzazione dell'unita'.",
+    deepdive: "Cavour realizzo' l'unita' attraverso la diplomazia e alleanze strategiche (Seconda guerra d'indipendenza con la Francia).",
+    difficulty: 2, topic: "Gioberti, Balbo e Cavour"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Cesare Balbo sperava che un'azione diplomatica spostasse gli interessi dell'Austria verso i Balcani, liberando l'Italia dalla presenza austriaca.",
+    answer: true,
+    explanation: "Corretto. Balbo riteneva che l'Austria potesse essere 'compensata' con espansioni nei Balcani, cosi' da rinunciare ai domini italiani.",
+    commonError: "Non confondere con la posizione di Mazzini (scacciare l'Austria con una rivoluzione popolare).",
+    deepdive: "Questa idea fu parzialmente realizzata da Cavour, che uso' la diplomazia e la guerra di Crimea per isolare l'Austria.",
+    difficulty: 2, topic: "Gioberti, Balbo e Cavour"
+  },
+  {
+    text: "La forza militare per l'unificazione italiana nel progetto di Balbo sarebbe stata costituita da:",
+    type: "multiple",
+    options: ["L'esercito garibaldino","Il Regno di Sardegna","La Francia di Napoleone III","La Santa Alleanza"],
+    answer: 1,
+    explanation: "Per Balbo la forza militare per cacciare l'Austria dall'Italia sarebbe stata fornita dal Regno di Sardegna (Piemonte).",
+    commonError: "Garibaldi e Napoleone III verranno coinvolti nel 1859-60, decenni dopo Balbo.",
+    deepdive: "Il primato militare del Piemonte era fondamentale per la strategia moderata-filosabauda.",
+    difficulty: 1, topic: "Gioberti, Balbo e Cavour"
+  },
+
+  // 1848 EUROPEO
+  {
+    text: "Quale paese fu maggiormente colpito dalla crisi economica degli anni '40 dell'Ottocento?",
+    type: "multiple",
+    options: ["Francia","Prussia","Irlanda","Austria"],
+    answer: 2,
+    explanation: "L'Irlanda fu il paese piu' colpito: epidemia della patata (1845), economia agricola arretrata, controllo inglese, molti terreni in mano ai proprietari inglesi.",
+    commonError: "La Francia ebbe la sua crisi politica, ma quella irlandese fu la piu' devastante demograficamente.",
+    deepdive: "La Grande Carestia irlandese (1845-1852) causo' oltre 1 milione di morti e 2 milioni di emigranti.",
+    difficulty: 1, topic: "1848 Europeo"
+  },
+  {
+    text: "La 'campagna dei banchetti' fu vietata in Francia il:",
+    type: "multiple",
+    options: ["22 febbraio 1848","25 luglio 1830","10 dicembre 1848","23 aprile 1848"],
+    answer: 0,
+    explanation: "Il governo vieto' la campagna dei banchetti il 22 febbraio 1848, scatenando l'insurrezione del popolo parigino.",
+    commonError: "Il 25 luglio 1830 sono le 4 ordinanze di Carlo X, altro evento.",
+    deepdive: "Il divieto fu la goccia che fece traboccare il vaso: il popolo parigino insorse e in tre giorni proclamo' la repubblica.",
+    difficulty: 2, topic: "1848 Europeo"
+  },
+  {
+    text: "Vero o Falso?",
+    type: "truefalse",
+    statement: "Il governo provvisorio francese del 1848 introdusse il suffragio universale maschile.",
+    answer: true,
+    explanation: "Corretto. Il governo provvisorio del 1848 introdusse il suffragio universale maschile, tra le altre misure progressive.",
+    commonError: "Non confondere con la riforma elettorale del 1832 in Gran Bretagna.",
+    deepdive: "Il governo provvisorio fece anche: abolire la pena di morte per delitti politici, cancellare i titoli nobiliari, dichiarare fine schiavitu' nelle colonie, ridurre giornata a 10 ore.",
+    difficulty: 1, topic: "1848 Europeo"
+  },
+  {
+    text: "In quale anno Luigi Bonaparte si fece proclamare imperatore dei Francesi?",
+    type: "multiple",
+    options: ["1848","1849","1851","1852"],
+    answer: 3,
+    explanation: "Eletto presidente nel 1848, nel 1851 ottenne la presidenza decennale e nel 1852 si fece proclamare imperatore con il nome di Napoleone III.",
+    commonError: "Il 1851 fu la nuova Costituzione, il 1852 la proclamazione imperiale.",
+    deepdive: "Luigi Napoleone sfrutto' il mito napoleonico per ottenere il potere in modo democraticamente legittimo, poi lo trasformo' in dittatura.",
+    difficulty: 2, topic: "1848 Europeo"
+  },
+  {
+    text: "La rivolta del 13 marzo 1848 nell'Impero asburgico scoppio' a:",
+    type: "multiple",
+    options: ["Parigi","Vienna","Budapest","Praga"],
+    answer: 1,
+    explanation: "La rivolta dell'Impero Asburgico del 1848 scoppio' a Vienna il 13 marzo 1848.",
+    commonError: "Budapest, Praga seguirono successivamente; Vienna fu la prima.",
+    deepdive: "Ferdinando I d'Austria concesse un'Assemblea Costituente per arginare la rivolta viennese.",
+    difficulty: 1, topic: "1848 Europeo"
+  },
+  {
+    text: "Chi sali' al trono austriaco dopo l'abdicazione di Ferdinando I nel dicembre 1848?",
+    type: "multiple",
+    options: ["Carlo d'Asburgo","Massimiliano d'Austria","Francesco Giuseppe","Francesco IV d'Este"],
+    answer: 2,
+    explanation: "Nel dicembre 1848 Ferdinando I abdico' e sali' al trono Francesco Giuseppe, che regno' fino al 1916.",
+    commonError: "Francesco IV d'Este era il duca di Modena, protagonista della rivolta italiana del 1831.",
+    deepdive: "Francesco Giuseppe regno' per quasi 68 anni, uno dei regni piu' lunghi della storia europea.",
+    difficulty: 2, topic: "1848 Europeo"
+  }
+];
+/* ============================================
+   ULTRA PREPARAZIONE - 5 domande da 10
+   Esercizi avanzati con ragionamento multi-step
+   ============================================ */
+const ULTRA_QUESTIONS = [
+  {
+    text: "Perche' le societa' segrete progressiste degli anni '20 fallirono, mentre la rivolta greca ebbe successo? Quale elemento decisivo mancava nelle prime e fu presente nella seconda?",
+    type: "multiple",
+    options: ["Le societa' segrete erano troppo violente; i greci erano pacifici","Il supporto internazionale (Russia, Inghilterra, Francia) fece la differenza: mancava nelle rivolte italiane e spagnole","Le societa' segrete non avevano programmi chiari; i greci si","Le rivolte europee erano monarchiche; la Grecia voleva la repubblica"],
+    answer: 1,
+    explanation: "Le rivolte italiane e spagnole furono represse dalla Santa Alleanza senza aiuto esterno. La Grecia ebbe il supporto di Russia, Inghilterra e Francia, decisivo per l'indipendenza.",
+    commonError: "Il problema delle societa' segrete fu anche interno (segretezza, mancanza di base popolare), ma il fattore esterno fu cruciale.",
+    deepdive: "Il filellenismo (simpatia per la causa greca) era diffuso in tutta Europa: anche Byron mori' combattendo per la Grecia.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Confrontando il pensiero di Mazzini e Cattaneo sull'organizzazione dello Stato, quale affermazione e' CORRETTA?",
+    type: "multiple",
+    options: ["Entrambi volevano una monarchia costituzionale","Mazzini voleva una repubblica unitaria, Cattaneo una repubblica federale sul modello USA-Svizzera","Mazzini era federalista, Cattaneo centralista","Entrambi rifiutavano la forma repubblicana"],
+    answer: 1,
+    explanation: "Mazzini: repubblica unitaria. Cattaneo: repubblica federale (modelli USA e Svizzera). Entrambi democratici, ma con visioni diverse dell'organizzazione dello Stato.",
+    commonError: "Non confondere i due: la distinzione unitario/federale e' cruciale.",
+    deepdive: "Il dibattito tra stato unitario e federale e' ancora attuale nell'Italia contemporanea.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Carlo Alberto fu soprannominato 're tentenna'. Quale sequenza di azioni giustifica meglio questo soprannome?",
+    type: "multiple",
+    options: ["Abdicò subito senza combattere","7 marzo: rivela il complotto; 8: incoraggia i ribelli; 10: giura fedelta' al re; poi come reggente concede la costituzione; poi si allea con le forze repressive","Si rifiuto' di combattere in qualsiasi occasione","Cambio' il nome del regno tre volte"],
+    answer: 1,
+    explanation: "Il comportamento di Carlo Alberto fu effettivamente contraddittorio: in tre giorni cambio' posizione piu' volte, oscillando tra i ribelli e il re.",
+    commonError: "Il soprannome non e' generico ma si riferisce a episodi precisi e documentati.",
+    deepdive: "Carlo Alberto si riscatto' parzialmente nel 1848, dichiarando guerra all'Austria e, dopo Novara, abdicando a favore di Vittorio Emanuele II.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Quale differenza fondamentale distingue i moti degli anni '20 da quelli degli anni '30?",
+    type: "multiple",
+    options: ["I moti '20 ebbero solo successi; i '30 solo fallimenti","Nei '20 le rivolte furono tutte represse; nei '30 alcune (Francia, Belgio) ottennero risultati duraturi","I moti '20 coinvolsero solo l'Italia; i '30 solo la Francia","I moti '20 erano democratici; i '30 erano monarchici"],
+    answer: 1,
+    explanation: "Nei '20 tutte le rivolte furono represse dalla Santa Alleanza. Nei '30 alcune ottennero risultati duraturi: la Francia cambio' re e costituzione, il Belgio ottenne l'indipendenza.",
+    commonError: "Non e' vero che i '30 furono tutti fallimenti: il Belgio e la Francia ebbero esiti positivi.",
+    deepdive: "La differenza di esito si spiega anche con il cambiamento della situazione internazionale: la Francia del '30 non supporto' piu' la repressione.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Le Quattro Ordinanze di Carlo X (25 luglio 1830): quale NON era tra di esse?",
+    type: "multiple",
+    options: ["Scioglimento della Camera appena eletta","Espulsione degli stranieri dalla Francia","Rigido controllo sulla stampa","Modifica della legge elettorale riducendo il diritto di voto"],
+    answer: 1,
+    explanation: "Le quattro ordinanze erano: 1) scioglimento Camera, 2) controllo stampa, 3) modifica legge elettorale, 4) nuove elezioni. L'espulsione degli stranieri NON era tra le ordinanze.",
+    commonError: "Memorizzare le 4 ordinanze reali: nessuna riguardava gli stranieri.",
+    deepdive: "Le ordinanze erano tecnicamente un colpo di Stato: Carlo X cercava di ridurre il potere parlamentare.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Perche' la proposta di Gioberti (Neoguelfismo) si rivelo' irrealistica?",
+    type: "multiple",
+    options: ["Perche' il papa non aveva un esercito","Perche' il papa era sotto il controllo austriaco e poco probabile guida di un processo antiaustriaco","Perche' la Svizzera si opponeva al progetto","Perche' i Savoia erano contrari a qualsiasi forma di unita'"],
+    answer: 1,
+    explanation: "Il papa era protetto dall'Austria e difficilmente avrebbe potuto guidare un processo di unificazione antiaustriaco. Pio IX, inizialmente aperto, poi si schiero' contro i liberali.",
+    commonError: "Il problema non era militare ma politico: il papa era allineato con le potenze conservatrici.",
+    deepdive: "Nel 1848 Pio IX si rifiuto' di dichiarare guerra all'Austria, spazzando via le speranze neoguelf.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Il governo provvisorio francese del 1848 adotto' una serie di misure progressive. Quale NON fu tra queste?",
+    type: "multiple",
+    options: ["Introduzione del suffragio universale maschile","Abolizione della pena di morte per detenuti politici","Proclamazione della repubblica federale sul modello svizzero","Riduzione giornata lavorativa a 10 ore"],
+    answer: 2,
+    explanation: "Il governo provvisorio proclamo' la repubblica unitaria, non federale. La proposta federale era di Cattaneo per l'Italia.",
+    commonError: "Non confondere il progetto di Cattaneo per l'Italia con le misure del governo provvisorio francese.",
+    deepdive: "Le misure del governo provvisorio furono in parte cancellate dopo la vittoria dei moderati nelle elezioni di aprile 1848.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Il principio di intervento di Metternich e il principio di non intervento della Francia (1830) erano:",
+    type: "multiple",
+    options: ["Sostanzialmente identici nella pratica","Opposti: Metternich legittimava l'interferenza militare per reprimere le rivoluzioni; la Francia si opponeva a qualsiasi ingerenza negli affari interni","Entrambi miranti alla stabilita' europea ma con metodi diversi","Il primo si applicava all'Italia, il secondo alla Francia"],
+    answer: 1,
+    explanation: "Il principio di intervento (Metternich) legittimava l'intervento armato per reprimere le rivoluzioni. Il principio di non intervento (Francia 1830) affermava il contrario.",
+    commonError: "Non sono sfumature dello stesso principio ma posizioni radicalmente opposte.",
+    deepdive: "Il principio di non intervento frances divento' un elemento del diritto internazionale ottocentesco.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Mazzini critico' la Carboneria e fondo' la Giovine Italia. Quale cambiamento strategico era alla base di questa scelta?",
+    type: "multiple",
+    options: ["Passare dalla violenza alla diplomazia","Passare dalla clandestinita' all'apertura popolare: propaganda pubblica e coinvolgimento delle masse","Passare dall'obiettivo repubblicano a quello monarchico","Cercare alleanze con le potenze straniere invece di puntare sull'Italia"],
+    answer: 1,
+    explanation: "La svolta di Mazzini fu il superamento della clandestinita': la Giovine Italia doveva fare propaganda pubblica e coinvolgere il popolo, non operare nell'ombra.",
+    commonError: "Non fu un cambio di obiettivi ma di metodo: l'obiettivo repubblicano rimase immutato.",
+    deepdive: "Nonostante la svolta, le insurrezioni mazziniane (1833, 1844, 1848-49) fallirono per mancanza di base popolare reale.",
+    difficulty: 3, topic: "Ultra Preparazione"
+  },
+  {
+    text: "Nella crisi del 1848 nell'Impero Asburgico, quale fu la sequenza corretta degli eventi?",
+    type: "multiple",
+    options: ["Prima Praga, poi Vienna, poi Budapest","Vienna (13 marzo) → Budapest → Praga bombardata (giugno) → Vienna repressa (ottobre) → Ferdinando I abdica (dicembre)","Ferdinando abdica prima delle rivolte per evitarle","Budapest ottenne l'indipendenza e Vienna capitolo'"],
+    answer: 1,
+    explanation: "La sequenza corretta: rivolta di Vienna (13 marzo), poi Budapest, poi Praga repressa (giugno), poi Vienna repressa (ottobre), infine abdica Ferdinando I (dicembre) → Francesco Giuseppe.",
+    commonError: "Non invertire l'ordine: Vienna fu prima, non ultima.",
+    deepdive: "La repressione delle rivolte impiego' quasi un anno e richiese l'aiuto russo per l'Ungheria (1849).",
+    difficulty: 3, topic: "Ultra Preparazione"
+  }
+];
+/* ============================================
+   VARIABILI DI STATO
+   ============================================ */
+let currentQuestions = [];  // domande della sessione corrente
+let currentIndex = 0;       // indice domanda corrente
+let correctCount = 0;       // risposte corrette
+let wrongCount = 0;         // risposte errate
+let history = [];           // cronologia risposte
+let topicStats = {};        // statistiche per argomento
+let errorQuestionIds = [];  // indici domande sbagliate (per ripasso)
+let answered = false;       // se la domanda corrente ha ricevuto risposta
+
+/* ============================================
+   INIZIALIZZAZIONE
+   ============================================ */
+(function init() {
+  // Popola i filtri per argomento
+  const topics = [...new Set(QUESTIONS.map(q => q.topic))];
+  const grid = document.getElementById('topic-filters');
+  topics.forEach(t => {
+    const div = document.createElement('div');
+    div.className = 'topic-item';
+    div.innerHTML = `<input type="checkbox" checked value="${t}" class="topic-cb"> ${t}`;
+    grid.appendChild(div);
+  });
+
+  // Mostra statistiche precedenti da localStorage
+  loadPreviousStats();
+})();
+
+/* Carica statistiche salvate */
+function loadPreviousStats() {
+  const saved = localStorage.getItem('storia_stats');
+  if (saved) {
+    const data = JSON.parse(saved);
+    document.getElementById('prev-stats').style.display = 'block';
+    document.getElementById('prev-stats-text').textContent =
+      `${data.correct}/${data.total} corrette (${data.percentage}%) - ${data.date}`;
+    // Mostra pulsante "ripassa errori" se ci sono errori salvati
+    const savedErrors = localStorage.getItem('storia_errors');
+    if (savedErrors && JSON.parse(savedErrors).length > 0) {
+      document.getElementById('btn-errors').style.display = 'inline-block';
+    }
+  }
+}
+
+/* Cancella progressi */
+function clearProgress() {
+  localStorage.removeItem('storia_stats');
+  localStorage.removeItem('storia_errors');
+  document.getElementById('prev-stats').style.display = 'none';
+  document.getElementById('btn-errors').style.display = 'none';
+}
+
+/* ============================================
+   AVVIO QUIZ
+   ============================================ */
+function startQuiz(mode) {
+  // Reset stato
+  currentIndex = 0;
+  correctCount = 0;
+  wrongCount = 0;
+  history = [];
+  topicStats = {};
+  errorQuestionIds = [];
+  answered = false;
+
+  // Seleziona domande in base alla modalita'
+  const selectedTopics = [...document.querySelectorAll('.topic-cb:checked')].map(cb => cb.value);
+
+  if (mode === 'ultra') {
+    currentQuestions = [...ULTRA_QUESTIONS];
+  } else if (mode === 'errors') {
+    const savedErrors = localStorage.getItem('storia_errors');
+    if (savedErrors) {
+      const errorIds = JSON.parse(savedErrors);
+      currentQuestions = errorIds.map(id => QUESTIONS[id]).filter(q => q);
+    }
+    if (currentQuestions.length === 0) {
+      alert('Non ci sono errori salvati da ripassare!');
+      return;
+    }
+  } else {
+    currentQuestions = QUESTIONS.filter(q => selectedTopics.includes(q.topic));
+    if (currentQuestions.length === 0) {
+      alert('Seleziona almeno un argomento!');
+      return;
+    }
+  }
+
+  if (mode === 'random') {
+    shuffleArray(currentQuestions);
+  } else if (mode === 'all') {
+    // Ordina per difficolta' crescente
+    currentQuestions.sort((a, b) => a.difficulty - b.difficulty);
+  }
+
+  // Inizializza statistiche per argomento
+  const topics = [...new Set(currentQuestions.map(q => q.topic))];
+  topics.forEach(t => { topicStats[t] = { correct: 0, wrong: 0, total: 0 }; });
+
+  // Mostra schermata quiz
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('total-q').textContent = currentQuestions.length;
+
+  showQuestion();
+}
+
+/* Mescola array (Fisher-Yates) */
+function shuffleArray(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+}
+
+/* ============================================
+   MOSTRA DOMANDA
+   ============================================ */
+function showQuestion() {
+  answered = false;
+  const q = currentQuestions[currentIndex];
+
+  // Aggiorna header
+  document.getElementById('current-q').textContent = currentIndex + 1;
+  document.getElementById('score-correct').textContent = correctCount;
+  document.getElementById('score-wrong').textContent = wrongCount;
+  const pct = ((currentIndex) / currentQuestions.length) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+
+  // Meta (argomento, difficolta', tipo)
+  const meta = document.getElementById('question-meta');
+  const diffLabels = ['Facile', 'Media', 'Difficile'];
+  const typeLabels = { multiple: 'Scelta multipla', truefalse: 'Vero/Falso', numeric: 'Esercizio numerico', completion: 'Completamento' };
+  meta.innerHTML = `
+    <span class="badge badge-topic">${q.topic}</span>
+    <span class="badge badge-diff-${q.difficulty}">${diffLabels[q.difficulty - 1]}</span>
+    <span class="badge badge-type">${typeLabels[q.type]}</span>
+  `;
+
+  // Testo domanda
+  document.getElementById('question-text').textContent = q.text;
+
+  // Area risposta
+  const area = document.getElementById('answer-area');
+  area.innerHTML = '';
+  document.getElementById('submit-area').style.display = 'none';
+
+  if (q.type === 'multiple') {
+    // Crea array di indici e mescolali per randomizzare l'ordine delle opzioni
+    const indices = q.options.map((_, i) => i);
+    shuffleArray(indices);
+    q._shuffledIndices = indices; // salva la mappatura per la correzione
+
+    const container = document.createElement('div');
+    container.className = 'options-container';
+    indices.forEach((origIdx, displayIdx) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = q.options[origIdx];
+      btn.onclick = () => handleMultipleChoice(displayIdx);
+      btn.id = 'opt-' + displayIdx;
+      btn.dataset.origIdx = origIdx;
+      container.appendChild(btn);
+    });
+    area.appendChild(container);
+  } else if (q.type === 'truefalse') {
+    // Mostra l'affermazione
+    const stmt = document.createElement('p');
+    stmt.style.cssText = 'font-style:italic; margin-bottom:15px; padding:12px; background:#f0f0f0; border-radius:8px;';
+    stmt.textContent = '\"' + q.statement + '\"';
+    area.appendChild(stmt);
+
+    const container = document.createElement('div');
+    container.className = 'options-container';
+    ['Vero', 'Falso'].forEach((label, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = label;
+      btn.onclick = () => handleTrueFalse(i === 0);
+      btn.id = 'tf-' + i;
+      container.appendChild(btn);
+    });
+    area.appendChild(container);
+  } else if (q.type === 'numeric') {
+    const container = document.createElement('div');
+    container.className = 'answer-input-container';
+    container.innerHTML = `<input type="text" class="answer-input" id="numeric-input" placeholder="Scrivi il valore numerico..." onkeydown="if(event.key==='Enter')checkOpenAnswer()">`;
+    area.appendChild(container);
+    document.getElementById('submit-area').style.display = 'block';
+  } else if (q.type === 'completion') {
+    const container = document.createElement('div');
+    container.className = 'answer-input-container';
+    container.innerHTML = `
+      <input type="text" class="answer-input" id="completion-input-0" placeholder="Prima parola mancante..." style="margin-bottom:8px;" onkeydown="if(event.key==='Enter')document.getElementById('completion-input-1').focus()">
+      <input type="text" class="answer-input" id="completion-input-1" placeholder="Seconda parola mancante..." onkeydown="if(event.key==='Enter')checkOpenAnswer()">
+    `;
+    area.appendChild(container);
+    document.getElementById('submit-area').style.display = 'block';
+  }
+
+  // Nascondi feedback, professore e pulsante next
+  document.getElementById('feedback-box').style.display = 'none';
+  document.getElementById('deepdive-box').style.display = 'none';
+  document.getElementById('next-btn-container').style.display = 'none';
+  document.getElementById('prof-container').className = 'prof-container';
+}
+
+/* ============================================
+   GESTIONE RISPOSTE
+   ============================================ */
+
+/* Scelta multipla */
+function handleMultipleChoice(displayIdx) {
+  if (answered) return;
+  answered = true;
+
+  const q = currentQuestions[currentIndex];
+  // Ricava l'indice originale dalla mappatura mescolata
+  const origSelected = q._shuffledIndices[displayIdx];
+  const isCorrect = origSelected === q.answer;
+
+  // Evidenzia opzioni usando l'indice originale salvato in data-origIdx
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    const origIdx = parseInt(btn.dataset.origIdx);
+    if (origIdx === q.answer) btn.classList.add('correct');
+    if (i === displayIdx && !isCorrect) btn.classList.add('wrong');
+  });
+
+  processAnswer(isCorrect, q);
+}
+
+/* Vero/Falso */
+function handleTrueFalse(selected) {
+  if (answered) return;
+  answered = true;
+
+  const q = currentQuestions[currentIndex];
+  const isCorrect = selected === q.answer;
+
+  const correctIdx = q.answer ? 0 : 1;
+  const selectedIdx = selected ? 0 : 1;
+
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
+    btn.classList.add('disabled');
+    if (i === correctIdx) btn.classList.add('correct');
+    if (i === selectedIdx && !isCorrect) btn.classList.add('wrong');
+  });
+
+  processAnswer(isCorrect, q);
+}
+
+/* Risposta aperta (numerica o completamento) */
+function checkOpenAnswer() {
+  if (answered) return;
+  answered = true;
+
+  const q = currentQuestions[currentIndex];
+  let isCorrect = false;
+
+  if (q.type === 'numeric') {
+    const input = document.getElementById('numeric-input');
+    const val = parseFloat(input.value.replace(',', '.'));
+    isCorrect = !isNaN(val) && Math.abs(val - q.answer) <= q.tolerance;
+    input.style.borderColor = isCorrect ? 'var(--success)' : 'var(--danger)';
+    input.style.background = isCorrect ? 'var(--success-light)' : 'var(--danger-light)';
+  } else if (q.type === 'completion') {
+    const inputs = [
+      document.getElementById('completion-input-0').value.trim().toLowerCase(),
+      document.getElementById('completion-input-1').value.trim().toLowerCase()
+    ];
+    const answers = q.answer.map(a => a.toLowerCase());
+    isCorrect = inputs[0].includes(answers[0]) && inputs[1].includes(answers[1]);
+
+    [0, 1].forEach(i => {
+      const el = document.getElementById('completion-input-' + i);
+      const ok = inputs[i].includes(answers[i]);
+      el.style.borderColor = ok ? 'var(--success)' : 'var(--danger)';
+      el.style.background = ok ? 'var(--success-light)' : 'var(--danger-light)';
+    });
+  }
+
+  processAnswer(isCorrect, q);
+}
+
+/* Logica comune di elaborazione risposta */
+function processAnswer(isCorrect, q) {
+  // Aggiorna contatori
+  if (isCorrect) {
+    correctCount++;
+    topicStats[q.topic].correct++;
+  } else {
+    wrongCount++;
+    topicStats[q.topic].wrong++;
+    // Salva indice per ripasso
+    const globalIdx = QUESTIONS.indexOf(q);
+    if (globalIdx !== -1) errorQuestionIds.push(globalIdx);
+  }
+  topicStats[q.topic].total++;
+
+  // Cronologia
+  history.push({
+    question: q.text,
+    topic: q.topic,
+    correct: isCorrect,
+    difficulty: q.difficulty
+  });
+
+  // Mostra feedback
+  showFeedback(isCorrect, q);
+
+  // Aggiorna punteggio
+  document.getElementById('score-correct').textContent = correctCount;
+  document.getElementById('score-wrong').textContent = wrongCount;
+}
+
+/* ============================================
+   FEEDBACK E APPROFONDIMENTI
+   ============================================ */
+/* ============================================
+   PROF. PALUDETTO — SVG CARTOON
+   Ispirato alla foto: capelli ricci scuri, barba,
+   occhiali, espressione autorevole
+   ============================================ */
+
+// SVG del prof felice/approvazione
+const PROF_SVG_HAPPY = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sfondo glow verde -->
+  <defs>
+    <radialGradient id="glowG" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#06d6a0;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#06d6a0;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowG)"/>
+  <!-- Corpo/giacca -->
+  <path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+  <path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#1e40af" stroke="none"/>
+  <!-- Collo -->
+  <rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/>
+  <!-- Testa -->
+  <ellipse cx="110" cy="105" rx="48" ry="52" fill="#deb887"/>
+  <!-- Capelli ricci scuri -->
+  <path d="M62 95 Q58 55 80 42 Q95 33 110 32 Q125 33 140 42 Q162 55 158 95" fill="#2c1810" stroke="#1a0f0a" stroke-width="1"/>
+  <circle cx="68" cy="82" r="8" fill="#2c1810"/><circle cx="72" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="152" cy="82" r="8" fill="#2c1810"/><circle cx="148" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="78" cy="90" r="6" fill="#2c1810"/><circle cx="142" cy="90" r="6" fill="#2c1810"/>
+  <circle cx="85" cy="65" r="6" fill="#2c1810"/><circle cx="135" cy="65" r="6" fill="#2c1810"/>
+  <circle cx="95" cy="50" r="7" fill="#2c1810"/><circle cx="125" cy="50" r="7" fill="#2c1810"/>
+  <circle cx="110" cy="45" r="8" fill="#2c1810"/>
+  <circle cx="100" cy="55" r="5" fill="#2c1810"/><circle cx="120" cy="55" r="5" fill="#2c1810"/>
+  <!-- Barba -->
+  <path d="M78 118 Q80 145 110 152 Q140 145 142 118 Q142 130 130 140 Q110 150 90 140 Q78 130 78 118Z" fill="#3d2914" stroke="#2c1810" stroke-width="1"/>
+  <path d="M75 108 Q72 125 78 118" fill="#3d2914"/><path d="M145 108 Q148 125 142 118" fill="#3d2914"/>
+  <!-- Occhiali -->
+  <rect x="76" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <rect x="116" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <line x1="104" y1="102" x2="116" y2="102" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="76" y1="100" x2="66" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="144" y1="100" x2="154" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <!-- Occhi felici (archi sorridenti) -->
+  <path d="M84 102 Q90 96 96 102" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M124 102 Q130 96 136 102" fill="none" stroke="#1a1a2e" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Sopracciglia alzate (contento) -->
+  <path d="M78 86 Q90 80 100 84" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M120 84 Q130 80 142 86" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Bocca sorridente (nella barba) -->
+  <path d="M96 132 Q110 142 124 132" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Pollice su -->
+  <g transform="translate(165,140) rotate(-15)">
+    <rect x="0" y="12" width="18" height="26" rx="5" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/>
+    <rect x="4" y="-8" width="12" height="24" rx="6" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/>
+  </g>
+  <!-- Badge check -->
+  <circle cx="180" cy="45" r="18" fill="#06d6a0"/>
+  <path d="M171 45 L177 51 L189 39" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+// SVG del prof arrabbiato/disapprovazione
+const PROF_SVG_ANGRY = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <!-- Sfondo glow rosso -->
+  <defs>
+    <radialGradient id="glowR" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#ef476f;stop-opacity:0.2"/>
+      <stop offset="100%" style="stop-color:#ef476f;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowR)"/>
+  <!-- Corpo/giacca -->
+  <path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+  <path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#1e40af" stroke="none"/>
+  <!-- Collo -->
+  <rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/>
+  <!-- Testa -->
+  <ellipse cx="110" cy="105" rx="48" ry="52" fill="#deb887"/>
+  <!-- Capelli ricci scuri -->
+  <path d="M62 95 Q58 55 80 42 Q95 33 110 32 Q125 33 140 42 Q162 55 158 95" fill="#2c1810" stroke="#1a0f0a" stroke-width="1"/>
+  <circle cx="68" cy="82" r="8" fill="#2c1810"/><circle cx="72" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="152" cy="82" r="8" fill="#2c1810"/><circle cx="148" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="78" cy="90" r="6" fill="#2c1810"/><circle cx="142" cy="90" r="6" fill="#2c1810"/>
+  <circle cx="85" cy="65" r="6" fill="#2c1810"/><circle cx="135" cy="65" r="6" fill="#2c1810"/>
+  <circle cx="95" cy="50" r="7" fill="#2c1810"/><circle cx="125" cy="50" r="7" fill="#2c1810"/>
+  <circle cx="110" cy="45" r="8" fill="#2c1810"/>
+  <circle cx="100" cy="55" r="5" fill="#2c1810"/><circle cx="120" cy="55" r="5" fill="#2c1810"/>
+  <!-- Barba -->
+  <path d="M78 118 Q80 145 110 152 Q140 145 142 118 Q142 130 130 140 Q110 150 90 140 Q78 130 78 118Z" fill="#3d2914" stroke="#2c1810" stroke-width="1"/>
+  <path d="M75 108 Q72 125 78 118" fill="#3d2914"/><path d="M145 108 Q148 125 142 118" fill="#3d2914"/>
+  <!-- Occhiali -->
+  <rect x="76" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <rect x="116" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <line x1="104" y1="102" x2="116" y2="102" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="76" y1="100" x2="66" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="144" y1="100" x2="154" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <!-- Occhi arrabbiati (puntini intensi) -->
+  <circle cx="90" cy="101" r="3.5" fill="#1a1a2e"/>
+  <circle cx="130" cy="101" r="3.5" fill="#1a1a2e"/>
+  <!-- Sopracciglia aggrottate -->
+  <path d="M78 88 Q88 82 100 88" fill="none" stroke="#2c1810" stroke-width="3" stroke-linecap="round" transform="rotate(8, 89, 85)"/>
+  <path d="M120 88 Q132 82 142 88" fill="none" stroke="#2c1810" stroke-width="3" stroke-linecap="round" transform="rotate(-8, 131, 85)"/>
+  <!-- Bocca contrariata -->
+  <path d="M96 135 Q110 128 124 135" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Mano facepalm -->
+  <g transform="translate(152,120) rotate(10)">
+    <rect x="0" y="0" width="22" height="14" rx="5" fill="#deb887" stroke="#c4956a" stroke-width="1.5"/>
+    <rect x="3" y="-6" width="5" height="10" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/>
+    <rect x="9" y="-8" width="5" height="12" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/>
+    <rect x="15" y="-6" width="5" height="10" rx="2.5" fill="#deb887" stroke="#c4956a" stroke-width="1"/>
+  </g>
+  <!-- Badge X -->
+  <circle cx="180" cy="45" r="18" fill="#ef476f"/>
+  <path d="M173 38 L187 52 M187 38 L173 52" fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Vena frustrazione -->
+  <g transform="translate(55,55)">
+    <path d="M0 5 L5 0 L10 5 L5 10 Z" fill="none" stroke="#ef476f" stroke-width="2"/>
+  </g>
+</svg>`;
+
+// SVG versione neutra per header
+const PROF_SVG_NEUTRAL = `
+<svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glowN" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#4361ee;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#4361ee;stop-opacity:0"/>
+    </radialGradient>
+  </defs>
+  <circle cx="110" cy="110" r="108" fill="url(#glowN)"/>
+  <path d="M55 195 Q55 165 80 155 L110 148 L140 155 Q165 165 165 195 Z" fill="#2563eb" stroke="#1d4ed8" stroke-width="2"/>
+  <path d="M80 155 L100 162 L110 148 L120 162 L140 155" fill="#1e40af" stroke="none"/>
+  <rect x="97" y="138" width="26" height="18" rx="6" fill="#d4a574"/>
+  <ellipse cx="110" cy="105" rx="48" ry="52" fill="#deb887"/>
+  <path d="M62 95 Q58 55 80 42 Q95 33 110 32 Q125 33 140 42 Q162 55 158 95" fill="#2c1810" stroke="#1a0f0a" stroke-width="1"/>
+  <circle cx="68" cy="82" r="8" fill="#2c1810"/><circle cx="72" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="152" cy="82" r="8" fill="#2c1810"/><circle cx="148" cy="72" r="7" fill="#2c1810"/>
+  <circle cx="78" cy="90" r="6" fill="#2c1810"/><circle cx="142" cy="90" r="6" fill="#2c1810"/>
+  <circle cx="85" cy="65" r="6" fill="#2c1810"/><circle cx="135" cy="65" r="6" fill="#2c1810"/>
+  <circle cx="95" cy="50" r="7" fill="#2c1810"/><circle cx="125" cy="50" r="7" fill="#2c1810"/>
+  <circle cx="110" cy="45" r="8" fill="#2c1810"/>
+  <circle cx="100" cy="55" r="5" fill="#2c1810"/><circle cx="120" cy="55" r="5" fill="#2c1810"/>
+  <path d="M78 118 Q80 145 110 152 Q140 145 142 118 Q142 130 130 140 Q110 150 90 140 Q78 130 78 118Z" fill="#3d2914" stroke="#2c1810" stroke-width="1"/>
+  <path d="M75 108 Q72 125 78 118" fill="#3d2914"/><path d="M145 108 Q148 125 142 118" fill="#3d2914"/>
+  <rect x="76" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <rect x="116" y="92" width="28" height="22" rx="5" fill="none" stroke="#1a1a2e" stroke-width="3"/>
+  <line x1="104" y1="102" x2="116" y2="102" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="76" y1="100" x2="66" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <line x1="144" y1="100" x2="154" y2="96" stroke="#1a1a2e" stroke-width="2.5"/>
+  <circle cx="90" cy="101" r="3" fill="#1a1a2e"/>
+  <circle cx="130" cy="101" r="3" fill="#1a1a2e"/>
+  <path d="M80 86 Q90 82 100 85" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M120 85 Q130 82 140 86" fill="none" stroke="#2c1810" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M100 134 L120 134" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+</svg>`;
+
+// Inietta SVG nei container
+(function initProfSVG() {
+  document.getElementById('prof-svg-happy').innerHTML = PROF_SVG_HAPPY;
+  document.getElementById('prof-svg-angry').innerHTML = PROF_SVG_ANGRY;
+  document.getElementById('prof-header-svg').innerHTML = PROF_SVG_NEUTRAL;
+})();
+
+/* Frasi del Prof. Paludetto */
+const PROF_CORRECT_PHRASES = [
+  "Bene. Questa e' fisica fatta con criterio.",
+  "Corretto. Finalmente una risposta degna.",
+  "Ottimo. Qui il campo elettrico non ti spaventa.",
+  "Bravo. Coulomb sarebbe soddisfatto.",
+  "Si', ci siamo. Ragionamento pulito.",
+  "Esatto. Vedo che qualcuno ha studiato.",
+  "Risposta corretta. Continua cosi' e il 10 e' tuo.",
+  "Perfetto. Gauss approva dal paradiso dei fisici.",
+  "Bene bene. Questo lo metto sul registro con il segno piu'.",
+  "Corretto. Non ti servira' neanche il ripasso.",
+  "Giusto. Hai la stoffa del fisico.",
+  "Ok, non male. Forse c'e' speranza per questa classe."
+];
+
+const PROF_WRONG_PHRASES = [
+  "No. Cosi' non va.",
+  "Attenzione: qui hai confuso i concetti.",
+  "Errore. Rivedi bene il ragionamento.",
+  "Questa risposta non regge. Riprova.",
+  "Fermati un attimo: qui c'e' da ripassare.",
+  "No, no, no. Torna sugli appunti.",
+  "Sbagliato. Ma almeno ci hai provato.",
+  "Questo errore lo vedo ogni anno. Leggi la spiegazione.",
+  "Coulomb si sta rivoltando. Concentrati.",
+  "Errore grave. Apri il quaderno e rileggi.",
+  "Non ci siamo. Ma il bello della fisica e' che si puo' rimediare.",
+  "Risposta sbagliata. Ti do un'altra possibilita' dopo."
+];
+
+function showFeedback(isCorrect, q) {
+  const fb = document.getElementById('feedback-box');
+  const dd = document.getElementById('deepdive-box');
+  const prof = document.getElementById('prof-container');
+
+  // --- Prof. Paludetto ---
+  prof.className = 'prof-container show ' + (isCorrect ? 'correct' : 'wrong');
+  const phrases = isCorrect ? PROF_CORRECT_PHRASES : PROF_WRONG_PHRASES;
+  document.getElementById('prof-phrase').textContent = phrases[Math.floor(Math.random() * phrases.length)];
+  document.getElementById('prof-name').textContent = 'Prof. Paludetto';
+
+  // --- Feedback ---
+  fb.style.display = 'block';
+  fb.className = 'feedback-box ' + (isCorrect ? 'feedback-correct' : 'feedback-wrong');
+
+  if (isCorrect) {
+    document.getElementById('feedback-title').textContent = 'Risposta corretta!';
+    document.getElementById('feedback-text').textContent = q.explanation;
+    dd.style.display = 'none';
+  } else {
+    document.getElementById('feedback-title').textContent = 'Risposta sbagliata';
+    document.getElementById('feedback-text').innerHTML =
+      `<strong>Errore comune:</strong> ${q.commonError}<br><br><strong>Spiegazione:</strong> ${q.explanation}`;
+
+    // Mostra approfondimento
+    dd.style.display = 'block';
+    document.getElementById('deepdive-text').textContent = q.deepdive;
+  }
+
+  document.getElementById('next-btn-container').style.display = 'block';
+
+  // Scroll al professore (che e' sopra il feedback)
+  prof.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+/* ============================================
+   NAVIGAZIONE
+   ============================================ */
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= currentQuestions.length) {
+    endQuiz();
+  } else {
+    showQuestion();
+    document.getElementById('question-card').scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+/* ============================================
+   FINE QUIZ E RIEPILOGO
+   ============================================ */
+function endQuiz() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'block';
+
+  const total = correctCount + wrongCount;
+  const pct = total > 0 ? Math.round((correctCount / total) * 100) : 0;
+
+  // Punteggio grande
+  const scoreEl = document.getElementById('final-score');
+  scoreEl.textContent = pct + '%';
+  scoreEl.className = 'big-score ' + (pct >= 70 ? 'good' : pct >= 50 ? 'medium' : 'bad');
+  document.getElementById('final-score-label').textContent =
+    `${correctCount} corrette su ${total} domande`;
+
+  // Commento del Prof nel riepilogo
+  const profSummary = document.getElementById('prof-summary');
+  let summaryPhrase, summaryClass;
+  if (pct >= 90) {
+    summaryPhrase = "Eccellente. Risultato da primo della classe. Quasi quasi ti metto 10.";
+    summaryClass = 'correct';
+  } else if (pct >= 70) {
+    summaryPhrase = "Bene, risultato solido. Ma non adagiarti: c'e' ancora margine di miglioramento.";
+    summaryClass = 'correct';
+  } else if (pct >= 50) {
+    summaryPhrase = "Sufficiente, ma di poco. Hai le basi, pero' devi ripassare. Sul serio.";
+    summaryClass = 'wrong';
+  } else {
+    summaryPhrase = "Insufficiente. Ci vediamo all'interrogazione di recupero. Studia.";
+    summaryClass = 'wrong';
+  }
+  profSummary.className = 'prof-container show ' + summaryClass;
+  document.getElementById('prof-summary-svg').innerHTML = pct >= 70 ? PROF_SVG_HAPPY : PROF_SVG_ANGRY;
+  document.getElementById('prof-summary-phrase').textContent = summaryPhrase;
+  document.getElementById('prof-summary-name').textContent = 'Prof. Paludetto';
+
+  // Griglia statistiche
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-box"><div class="stat-number">${total}</div><div class="stat-label">Domande totali</div></div>
+    <div class="stat-box"><div class="stat-number" style="color:var(--success)">${correctCount}</div><div class="stat-label">Corrette</div></div>
+    <div class="stat-box"><div class="stat-number" style="color:var(--danger)">${wrongCount}</div><div class="stat-label">Errate</div></div>
+    <div class="stat-box"><div class="stat-number">${pct}%</div><div class="stat-label">Percentuale</div></div>
+  `;
+
+  // Risultati per argomento
+  const topicDiv = document.getElementById('topic-results');
+  topicDiv.innerHTML = '';
+  const weakTopics = [];
+
+  for (const [topic, stats] of Object.entries(topicStats)) {
+    if (stats.total === 0) continue;
+    const topicPct = Math.round((stats.correct / stats.total) * 100);
+    const cls = topicPct >= 70 ? 'strong' : topicPct >= 50 ? 'medium-res' : 'weak';
+    const barColor = topicPct >= 70 ? 'var(--success)' : topicPct >= 50 ? 'var(--warning)' : 'var(--danger)';
+
+    if (topicPct < 70) weakTopics.push(topic);
+
+    topicDiv.innerHTML += `
+      <div class="topic-result-item ${cls}">
+        <span><strong>${topic}</strong> — ${stats.correct}/${stats.total} (${topicPct}%)</span>
+        <div class="topic-bar"><div class="topic-bar-fill" style="width:${topicPct}%;background:${barColor}"></div></div>
+      </div>
+    `;
+  }
+
+  // Suggerimenti
+  const sugDiv = document.getElementById('suggestions');
+  if (weakTopics.length > 0) {
+    sugDiv.innerHTML = `
+      <h3>Suggerimenti per il ripasso</h3>
+      <p>Dovresti concentrarti su questi argomenti:</p>
+      <ul>${weakTopics.map(t => `<li><strong>${t}</strong> — rileggi gli appunti e rifai gli esercizi su questo tema</li>`).join('')}</ul>
+      <p style="margin-top:8px;">Usa il pulsante "Ripassa gli errori" per rifare solo le domande sbagliate.</p>
+    `;
+  } else {
+    sugDiv.innerHTML = `
+      <h3>Ottimo lavoro!</h3>
+      <p>Hai risposto bene su tutti gli argomenti. Continua cosi'! Prova la modalita' casuale per consolidare.</p>
+    `;
+  }
+
+  // Cronologia
+  const histDiv = document.getElementById('history-list');
+  histDiv.innerHTML = '';
+  history.forEach((h, i) => {
+    histDiv.innerHTML += `
+      <div class="history-item">
+        <span>${i + 1}. ${h.question.substring(0, 60)}${h.question.length > 60 ? '...' : ''}</span>
+        <span class="${h.correct ? 'correct-mark' : 'wrong-mark'}">${h.correct ? 'Corretta' : 'Errata'}</span>
+      </div>
+    `;
+  });
+
+  // Salva in localStorage
+  localStorage.setItem('storia_stats', JSON.stringify({
+    total, correct: correctCount, wrong: wrongCount, percentage: pct,
+    date: new Date().toLocaleDateString('it-IT')
+  }));
+  localStorage.setItem('storia_errors', JSON.stringify(errorQuestionIds));
+}
+
+/* ============================================
+   SEZIONE APPUNTI
+   ============================================ */
+const noteIds = ['massoneria','buonarroti','opposizione','moti-20','restaurazione','grecia-gb','moti-30-fr','moti-30-eu','risorgimento','mazzini-cattaneo','gioberti-balbo','1848','dim-mazzini'];
+const noteLabels = ['Massoneria','Buonarroti e insurrezioni','Opposizione intellettuale','Moti anni \'20','Restaurazione risponde','Grecia e Gran Bretagna','Moti \'30: Francia','Moti \'30: Europa','Dibattito Risorgimentale','Mazzini e Cattaneo','Gioberti, Balbo, Cavour','1848 Europeo','ANALISI: Mazzini'];
+
+// Popola navigazione rapida appunti
+(function initNotes() {
+  const nav = document.getElementById('notes-nav');
+  if (!nav) return;
+  noteIds.forEach((id, i) => {
+    const btn = document.createElement('button');
+    btn.textContent = noteLabels[i];
+    btn.onclick = () => {
+      // Apri la sezione e scrolla
+      const body = document.getElementById('body-' + id);
+      if (!body.classList.contains('open')) toggleNote(id);
+      document.getElementById('note-' + id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    nav.appendChild(btn);
+  });
+})();
+
+function showNotes(section) {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'block';
+
+  // Se richiesto, scrolla direttamente alle dimostrazioni
+  if (section === 'dimostrazioni') {
+    setTimeout(() => {
+      const el = document.getElementById('note-dim-mazzini');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+}
+
+function hideNotes() {
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+
+function toggleNote(id) {
+  const body = document.getElementById('body-' + id);
+  const toggle = body.previousElementSibling.querySelector('.note-toggle');
+  body.classList.toggle('open');
+  toggle.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+/* ============================================
+   SIMULAZIONE VERIFICA
+   Struttura identica alla verifica del prof:
+   - Parte 1: 10 domande scelta multipla (A-E)
+   - Parte 2: 3 domande aperte/dimostrative
+   ============================================ */
+
+const EXAM_MC = [
+  {
+    text: "Quale era l'obiettivo della Carboneria?",
+    options: ["Instaurare il comunismo agrario","Ottenere una costituzione liberale","Fondare una confederazione italiana presieduta dal papa","Espellere l'Austria dall'Italia con la forza","Instaurare la monarchia assoluta"],
+    answer: 1,
+    explanation: "La Carboneria aveva come obiettivo l'ottenimento di una costituzione liberale."
+  },
+  {
+    text: "In quale anno e dove scoppio' la prima ondata rivoluzionaria del 1820?",
+    options: ["1820 a Napoli","1820 a Parigi","1820 in Spagna (Cadice)","1821 a Torino","1820 a Vienna"],
+    answer: 2,
+    explanation: "La prima ondata rivoluzionaria del 1820 scoppio' in Spagna, con le truppe a Cadice che si ribellarono il 1 gennaio."
+  },
+  {
+    text: "I tre congressi convocati dalla Restaurazione in risposta ai moti furono:",
+    options: ["Vienna, Parigi, Londra","Berlino, Vienna, Mosca","Troppau (1820), Lubiana (1821), Verona (1822)","Napoli, Madrid, Lisbona","Troppau, Verona, Berlino"],
+    answer: 2,
+    explanation: "I tre congressi furono Troppau 1820, Lubiana 1821, Verona 1822."
+  },
+  {
+    text: "Mazzini fondo' la Giovine Italia nel:",
+    options: ["1820","1823","1830","1831","1848"],
+    answer: 3,
+    explanation: "Mazzini fondo' la Giovine Italia nel 1831."
+  },
+  {
+    text: "Qual era la proposta di Gioberti per l'unificazione italiana?",
+    options: ["Una repubblica federale sul modello USA","Una monarchia guidata dai Savoia","Una confederazione presieduta dal papa (Neoguelfismo)","Un'alleanza militare con la Francia","L'intervento diretto del popolo in una rivoluzione"],
+    answer: 2,
+    explanation: "Gioberti propone una confederazione fra gli Stati italiani presieduta dal papa: posizione neoguelfa."
+  },
+  {
+    text: "Le 'Tre giornate gloriose' in Francia (luglio 1830) portarono al trono:",
+    options: ["Carlo X","Napoleone III","Luigi XVIII","Luigi Filippo d'Orleans ('re borghese')","Francesco II"],
+    answer: 3,
+    explanation: "Dopo le Tre Gloriose (27-29 luglio 1830), la corona fu offerta a Luigi Filippo d'Orleans, detto 're borghese'."
+  },
+  {
+    text: "Quale fu il principale limite delle societa' segrete progressiste che le porto' al fallimento?",
+    options: ["L'eccessiva violenza","La mancanza di fondi","La segretezza che impedi' il coinvolgimento popolare","L'opposizione della borghesia","L'alleanza con la Chiesa"],
+    answer: 2,
+    explanation: "La segretezza dei programmi e degli iscritti rese impossibile il coinvolgimento delle classi popolari."
+  },
+  {
+    text: "La pace di Adrianopoli (1829) sancì:",
+    options: ["La fine delle guerre napoleoniche","L'indipendenza del Belgio","L'indipendenza della Grecia dall'Impero ottomano","La repressione della rivolta polacca","La nascita del Regno d'Italia"],
+    answer: 2,
+    explanation: "La pace di Adrianopoli del 1829 sancì l'indipendenza della Grecia dall'Impero ottomano."
+  },
+  {
+    text: "Chi fu eletto presidente della Repubblica francese il 10 dicembre 1848?",
+    options: ["Luigi Filippo d'Orleans","Adolphe Thiers","Alphonse de Lamartine","Carlo Luigi Napoleone Bonaparte","Victor Hugo"],
+    answer: 3,
+    explanation: "Il 10 dicembre 1848 fu eletto Carlo Luigi Napoleone Bonaparte, che poi divenne Napoleone III imperatore nel 1852."
+  },
+  {
+    text: "La posizione dei moderati risorgimentali era:",
+    options: ["Rivoluzione popolare e repubblica","Federalismo sul modello svizzero","Confederazione col papa","Coinvolgimento dei sovrani come garanzia del successo","Alleanza con la Francia bonapartista"],
+    answer: 3,
+    explanation: "I moderati credevano che il coinvolgimento dei sovrani fosse la garanzia del successo dell'unificazione."
+  }
+];
+const EXAM_OPEN = [
+  {
+    title: "Societa' segrete e insurrezioni",
+    text: "Spiega cos'erano le societa' segrete, qual era il loro scopo e per quale motivo le societa' segrete progressiste fallirono nel raggiungere i propri obiettivi."
+  },
+  {
+    title: "Il dibattito risorgimentale",
+    text: "Descrivi le posizioni dei principali protagonisti del dibattito risorgimentale (Mazzini, Cattaneo, Gioberti, Balbo/Cavour) indicando per ciascuno: la forma di stato proposta e i mezzi per raggiungerla."
+  },
+  {
+    title: "I moti degli anni '30",
+    text: "Confronta l'esito dei moti degli anni '30 in Francia, Belgio e Polonia: quali ottennero risultati duraturi e quali fallirono? Quali fattori determinarono le differenze?"
+  }
+];
+let examTimer = null;
+let examSeconds = 3000; // 50 minuti
+let examSubmitted = false;
+
+function showExam() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'block';
+
+  examSubmitted = false;
+  document.getElementById('exam-submit-btn').style.display = 'inline-block';
+  document.getElementById('exam-result').style.display = 'none';
+
+  renderExamMC();
+  renderExamOpen();
+  startExamTimer();
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function hideExam() {
+  clearInterval(examTimer);
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+
+function resetExam() {
+  examSeconds = 3000;
+  showExam();
+}
+
+/* Renderizza domande a scelta multipla con opzioni mescolate */
+function renderExamMC() {
+  const container = document.getElementById('exam-mc-questions');
+  container.innerHTML = '';
+
+  EXAM_MC.forEach((q, qi) => {
+    // Mescola opzioni
+    const indices = q.options.map((_, i) => i);
+    shuffleArray(indices);
+    q._shuffled = indices;
+
+    const letters = ['A', 'B', 'C', 'D', 'E'];
+    let html = `<div class="exam-question" id="exam-q-${qi}">
+      <div class="eq-text"><span class="eq-number">${qi + 1}.</span> ${q.text}</div>
+      <div class="exam-options">`;
+
+    indices.forEach((origIdx, dispIdx) => {
+      html += `
+        <div class="exam-option" id="exam-opt-${qi}-${dispIdx}">
+          <input type="radio" name="exam-q-${qi}" id="exam-radio-${qi}-${dispIdx}" value="${origIdx}">
+          <label for="exam-radio-${qi}-${dispIdx}">${letters[dispIdx]}. ${q.options[origIdx]}</label>
+        </div>`;
+    });
+
+    html += `</div>
+      <div class="exam-correction" id="exam-corr-${qi}"></div>
+    </div>`;
+    container.innerHTML += html;
+  });
+}
+
+/* Renderizza domande aperte */
+function renderExamOpen() {
+  const container = document.getElementById('exam-open-questions');
+  container.innerHTML = '';
+
+  EXAM_OPEN.forEach((q, qi) => {
+    const num = EXAM_MC.length + qi + 1;
+    container.innerHTML += `
+      <div class="exam-question" id="exam-open-${qi}">
+        <div class="eq-text"><span class="eq-number">${num}.</span> ${q.text}</div>
+        <div class="exam-open-area">
+          <textarea id="exam-textarea-${qi}" placeholder="Scrivi qui la tua risposta..."></textarea>
+        </div>
+        <div class="exam-correction" id="exam-open-corr-${qi}"></div>
+      </div>`;
+  });
+}
+
+/* Timer */
+function startExamTimer() {
+  examSeconds = 3000;
+  clearInterval(examTimer);
+  updateTimerDisplay();
+  examTimer = setInterval(() => {
+    examSeconds--;
+    updateTimerDisplay();
+    if (examSeconds <= 0) {
+      clearInterval(examTimer);
+      if (!examSubmitted) submitExam();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(examSeconds / 60);
+  const s = examSeconds % 60;
+  const el = document.getElementById('exam-timer');
+  el.textContent = `Tempo: ${m}:${s.toString().padStart(2, '0')}`;
+  el.style.color = examSeconds < 300 ? 'var(--danger)' : 'var(--dark)';
+}
+
+/* Consegna verifica */
+function submitExam() {
+  if (examSubmitted) return;
+  if (!confirm('Sei sicuro di voler consegnare la verifica?')) return;
+
+  examSubmitted = true;
+  clearInterval(examTimer);
+
+  let correctMC = 0;
+
+  // Correggi scelta multipla
+  EXAM_MC.forEach((q, qi) => {
+    const selected = document.querySelector(`input[name="exam-q-${qi}"]:checked`);
+    const corrDiv = document.getElementById('exam-corr-' + qi);
+    const selectedVal = selected ? parseInt(selected.value) : -1;
+    const isCorrect = selectedVal === q.answer;
+
+    if (isCorrect) {
+      correctMC++;
+      corrDiv.className = 'exam-correction show correct-box';
+      corrDiv.innerHTML = `<strong>Corretta!</strong> ${q.explanation}`;
+    } else {
+      corrDiv.className = 'exam-correction show wrong-box';
+      corrDiv.innerHTML = `<strong>Sbagliata.</strong> ${q.explanation}`;
+    }
+
+    // Evidenzia opzioni
+    q._shuffled.forEach((origIdx, dispIdx) => {
+      const optEl = document.getElementById(`exam-opt-${qi}-${dispIdx}`);
+      if (origIdx === q.answer) optEl.classList.add('correct-highlight');
+      if (dispIdx === getDisplayIdx(qi, selectedVal) && !isCorrect) optEl.classList.add('wrong-highlight');
+    });
+
+    // Disabilita radio
+    document.querySelectorAll(`input[name="exam-q-${qi}"]`).forEach(r => r.disabled = true);
+  });
+
+  // Mostra soluzioni aperte
+  EXAM_OPEN.forEach((q, qi) => {
+    const corrDiv = document.getElementById('exam-open-corr-' + qi);
+    corrDiv.className = 'exam-correction show correct-box';
+    corrDiv.innerHTML = `<strong>Soluzione completa:</strong><pre style="white-space:pre-wrap;font-family:inherit;margin-top:8px;">${q.solution}</pre>`;
+  });
+
+  // Calcolo voto: 10 MC (0.6 punti ciascuna = 6 pt) + 3 aperte (valutazione manuale suggerita)
+  const mcPoints = correctMC * 0.6;
+  const grade = Math.min(10, mcPoints + 4); // mc da 0 a 6 + max 4 per aperte (autovalutazione)
+  const mcGrade = (mcPoints / 6 * 10).toFixed(1);
+
+  document.getElementById('exam-submit-btn').style.display = 'none';
+  const resultDiv = document.getElementById('exam-result');
+  resultDiv.style.display = 'block';
+
+  const gradeEl = document.getElementById('exam-grade');
+  gradeEl.textContent = `${correctMC}/10 risposte multiple corrette`;
+  gradeEl.style.color = correctMC >= 7 ? 'var(--success)' : correctMC >= 5 ? 'var(--warning)' : 'var(--danger)';
+
+  document.getElementById('exam-grade-detail').innerHTML =
+    `Parte 1 (scelta multipla): <strong>${correctMC}/10</strong> — Voto stimato parte 1: <strong>${mcGrade}/10</strong><br>
+     Parte 2 (domande aperte): confronta le tue risposte con le soluzioni mostrate sopra.`;
+
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function getDisplayIdx(qi, origVal) {
+  const shuffled = EXAM_MC[qi]._shuffled;
+  return shuffled.indexOf(origVal);
+}
+
+/* ============================================
+   VERIFICA DIMOSTRAZIONI
+   6 domande aperte: riproduci la dimostrazione
+   ============================================ */
+
+const DEMO_EXAM = [
+  {
+    title: "Il pensiero politico di Mazzini",
+    text: "Analizza il pensiero politico di Mazzini esaminando: (a) la critica alla Carboneria e la fondazione della Giovine Italia; (b) il binomio 'Dio e Popolo'; (c) il principio 'Pensiero e Azione'; (d) i limiti del suo progetto.",
+    solution: "a) CRITICA ALLA CARBONERIA: la segretezza era un errore strategico che rendeva impossibile il coinvolgimento popolare. 1831: fonda la Giovine Italia come organizzazione aperta, basata sulla propaganda pubblica.\n\nb) DIO E POPOLO: Dio si identifica con lo spirito della Storia. Individui (doveri personali) e popoli (missione storica) sono chiamati a contribuire al bene dell'umanita'. Il binomio esprime l'unione tra fede religiosa e impegno politico. Missione dell'Italia: abbattere l'Impero asburgico e lo Stato Pontificio.\n\nc) PENSIERO E AZIONE: teoria e pratica sono inseparabili. Non basta pensare la rivoluzione: bisogna agire. Non basta agire senza una teoria. Il rivoluzionario deve essere insieme pensatore e combattente.\n\nd) LIMITI: le insurrezioni mazziniane fallirono ripetutamente (1833, 1844, 1848-49). La base popolare reale era insufficiente. L'ideale era alto ma la tattica era debole."
+  },
+  {
+    title: "I moti degli anni '20: cause, svolgimento e repressione",
+    text: "Analizza i moti degli anni '20 descrivendo: (a) dove e quando scoppiarono; (b) cosa rivendicavano; (c) come la Restaurazione rispose; (d) per quale motivo fallirono.",
+    solution: "a) DOVE E QUANDO: Spagna (gennaio 1820, Cadice), poi Portogallo, Regno delle due Sicilie (luglio 1820, Nola), Sicilia, Piemonte (1821, Alessandria). La Spagna fu la scintilla.\n\nb) COSA RIVENDICAVANO: il ripristino o la concessione di costituzioni liberali (modello Cadice 1812). In Sicilia: separazione dal Regno di Napoli. In Piemonte: simpatie liberali degli oppositori.\n\nc) RISPOSTA DELLA RESTAURAZIONE: tre Congressi (Troppau 1820, Lubiana 1821, Verona 1822). Metternich applica il principio di intervento. Truppe austriache entrano a Napoli (23 marzo 1821). In Piemonte Carlo Felice + Austria sconfiggono i rivoltosi (8 aprile 1821). In Spagna l'esercito francese conquista Trocadero (agosto 1823).\n\nd) PERCHE' FALLIRONO: mancanza di supporto internazionale; basi sociali ristrette (non coinvolgevano il popolo); la Santa Alleanza era compatta nella repressione."
+  },
+  {
+    title: "Dal 1820 al 1848: un'analisi comparata",
+    text: "Confronta le ondate rivoluzionarie del 1820, 1830 e 1848 indicando: protagonisti, rivendicazioni principali, esiti. Quale ondata ottenne i risultati piu' duraturi e perche'?",
+    solution: "MOTI ANNI '20 (1820-1821):\n- Protagonisti: societa' segrete (Carboneria, Comuneros), militari liberali\n- Rivendicazioni: costituzioni liberali, modello Cadice 1812\n- Esito: repressione totale da parte della Santa Alleanza\n\nMOTI ANNI '30 (1830-1831):\n- Protagonisti: borghesia liberale, clero (Belgio), patrioti (Polonia, Italia)\n- Rivendicazioni: riforme costituzionali, indipendenza nazionale (Belgio, Polonia)\n- Esito: MISTO. Successi duraturi: Francia (Luigi Filippo, costituzione piu' liberale), Belgio (indipendenza riconosciuta). Fallimenti: Polonia (repressa da Nicola I), Italia centrale (repressa dall'Austria)\n\nMOTI 1848:\n- Protagonisti: piu' ampi, include proletariato\n- Rivendicazioni: suffragio universale, riforme sociali, indipendenza nazionale\n- Esito: inizialmente successi (monarchie cedono), poi repressione. In Francia: repubblica → Napoleone III imperatore\n\nCONCLUSIONE: i moti anni '30 ottennero risultati piu' duraturi perche' la Francia non supporto' piu' la repressione (principio di non intervento) e alcune rivolte avevano basi sociali piu' solide (Belgio: borghesia + clero uniti)."
+  }
+];
+let demoExamTimer = null;
+let demoExamSeconds = 2400;
+let demoExamSubmitted = false;
+
+function showDemoExam() {
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('summary-screen').style.display = 'none';
+  document.getElementById('exam-screen').style.display = 'none';
+  document.getElementById('notes-screen').style.display = 'none';
+  document.getElementById('demo-exam-screen').style.display = 'block';
+
+  demoExamSubmitted = false;
+  document.getElementById('demo-exam-submit-btn').style.display = 'inline-block';
+  document.getElementById('demo-exam-result').style.display = 'none';
+
+  renderDemoExamQuestions();
+  startDemoExamTimer();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function hideDemoExam() {
+  clearInterval(demoExamTimer);
+  document.getElementById('demo-exam-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+
+function resetDemoExam() {
+  demoExamSeconds = 2400;
+  showDemoExam();
+}
+
+function renderDemoExamQuestions() {
+  const container = document.getElementById('demo-exam-questions');
+  container.innerHTML = '';
+
+  DEMO_EXAM.forEach((q, qi) => {
+    container.innerHTML += `
+      <div class="exam-question" id="demo-q-${qi}">
+        <div class="eq-text">
+          <span class="eq-number">${qi + 1}.</span>
+          <strong style="color:#7c3aed;">[${q.title}]</strong><br>
+          ${q.text}
+        </div>
+        <div class="exam-open-area">
+          <textarea id="demo-textarea-${qi}" placeholder="Scrivi qui la dimostrazione passo per passo..."></textarea>
+        </div>
+        <div class="exam-correction" id="demo-corr-${qi}"></div>
+      </div>`;
+  });
+}
+
+function startDemoExamTimer() {
+  demoExamSeconds = 2400;
+  clearInterval(demoExamTimer);
+  updateDemoTimerDisplay();
+  demoExamTimer = setInterval(() => {
+    demoExamSeconds--;
+    updateDemoTimerDisplay();
+    if (demoExamSeconds <= 0) {
+      clearInterval(demoExamTimer);
+      if (!demoExamSubmitted) submitDemoExam();
+    }
+  }, 1000);
+}
+
+function updateDemoTimerDisplay() {
+  const m = Math.floor(demoExamSeconds / 60);
+  const s = demoExamSeconds % 60;
+  const el = document.getElementById('demo-exam-timer');
+  el.textContent = `Tempo: ${m}:${s.toString().padStart(2, '0')}`;
+  el.style.color = demoExamSeconds < 300 ? 'var(--danger)' : 'var(--dark)';
+}
+
+function submitDemoExam() {
+  if (demoExamSubmitted) return;
+  if (!confirm('Sei sicuro di voler consegnare la verifica sulle dimostrazioni?')) return;
+
+  demoExamSubmitted = true;
+  clearInterval(demoExamTimer);
+
+  // Mostra le soluzioni per ogni dimostrazione
+  DEMO_EXAM.forEach((q, qi) => {
+    const corrDiv = document.getElementById('demo-corr-' + qi);
+    const textarea = document.getElementById('demo-textarea-' + qi);
+    const userAnswer = textarea.value.trim();
+
+    corrDiv.className = 'exam-correction show correct-box';
+    corrDiv.innerHTML = `
+      <strong>Soluzione completa — ${q.title}:</strong>
+      <pre style="white-space:pre-wrap; font-family:inherit; margin-top:8px; line-height:1.7;">${q.solution}</pre>
+      ${userAnswer.length < 10 ? '<p style="color:var(--danger); margin-top:8px;"><strong>Non hai scritto una risposta per questa domanda.</strong></p>' : '<p style="color:var(--primary); margin-top:8px;"><strong>Confronta la tua risposta con la soluzione qui sopra.</strong></p>'}
+    `;
+    textarea.disabled = true;
+    textarea.style.opacity = '0.7';
+  });
+
+  document.getElementById('demo-exam-submit-btn').style.display = 'none';
+  const resultDiv = document.getElementById('demo-exam-result');
+  resultDiv.style.display = 'block';
+  document.getElementById('demo-exam-grade-detail').innerHTML =
+    'Le dimostrazioni richiedono valutazione manuale. Confronta attentamente ogni tua risposta con la soluzione mostrata sopra.<br>Controlla: hai incluso tutti i passaggi? Le semplificazioni sono corrette? Hai spiegato il significato fisico?';
+
+  resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+</script>
+
+</body>
+</html>
